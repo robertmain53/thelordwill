@@ -4,7 +4,11 @@
  */
 
 import { cache } from 'react';
-import { prisma } from './prisma';
+
+async function getPrisma() {
+  const { prisma } = await import('./prisma');
+  return prisma;
+}
 
 export interface SituationWithVerses {
   id: string;
@@ -51,6 +55,11 @@ export interface SituationWithVerses {
  */
 export const getSituationWithVerses = cache(
   async (slug: string, limit: number = 10): Promise<SituationWithVerses | null> => {
+    if (!process.env.DATABASE_URL) {
+      return null;
+    }
+
+    const prisma = await getPrisma();
     return await prisma.situation.findUnique({
       where: { slug },
       include: {
@@ -109,6 +118,11 @@ export function formatVerseReference(verse: {
  * Get related situations
  */
 export const getRelatedSituations = cache(async (currentSlug: string, limit: number = 5) => {
+  if (!process.env.DATABASE_URL) {
+    return [];
+  }
+
+  const prisma = await getPrisma();
   const current = await prisma.situation.findUnique({
     where: { slug: currentSlug },
     select: { category: true },
@@ -155,6 +169,11 @@ export async function calculateContentUniqueness(content: string): Promise<numbe
  * Get verse statistics for analytics
  */
 export const getVerseStatistics = cache(async (verseId: number) => {
+  if (!process.env.DATABASE_URL) {
+    return null;
+  }
+
+  const prisma = await getPrisma();
   return await prisma.versePopularity.findUnique({
     where: { verseId },
     select: {

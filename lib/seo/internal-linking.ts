@@ -4,8 +4,12 @@
  * Ensures shallow depth (3 clicks max) and optimal linking density
  */
 
-import { prisma } from '@/lib/db';
 import { cache } from 'react';
+
+async function getPrisma() {
+  const { prisma } = await import('@/lib/db');
+  return prisma;
+}
 
 export interface InternalLink {
   href: string;
@@ -51,6 +55,11 @@ export function calculatePageDepth(pageType: string): number {
  */
 export const getThematicLinks = cache(
   async (pageType: 'name' | 'situation' | 'profession', slug: string): Promise<InternalLink[]> => {
+    if (!process.env.DATABASE_URL) {
+      return [];
+    }
+
+    const prisma = await getPrisma();
     const links: InternalLink[] = [];
 
     if (pageType === 'name') {
@@ -150,6 +159,11 @@ export const getThematicLinks = cache(
  */
 export const getRelatedSituations = cache(
   async (currentSlug: string, limit: number = 3): Promise<InternalLink[]> => {
+    if (!process.env.DATABASE_URL) {
+      return [];
+    }
+
+    const prisma = await getPrisma();
     const current = await prisma.situation.findUnique({
       where: { slug: currentSlug },
       select: { category: true },
@@ -163,7 +177,7 @@ export const getRelatedSituations = cache(
         select: { slug: true, title: true },
       });
 
-      return situations.map(s => ({
+      return situations.map((s: { slug: string; title: string }) => ({
         href: `/bible-verses-for-${s.slug}`,
         title: s.title,
         category: 'situation' as const,
@@ -184,7 +198,7 @@ export const getRelatedSituations = cache(
       select: { slug: true, title: true },
     });
 
-    return related.map(s => ({
+    return related.map((s: { slug: string; title: string }) => ({
       href: `/bible-verses-for-${s.slug}`,
       title: s.title,
       category: 'situation' as const,
@@ -196,6 +210,11 @@ export const getRelatedSituations = cache(
  * Get trending names (most viewed/searched)
  */
 export const getTrendingNames = cache(async (limit: number = 2): Promise<InternalLink[]> => {
+  if (!process.env.DATABASE_URL) {
+    return [];
+  }
+
+  const prisma = await getPrisma();
   // Get names with most mentions (proxy for popularity)
   const names = await prisma.name.findMany({
     take: limit,
@@ -215,7 +234,7 @@ export const getTrendingNames = cache(async (limit: number = 2): Promise<Interna
     },
   });
 
-  return names.map(n => ({
+  return names.map((n: { slug: string; name: string }) => ({
     href: `/meaning-of-${n.slug}-in-the-bible`,
     title: `Meaning of ${n.name}`,
     category: 'name' as const,
@@ -226,13 +245,18 @@ export const getTrendingNames = cache(async (limit: number = 2): Promise<Interna
  * Get trending professions
  */
 export const getTrendingProfessions = cache(async (limit: number = 2): Promise<InternalLink[]> => {
+  if (!process.env.DATABASE_URL) {
+    return [];
+  }
+
+  const prisma = await getPrisma();
   const professions = await prisma.profession.findMany({
     take: limit,
     orderBy: { createdAt: 'desc' },
     select: { slug: true, title: true },
   });
 
-  return professions.map(p => ({
+  return professions.map((p: { slug: string; title: string }) => ({
     href: `/bible-verses-for-${p.slug}`,
     title: `Bible Verses for ${p.title}s`,
     category: 'profession' as const,
@@ -391,6 +415,11 @@ export function calculateLinkDistribution(totalPages: number): {
  * Get hub pages (high authority pages with more links)
  */
 export const getHubPages = cache(async (): Promise<InternalLink[]> => {
+  if (!process.env.DATABASE_URL) {
+    return [];
+  }
+
+  const prisma = await getPrisma();
   // Hub pages: Most popular situations
   const topSituations = await prisma.situation.findMany({
     take: 10,
@@ -402,7 +431,7 @@ export const getHubPages = cache(async (): Promise<InternalLink[]> => {
     select: { slug: true, title: true },
   });
 
-  return topSituations.map(s => ({
+  return topSituations.map((s: { slug: string; title: string }) => ({
     href: `/bible-verses-for-${s.slug}`,
     title: s.title,
     category: 'situation' as const,

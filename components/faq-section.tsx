@@ -4,8 +4,6 @@
  * Server component - no client-side JS
  */
 
-import { getCanonicalUrl } from '@/lib/utils';
-
 export interface FAQItem {
   question: string;
   answer: string;
@@ -16,7 +14,7 @@ interface FAQSectionProps {
   pageUrl: string;
 }
 
-export function FAQSection({ faqs, pageUrl }: FAQSectionProps) {
+export function FAQSection({ faqs }: FAQSectionProps) {
   if (faqs.length === 0) {
     return null;
   }

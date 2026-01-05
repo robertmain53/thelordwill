@@ -23,8 +23,8 @@ export interface BibleAPIResponse {
  * Documentation: https://scripture.api.bible/
  */
 async function fetchFromAPIBible(
-  reference: string,
-  version: string = 'KJV'
+  _reference: string,
+  _version: string = 'KJV'
 ): Promise<BibleAPIResponse> {
   const apiKey = process.env.BIBLE_API_KEY;
 
@@ -61,7 +61,7 @@ async function fetchFromAPIBible(
  * Fetch verses from ESV API
  * Documentation: https://api.esv.org/docs/
  */
-async function fetchFromESVAPI(reference: string): Promise<BibleAPIResponse> {
+async function fetchFromESVAPI(_reference: string): Promise<BibleAPIResponse> {
   const apiKey = process.env.ESV_API_KEY;
 
   if (!apiKey) {
@@ -113,8 +113,8 @@ export async function fetchBibleVerses(
  */
 export async function searchBibleVerses(
   query: string,
-  version: string = 'KJV',
-  limit: number = 10
+  _version: string = 'KJV',
+  _limit: number = 10
 ): Promise<BibleAPIResponse> {
   const apiKey = process.env.BIBLE_API_KEY;
 

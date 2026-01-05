@@ -5,7 +5,6 @@ import {
   getSituationWithVerses,
   getTopStrongsFromVerse,
   formatVerseReference,
-  getRelatedSituations,
 } from "@/lib/db/situation-queries";
 import {
   generateIntroduction,
@@ -40,6 +39,18 @@ interface PageProps {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { situation } = await params;
+  if (!process.env.DATABASE_URL) {
+    const title = `Bible Verses for ${titleCase(situation)}`;
+    const canonicalUrl = getCanonicalUrl(`/bible-verses-for-${situation}`);
+
+    return {
+      title,
+      alternates: {
+        canonical: canonicalUrl,
+      },
+    };
+  }
+
   const data = await getSituationWithVerses(situation, 10);
 
   if (!data) {
@@ -95,6 +106,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function SituationVersesPage({ params }: PageProps) {
   const { situation } = await params;
+  if (!process.env.DATABASE_URL) {
+    const title = titleCase(situation);
+
+    return (
+      <main className="mx-auto max-w-3xl px-6 py-12">
+        <h1 className="text-3xl font-semibold">Bible Verses for {title}</h1>
+        <p className="mt-4 text-muted-foreground">
+          Content will be available once the database is connected.
+        </p>
+      </main>
+    );
+  }
+
   const data = await getSituationWithVerses(situation, 10);
 
   if (!data) {
@@ -112,9 +136,6 @@ export default async function SituationVersesPage({ params }: PageProps) {
 
   // Get top Strong's numbers from primary verse
   const topStrongs = getTopStrongsFromVerse(primaryVerse, 3);
-
-  // Get related situations
-  const relatedSituations = await getRelatedSituations(situation, 5);
 
   // Prepare data for AI generation
   const versesForGeneration = data.verseMappings.slice(0, 5).map((mapping) => ({

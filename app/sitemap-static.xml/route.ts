@@ -11,14 +11,19 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemap
-  .map(
-    (entry) => `  <url>
+  .map((entry) => {
+    const lastModified = entry.lastModified
+      ? new Date(entry.lastModified).toISOString()
+      : new Date().toISOString();
+    const priority = (entry.priority ?? 0.5).toFixed(2);
+
+    return `  <url>
     <loc>${entry.url}</loc>
-    <lastmod>${entry.lastModified.toISOString()}</lastmod>
+    <lastmod>${lastModified}</lastmod>
     <changefreq>${entry.changeFrequency}</changefreq>
-    <priority>${entry.priority}</priority>
-  </url>`
-  )
+    <priority>${priority}</priority>
+  </url>`;
+  })
   .join('\n')}
 </urlset>`;
 

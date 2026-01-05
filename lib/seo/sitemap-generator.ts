@@ -4,11 +4,15 @@
  * Splits into 10,000 URL chunks per sitemap
  */
 
-import { prisma } from '@/lib/db';
 import { getCanonicalUrl } from '@/lib/utils';
 import { MetadataRoute } from 'next';
 
 const CHUNK_SIZE = 10000;
+
+async function getPrisma() {
+  const { prisma } = await import('@/lib/db');
+  return prisma;
+}
 
 export interface SitemapEntry {
   url: string;
@@ -53,6 +57,11 @@ export async function generateStaticSitemap(): Promise<MetadataRoute.Sitemap> {
  * Generate sitemap for situations
  */
 export async function generateSituationsSitemap(): Promise<MetadataRoute.Sitemap> {
+  if (!process.env.DATABASE_URL) {
+    return [];
+  }
+
+  const prisma = await getPrisma();
   const situations = await prisma.situation.findMany({
     select: {
       slug: true,
@@ -66,7 +75,12 @@ export async function generateSituationsSitemap(): Promise<MetadataRoute.Sitemap
     orderBy: { updatedAt: 'desc' },
   });
 
-  return situations.map((situation) => {
+  return situations.map(
+    (situation: {
+      slug: string;
+      updatedAt: Date | string;
+      verseMappings: Array<{ relevanceScore: number }>;
+    }) => {
     // Calculate priority based on verse count and avg relevance
     const avgRelevance =
       situation.verseMappings.reduce((sum, m) => sum + m.relevanceScore, 0) /
@@ -80,13 +94,19 @@ export async function generateSituationsSitemap(): Promise<MetadataRoute.Sitemap
       changeFrequency: 'monthly' as const,
       priority,
     };
-  });
+    }
+  );
 }
 
 /**
  * Generate sitemap chunk for names
  */
 export async function generateNamesSitemap(chunk: number = 1): Promise<MetadataRoute.Sitemap> {
+  if (!process.env.DATABASE_URL) {
+    return [];
+  }
+
+  const prisma = await getPrisma();
   const offset = (chunk - 1) * CHUNK_SIZE;
 
   const names = await prisma.name.findMany({
@@ -104,7 +124,8 @@ export async function generateNamesSitemap(chunk: number = 1): Promise<MetadataR
     take: CHUNK_SIZE,
   });
 
-  return names.map((name) => {
+  return names.map(
+    (name: { slug: string; updatedAt: Date | string; _count: { mentions: number } }) => {
     // Priority based on mention count (more mentions = higher priority)
     const priority = Math.min(0.8, 0.4 + (name._count.mentions / 100));
 
@@ -114,13 +135,19 @@ export async function generateNamesSitemap(chunk: number = 1): Promise<MetadataR
       changeFrequency: 'monthly' as const,
       priority,
     };
-  });
+    }
+  );
 }
 
 /**
  * Generate sitemap for professions
  */
 export async function generateProfessionsSitemap(): Promise<MetadataRoute.Sitemap> {
+  if (!process.env.DATABASE_URL) {
+    return [];
+  }
+
+  const prisma = await getPrisma();
   const professions = await prisma.profession.findMany({
     select: {
       slug: true,
@@ -129,12 +156,14 @@ export async function generateProfessionsSitemap(): Promise<MetadataRoute.Sitema
     orderBy: { updatedAt: 'desc' },
   });
 
-  return professions.map((profession) => ({
-    url: getCanonicalUrl(`/bible-verses-for-${profession.slug}`),
-    lastModified: profession.updatedAt,
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }));
+  return professions.map(
+    (profession: { slug: string; updatedAt: Date | string }) => ({
+      url: getCanonicalUrl(`/bible-verses-for-${profession.slug}`),
+      lastModified: profession.updatedAt,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })
+  );
 }
 
 /**
@@ -146,11 +175,17 @@ export async function calculateSitemapChunks(): Promise<{
   professions: number;
   total: number;
 }> {
-  const [namesCount, situationsCount, professionsCount] = await Promise.all([
-    prisma.name.count(),
-    prisma.situation.count(),
-    prisma.profession.count(),
-  ]);
+  if (!process.env.DATABASE_URL) {
+    return {
+      names: 0,
+      situations: 0,
+      professions: 0,
+      total: 0,
+    };
+  }
+
+  const prisma = await getPrisma();
+  const namesCount = await prisma.name.count();
 
   const nameChunks = Math.ceil(namesCount / CHUNK_SIZE);
 
@@ -177,7 +212,7 @@ export async function generateSitemapIndex(): Promise<string> {
 
   // Add name sitemap chunks
   for (let i = 1; i <= chunks.names; i++) {
-    sitemaps.push(`${baseUrl}/sitemap-names-${i}.xml`);
+    sitemaps.push(`${baseUrl}/sitemap-names/${i}.xml`);
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -208,6 +243,20 @@ export async function getSitemapStats(): Promise<{
     professions: number;
   };
 }> {
+  if (!process.env.DATABASE_URL) {
+    return {
+      totalUrls: 0,
+      totalChunks: 0,
+      breakdown: {
+        static: 0,
+        situations: 0,
+        names: 0,
+        professions: 0,
+      },
+    };
+  }
+
+  const prisma = await getPrisma();
   const [namesCount, situationsCount, professionsCount] = await Promise.all([
     prisma.name.count(),
     prisma.situation.count(),

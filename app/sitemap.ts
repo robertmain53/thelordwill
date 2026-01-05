@@ -8,8 +8,6 @@ import { MetadataRoute } from 'next';
 import { getCanonicalUrl } from '@/lib/utils';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thelordwill.com';
-
   // Main sitemap index pointing to chunked sitemaps
   return [
     {
@@ -21,11 +19,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
     },
     {
-      url: getCanonicalUrl('/sitemap-names-1.xml'),
+      url: getCanonicalUrl('/sitemap-names/1.xml'),
       lastModified: new Date(),
     },
     {
-      url: getCanonicalUrl('/sitemap-names-2.xml'),
+      url: getCanonicalUrl('/sitemap-names/2.xml'),
       lastModified: new Date(),
     },
     {

@@ -94,7 +94,7 @@ Write ONLY the introduction paragraph, no titles or headings.`;
 /**
  * Call LLM API (placeholder for actual implementation)
  */
-async function callLLMAPI(prompt: string): Promise<string> {
+async function callLLMAPI(_prompt: string): Promise<string> {
   // PRODUCTION: Replace with actual API call
   //
   // Example with OpenAI:
