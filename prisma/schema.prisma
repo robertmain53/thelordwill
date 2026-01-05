@@ -1,0 +1,345 @@
+// Optimized Bible Database Schema
+// Primary Key Format: BBCCCVVV (8 digits)
+// Example: 01001001 = Genesis 1:1 (Book 01, Chapter 001, Verse 001)
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================================
+// CORE BIBLE DATA
+// ============================================================================
+
+// Books of the Bible
+model Book {
+  id        Int      @id // 1-66 for standard Protestant canon
+  name      String   @unique
+  slug      String   @unique
+  testament String   // "OT" or "NT"
+  genre     String   // "Law", "History", "Wisdom", "Prophecy", "Gospel", "Epistle", "Apocalyptic"
+
+  // Metadata
+  chapters  Int      // Total chapters in book
+  verses    Int      // Total verses in book
+
+  // Relationships
+  verseRecords Verse[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([testament])
+  @@index([genre])
+  @@index([slug])
+}
+
+// Bible Verses - Multi-language support
+model Verse {
+  id           Int      @id // 8-digit format: BBCCCVVV
+  bookId       Int      // 1-66
+  chapter      Int      // Chapter number
+  verseNumber  Int      // Verse number within chapter
+
+  // English translations
+  textKjv      String?  @db.Text // King James Version
+  textWeb      String?  @db.Text // World English Bible
+  textAsv      String?  @db.Text // American Standard Version
+  textBbe      String?  @db.Text // Bible in Basic English
+  textYlt      String?  @db.Text // Young's Literal Translation
+
+  // Additional metadata
+  wordsCount   Int?     // Word count for analytics
+
+  // Relationships
+  book         Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  // Strong's Numbers (many-to-many)
+  strongsNumbers VerseStrong[]
+
+  // Situation mappings
+  situationMappings SituationVerseMapping[]
+
+  // Name mentions
+  nameMentions NameMention[]
+
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([bookId, chapter, verseNumber])
+  @@index([bookId, chapter])
+  @@index([bookId])
+  @@index([chapter])
+}
+
+// ============================================================================
+// STRONG'S CONCORDANCE
+// ============================================================================
+
+model StrongsLexicon {
+  strongsId      String   @id // Format: "H1" (Hebrew) or "G1" (Greek)
+  originalWord   String   // Hebrew/Greek word
+  transliteration String  // Pronunciation guide
+  definition     String   @db.Text
+
+  // Language
+  language       String   // "Hebrew" or "Greek"
+
+  // Usage statistics
+  occurrences    Int      @default(0)
+
+  // Relationships
+  verseUsages    VerseStrong[]
+
+  // Timestamps
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([language])
+  @@index([occurrences])
+}
+
+// Many-to-many relationship: Verse <-> Strong's Number
+model VerseStrong {
+  id           String         @id @default(cuid())
+  verseId      Int
+  strongsId    String
+
+  // Position in verse (for ordering)
+  position     Int?
+
+  // Relationships
+  verse        Verse          @relation(fields: [verseId], references: [id], onDelete: Cascade)
+  strongs      StrongsLexicon @relation(fields: [strongsId], references: [strongsId], onDelete: Cascade)
+
+  @@unique([verseId, strongsId, position])
+  @@index([verseId])
+  @@index([strongsId])
+}
+
+// ============================================================================
+// BIBLICAL NAMES & CHARACTERS
+// ============================================================================
+
+model Name {
+  id                    String   @id @default(cuid())
+  name                  String   @unique
+  slug                  String   @unique
+  meaning               String
+  originLanguage        String   // "Hebrew", "Greek", "Aramaic"
+  characterDescription  String   @db.Text
+
+  // First mention
+  firstMentionVerseId   Int?
+  firstMentionVerse     Verse?   @relation("FirstMention", fields: [firstMentionVerseId], references: [id])
+
+  // SEO
+  metaTitle             String?
+  metaDescription       String?
+
+  // Relationships
+  mentions              NameMention[]
+  relatedNames          NameRelation[] @relation("NameRelations")
+
+  // Timestamps
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([slug])
+  @@index([name])
+  @@index([originLanguage])
+}
+
+// Track all mentions of a name throughout the Bible
+model NameMention {
+  id        String   @id @default(cuid())
+  nameId    String
+  verseId   Int
+
+  // Context
+  context   String?  @db.Text
+
+  // Relationships
+  name      Name     @relation(fields: [nameId], references: [id], onDelete: Cascade)
+  verse     Verse    @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  @@unique([nameId, verseId])
+  @@index([nameId])
+  @@index([verseId])
+}
+
+// Related names (e.g., alternative names, family relationships)
+model NameRelation {
+  id              String   @id @default(cuid())
+  nameId          String
+  relatedNameId   String
+  relationshipType String  // "alias", "father", "son", "spouse", etc.
+
+  name            Name     @relation("NameRelations", fields: [nameId], references: [id], onDelete: Cascade)
+
+  @@unique([nameId, relatedNameId])
+  @@index([nameId])
+}
+
+// ============================================================================
+// SITUATIONS & TOPICS
+// ============================================================================
+
+model Situation {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String   @unique
+  metaDescription String   @db.Text
+  content         String?  @db.Text
+
+  // Category
+  category        String?  // "emotion", "life-event", "challenge", etc.
+
+  // Relationships
+  verseMappings   SituationVerseMapping[]
+  relatedSituations SituationRelation[] @relation("SituationRelations")
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@index([title])
+  @@index([category])
+}
+
+// Situation to Verse mapping with relevance scoring
+model SituationVerseMapping {
+  id             String    @id @default(cuid())
+  situationId    String
+  verseId        Int
+
+  // Relevance scoring (1-100, higher = more relevant)
+  relevanceScore Int       @default(50)
+
+  // Manual curation
+  manualNote     String?   @db.Text
+  isVerified     Boolean   @default(false)
+
+  // Relationships
+  situation      Situation @relation(fields: [situationId], references: [id], onDelete: Cascade)
+  verse          Verse     @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([situationId, verseId])
+  @@index([situationId, relevanceScore])
+  @@index([verseId])
+  @@index([relevanceScore])
+}
+
+// Related situations
+model SituationRelation {
+  id                 String    @id @default(cuid())
+  situationId        String
+  relatedSituationId String
+
+  situation          Situation @relation("SituationRelations", fields: [situationId], references: [id], onDelete: Cascade)
+
+  @@unique([situationId, relatedSituationId])
+  @@index([situationId])
+}
+
+// ============================================================================
+// PROFESSIONS (Keep for pSEO)
+// ============================================================================
+
+model Profession {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String   @unique
+  description     String   @db.Text
+  content         String?  @db.Text
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Relationships
+  relatedProfessions ProfessionRelation[] @relation("ProfessionRelations")
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@index([title])
+}
+
+model ProfessionRelation {
+  id                  String      @id @default(cuid())
+  professionId        String
+  relatedProfessionId String
+
+  profession          Profession  @relation("ProfessionRelations", fields: [professionId], references: [id], onDelete: Cascade)
+
+  @@unique([professionId, relatedProfessionId])
+}
+
+// ============================================================================
+// ANALYTICS & SEARCH
+// ============================================================================
+
+model PageView {
+  id        String   @id @default(cuid())
+  slug      String
+  pageType  String   // "name", "situation", "profession", "verse"
+  views     Int      @default(0)
+  date      DateTime @default(now())
+
+  @@unique([slug, pageType, date])
+  @@index([slug])
+  @@index([pageType])
+  @@index([date])
+}
+
+// Track most searched verses for Strong's number priority
+model VersePopularity {
+  verseId       Int      @id
+  searchCount   Int      @default(0)
+  viewCount     Int      @default(0)
+  lastAccessed  DateTime @default(now())
+
+  @@index([searchCount])
+  @@index([viewCount])
+}
+
+// ============================================================================
+// DATA INGESTION TRACKING
+// ============================================================================
+
+model IngestionLog {
+  id          String   @id @default(cuid())
+  source      String   // "bolls_api", "strongs_import", etc.
+  operation   String   // "import_verses", "import_strongs", etc.
+  status      String   // "pending", "in_progress", "completed", "failed"
+
+  // Metrics
+  recordsProcessed Int  @default(0)
+  recordsFailed    Int  @default(0)
+
+  // Error tracking
+  errorMessage     String? @db.Text
+
+  // Timestamps
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([source, status])
+  @@index([startedAt])
+}
