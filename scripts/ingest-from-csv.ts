@@ -16,7 +16,7 @@
  * Usage: npx tsx scripts/ingest-from-csv.ts
  */
 
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { generateVerseId, BIBLE_BOOKS, getBookByName } from '../lib/bible';
 import * as fs from 'fs';
@@ -86,11 +86,7 @@ function isConnectionClosedError(error: unknown): boolean {
 
 async function upsertVerseWithRetry(
   prisma: PrismaClient,
-  data: {
-    where: { id: number };
-    update: Record<string, unknown>;
-    create: Record<string, unknown>;
-  }
+  data: Prisma.VerseUpsertArgs
 ) {
   let attempt = 0;
   const maxAttempts = 2;
