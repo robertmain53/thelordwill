@@ -16,7 +16,9 @@
     "ingest:bible:legacy": "tsx scripts/ingest-bible-data.ts",
     "ingest:multilang": "tsx scripts/ingest-multilang.ts",
     "ingest:strongs": "tsx scripts/ingest-strongs.ts",
-    "ingest:all": "npm run ingest:bible && npm run ingest:multilang && npm run ingest:strongs"
+    "ingest:all": "npm run ingest:bible && npm run ingest:multilang && npm run ingest:strongs",
+    "seed:books": "tsx scripts/seed-books.ts",
+    "check:books": "tsx scripts/check-books.ts"
   },
   "dependencies": {
     "next": "^15.1.3",
