@@ -337,6 +337,7 @@ model Place {
   // Relationships
   verseMentions   PlaceVerseMapping[]
   relatedPlaces   PlaceRelation[] @relation("PlaceRelations")
+  relatedToPlaces PlaceRelation[] @relation("RelatedPlace")
   tourLeads       TourLead[]
 
   // Timestamps
@@ -381,6 +382,7 @@ model PlaceRelation {
   relationship      String?  // "near", "route", "regional"
 
   place             Place    @relation("PlaceRelations", fields: [placeId], references: [id], onDelete: Cascade)
+  relatedPlace      Place    @relation("RelatedPlace", fields: [relatedPlaceId], references: [id], onDelete: Cascade)
 
   @@unique([placeId, relatedPlaceId])
   @@index([placeId])
