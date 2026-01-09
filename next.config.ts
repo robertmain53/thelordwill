@@ -20,6 +20,19 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 31536000, // 1 year for immutable Bible content
   },
 
+  async rewrites() {
+    return [
+      {
+        source: '/bible-verses-for-:slug',
+        destination: '/bible-verses-for/:slug',
+      },
+      {
+        source: '/meaning-of-:name-in-the-bible',
+        destination: '/meaning-of/:name/in-the-bible',
+      },
+    ];
+  },
+
   // Headers for performance and SEO
   async headers() {
     return [
