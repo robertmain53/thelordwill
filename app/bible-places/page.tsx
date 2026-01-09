@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getCanonicalUrl } from "@/lib/utils";
 
@@ -9,22 +9,18 @@ const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-type PlaceListItem = Prisma.PlaceGetPayload<{
-  select: {
-    id: true;
-    slug: true;
-    name: true;
-    description: true;
-    country: true;
-    region: true;
-    tourHighlight: true;
-    _count: {
-      select: {
-        verseMentions: true;
-      };
-    };
+type PlaceListItem = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  country: string | null;
+  region: string | null;
+  tourHighlight: boolean;
+  _count: {
+    verseMentions: number;
   };
-}>;
+};
 
 export const metadata: Metadata = {
   title: "Biblical Places - Holy Land Sites & Christian Pilgrimage Tours",
