@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getCanonicalUrl } from "@/lib/utils";
 
@@ -8,6 +8,23 @@ const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+type PlaceListItem = Prisma.PlaceGetPayload<{
+  select: {
+    id: true;
+    slug: true;
+    name: true;
+    description: true;
+    country: true;
+    region: true;
+    tourHighlight: true;
+    _count: {
+      select: {
+        verseMentions: true;
+      };
+    };
+  };
+}>;
 
 export const metadata: Metadata = {
   title: "Biblical Places - Holy Land Sites & Christian Pilgrimage Tours",
@@ -26,7 +43,7 @@ export const metadata: Metadata = {
   ],
 };
 
-async function getPlaces() {
+async function getPlaces(): Promise<PlaceListItem[]> {
   try {
     const places = await prisma.place.findMany({
       orderBy: [
@@ -60,8 +77,8 @@ export default async function BiblePlacesPage() {
   const places = await getPlaces();
 
   const breadcrumbs = [
-    { label: "Home", href: "/" },
-    { label: "Bible Places", href: "/bible-places" },
+    { label: "Home", href: "/", position: 1 },
+    { label: "Bible Places", href: "/bible-places", position: 2 },
   ];
 
   const highlightPlaces = places.filter((p) => p.tourHighlight);
