@@ -112,9 +112,9 @@ export default async function PlacePage({ params }: PageProps) {
   }
 
   const breadcrumbs = [
-    { label: "Home", href: "/" },
-    { label: "Bible Places", href: "/bible-places" },
-    { label: place.name, href: `/bible-places/${slug}` },
+    { label: "Home", href: "/", position: 1 },
+    { label: "Bible Places", href: "/bible-places", position: 2 },
+    { label: place.name, href: `/bible-places/${slug}`, position: 3 },
   ];
 
   return (
