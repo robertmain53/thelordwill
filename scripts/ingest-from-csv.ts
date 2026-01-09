@@ -16,7 +16,8 @@
  * Usage: npx tsx scripts/ingest-from-csv.ts
  */
 
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { generateVerseId, BIBLE_BOOKS, getBookByName } from '../lib/bible';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -71,7 +72,7 @@ function createPrismaClient(databaseUrl: string) {
 }
 
 function isConnectionClosedError(error: unknown): boolean {
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+  if (error instanceof PrismaClientKnownRequestError) {
     return error.code === 'P1017';
   }
 
