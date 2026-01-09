@@ -2,9 +2,11 @@
  * Database queries for biblical places and tour lead data
  */
 
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+async function getPrisma() {
+  const { prisma } = await import('./prisma');
+  return prisma;
+}
 
 type PlaceVerseMention = {
   verse: {
@@ -88,6 +90,7 @@ export async function getPlaceBySlug(
   verseLimit: number = 20
 ): Promise<PlaceWithVerses | null> {
   try {
+    const prisma = await getPrisma();
     const place = await prisma.place.findUnique({
       where: { slug },
       include: {
@@ -169,6 +172,7 @@ export async function getPlaceBySlug(
  */
 export async function getAllPlaceSlugs(): Promise<string[]> {
   try {
+    const prisma = await getPrisma();
     const places: Array<{ slug: string }> = await prisma.place.findMany({
       select: { slug: true },
       orderBy: { tourPriority: 'desc' },

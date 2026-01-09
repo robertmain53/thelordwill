@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PrismaClient } from '@prisma/client';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getCanonicalUrl } from "@/lib/utils";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/db/prisma";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
