@@ -4,7 +4,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -55,6 +55,12 @@ model Verse {
   textBbe      String?  @db.Text // Bible in Basic English
   textYlt      String?  @db.Text // Young's Literal Translation
 
+  // Spanish translations
+  textRV       String?  @db.Text // Reina Valera 1909
+
+  // Portuguese translations
+  textBL       String?  @db.Text // Bíblia Livre
+
   // Additional metadata
   wordsCount   Int?     // Word count for analytics
 
@@ -67,8 +73,14 @@ model Verse {
   // Situation mappings
   situationMappings SituationVerseMapping[]
 
+  // Place mentions (for Holy Land Tours)
+  placeMentions PlaceVerseMapping[]
+
   // Name mentions
   nameMentions NameMention[]
+
+  // First mention for names
+  namesFirstMentioned Name[] @relation("FirstMention")
 
   // Timestamps
   createdAt    DateTime @default(now())
@@ -289,6 +301,135 @@ model ProfessionRelation {
   profession          Profession  @relation("ProfessionRelations", fields: [professionId], references: [id], onDelete: Cascade)
 
   @@unique([professionId, relatedProfessionId])
+}
+
+// ============================================================================
+// BIBLICAL PLACES (Holy Land Tours Monetization)
+// ============================================================================
+
+model Place {
+  id              String   @id @default(cuid())
+  slug            String   @unique // e.g., "jerusalem", "bethlehem"
+  name            String   @unique // e.g., "Jerusalem", "Bethlehem"
+
+  // Content
+  description     String   @db.Text
+  historicalInfo  String?  @db.Text
+  biblicalContext String?  @db.Text
+
+  // Geography
+  modernName      String?  // Modern name if different
+  country         String?  // Israel, Jordan, Egypt, etc.
+  region          String?  // Judea, Galilee, etc.
+
+  // Coordinates for map integration
+  latitude        Float?
+  longitude       Float?
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?  @db.Text
+
+  // Tour affiliate metadata
+  tourHighlight   Boolean  @default(false) // Featured on tour pages
+  tourPriority    Int      @default(50)    // 1-100, higher = more promoted
+
+  // Relationships
+  verseMentions   PlaceVerseMapping[]
+  relatedPlaces   PlaceRelation[] @relation("PlaceRelations")
+  tourLeads       TourLead[]
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@index([name])
+  @@index([country])
+  @@index([tourHighlight])
+  @@index([tourPriority])
+}
+
+// Place to Verse mapping
+model PlaceVerseMapping {
+  id              String   @id @default(cuid())
+  placeId         String
+  verseId         Int
+
+  // Context of the mention
+  mentionType     String?  // "event", "journey", "prophecy", "genealogy"
+  relevanceScore  Int      @default(50)
+
+  // Relationships
+  place           Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  verse           Verse    @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([placeId, verseId])
+  @@index([placeId, relevanceScore])
+  @@index([verseId])
+}
+
+// Related places (e.g., Jerusalem → Bethlehem)
+model PlaceRelation {
+  id                String   @id @default(cuid())
+  placeId           String
+  relatedPlaceId    String
+  relationship      String?  // "near", "route", "regional"
+
+  place             Place    @relation("PlaceRelations", fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([placeId, relatedPlaceId])
+  @@index([placeId])
+}
+
+// Tour lead capture for affiliate conversions
+model TourLead {
+  id              String    @id @default(cuid())
+
+  // Contact info
+  name            String
+  email           String
+  phone           String?
+  country         String?
+
+  // Tour preferences
+  interestedIn    String[]  // ["jerusalem", "nazareth", "dead-sea"]
+  travelDates     String?   // Flexible date range
+  groupSize       Int?      // Number of travelers
+  budget          String?   // "economy", "standard", "luxury", "private"
+
+  // Marketing data
+  sourcePlace     String?   // Which place page they came from
+  sourcePage      String?   // Full URL
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+
+  // Affiliate tracking
+  affiliateId     String?   // Tour partner ID
+  commission      Float?    // Expected commission amount
+
+  // Follow-up status
+  status          String    @default("new") // "new", "contacted", "quoted", "booked", "lost"
+  notes           String?   @db.Text
+  contactedAt     DateTime?
+  bookedAt        DateTime?
+
+  // Relationships
+  place           Place?    @relation(fields: [sourcePlace], references: [slug])
+
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([sourcePlace])
+  @@index([createdAt])
 }
 
 // ============================================================================

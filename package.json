@@ -10,9 +10,12 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "ingest:bible": "tsx scripts/ingest-bible-data.ts",
+    "ingest:bible": "tsx scripts/ingest-from-csv.ts",
+    "ingest:bible:api": "tsx scripts/ingest-bible-simple.ts",
+    "ingest:bible:legacy": "tsx scripts/ingest-bible-data.ts",
+    "ingest:multilang": "tsx scripts/ingest-multilang.ts",
     "ingest:strongs": "tsx scripts/ingest-strongs.ts",
-    "ingest:all": "npm run ingest:bible && npm run ingest:strongs"
+    "ingest:all": "npm run ingest:bible && npm run ingest:multilang && npm run ingest:strongs"
   },
   "dependencies": {
     "next": "^15.1.3",
