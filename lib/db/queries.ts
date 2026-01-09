@@ -5,7 +5,7 @@ import { cache } from 'react';
  * Get biblical name by slug (cached for performance)
  */
 export const getBiblicalName = cache(async (slug: string) => {
-  return await prisma.name.findUnique({
+  const name = await prisma.name.findUnique({
     where: { slug },
     include: {
       mentions: {
@@ -20,6 +20,22 @@ export const getBiblicalName = cache(async (slug: string) => {
       },
     },
   });
+
+  if (!name) return null;
+
+  // Fetch related names separately since the relation doesn't include nested data
+  const relatedNameIds = name.relatedNames.map(r => r.relatedNameId);
+  const relatedNamesData = relatedNameIds.length > 0
+    ? await prisma.name.findMany({
+        where: { id: { in: relatedNameIds } },
+        select: { id: true, name: true, slug: true, meaning: true },
+      })
+    : [];
+
+  return {
+    ...name,
+    relatedNames: relatedNamesData,
+  };
 });
 
 /**

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCanonicalUrl, titleCase } from "@/lib/utils";
+import { getBiblicalName } from "@/lib/db/queries";
 
 // Force SSR - disable static generation
 export const dynamic = 'force-dynamic';
@@ -12,27 +13,23 @@ interface PageProps {
   }>;
 }
 
-// Fetch name meaning data (placeholder - replace with actual DB/API call)
-async function getNameMeaning(name: string) {
-  // TODO: Replace with actual database/API call
-  // const data = await db.biblicalName.findUnique({ where: { slug: name } });
-
-  // Placeholder data
-  return {
-    name: titleCase(name),
-    slug: name,
-    meaning: `The biblical meaning of ${titleCase(name)}`,
-    origin: "Hebrew",
-    description: `Discover the deep biblical significance and spiritual meaning of the name ${titleCase(name)}.`,
-    verses: [],
-    relatedNames: [],
-  };
-}
-
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { name } = await params;
-  const data = await getNameMeaning(name);
+
+  if (!process.env.DATABASE_URL) {
+    const title = `Meaning of ${titleCase(name)} in the Bible - Biblical Name Meaning`;
+    const canonicalUrl = getCanonicalUrl(`/meaning-of-${name}-in-the-bible`);
+
+    return {
+      title,
+      alternates: {
+        canonical: canonicalUrl,
+      },
+    };
+  }
+
+  const data = await getBiblicalName(name);
 
   if (!data) {
     return {
@@ -41,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const title = `Meaning of ${data.name} in the Bible - Biblical Name Meaning`;
-  const description = data.description;
+  const description = data.metaDescription || `Discover the biblical meaning and significance of the name ${data.name}`;
   const canonicalUrl = getCanonicalUrl(`/meaning-of-${name}-in-the-bible`);
   const imageUrl = getCanonicalUrl(`/api/og?name=${encodeURIComponent(data.name)}&type=name`);
 
@@ -78,14 +75,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       `${data.name} in the Bible`,
       "biblical names",
       "name meanings",
-      data.origin,
+      data.originLanguage,
     ],
   };
 }
 
 export default async function NameMeaningPage({ params }: PageProps) {
   const { name } = await params;
-  const data = await getNameMeaning(name);
+
+  if (!process.env.DATABASE_URL) {
+    return (
+      <main className="min-h-screen py-12 px-4">
+        <article className="max-w-4xl mx-auto">
+          <header className="mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Meaning of {titleCase(name)} in the Bible
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Database connection required to display name data.
+            </p>
+          </header>
+        </article>
+      </main>
+    );
+  }
+
+  const data = await getBiblicalName(name);
 
   if (!data) {
     notFound();
@@ -96,7 +111,7 @@ export default async function NameMeaningPage({ params }: PageProps) {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: `Meaning of ${data.name} in the Bible`,
-    description: data.description,
+    description: data.metaDescription,
     author: {
       "@type": "Organization",
       name: "The Lord Will",
@@ -129,7 +144,7 @@ export default async function NameMeaningPage({ params }: PageProps) {
               Meaning of {data.name} in the Bible
             </h1>
             <p className="text-xl text-muted-foreground">
-              {data.description}
+              {data.metaDescription || `Discover the biblical meaning and significance of the name ${data.name}`}
             </p>
           </header>
 
@@ -143,7 +158,7 @@ export default async function NameMeaningPage({ params }: PageProps) {
                 </div>
                 <div>
                   <dt className="font-semibold inline">Origin:</dt>
-                  <dd className="inline ml-2">{data.origin}</dd>
+                  <dd className="inline ml-2">{data.originLanguage}</dd>
                 </div>
                 <div>
                   <dt className="font-semibold inline">Meaning:</dt>
@@ -152,12 +167,47 @@ export default async function NameMeaningPage({ params }: PageProps) {
               </dl>
             </div>
 
-            <div className="mt-8">
-              <h2 className="text-2xl font-semibold mb-4">Biblical Significance</h2>
-              <p className="text-muted-foreground">
-                Content about the biblical significance of {data.name} will be displayed here.
-              </p>
-            </div>
+            {data.characterDescription && (
+              <div className="mt-8">
+                <h2 className="text-2xl font-semibold mb-4">Biblical Significance</h2>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {data.characterDescription}
+                </p>
+              </div>
+            )}
+
+            {data.mentions && data.mentions.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-2xl font-semibold mb-4">Biblical References</h2>
+                <div className="space-y-4">
+                  {data.mentions.map((mention) => (
+                    <div key={mention.verseId} className="border-l-4 border-blue-500 pl-4">
+                      <p className="text-gray-800 italic">
+                        {mention.verse.textKjv || mention.verse.textWeb}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {data.relatedNames && data.relatedNames.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-2xl font-semibold mb-4">Related Names</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {data.relatedNames.map((related) => (
+                    <a
+                      key={related.id}
+                      href={`/meaning-of-${related.slug}-in-the-bible`}
+                      className="block p-4 border rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
+                    >
+                      <h3 className="font-semibold">{related.name}</h3>
+                      <p className="text-sm text-muted-foreground">{related.meaning}</p>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         </article>
       </main>

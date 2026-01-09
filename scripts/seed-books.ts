@@ -7,10 +7,8 @@
  * Or: npm run seed:books
  */
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/db/prisma';
 import { BIBLE_BOOKS } from '../lib/bible';
-
-const prisma = new PrismaClient();
 
 async function seedBooks() {
   console.log('📚 Seeding Book table...\n');
