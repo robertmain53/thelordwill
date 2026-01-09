@@ -5,12 +5,15 @@ import { cache } from 'react';
  * Get biblical name by slug (cached for performance)
  */
 export const getBiblicalName = cache(async (slug: string) => {
-  return await prisma.biblicalName.findUnique({
+  return await prisma.name.findUnique({
     where: { slug },
     include: {
-      verses: {
+      mentions: {
         take: 10,
-        orderBy: { reference: 'asc' },
+        orderBy: { verseId: 'asc' },
+        include: {
+          verse: true,
+        },
       },
       relatedNames: {
         take: 5,
@@ -26,9 +29,12 @@ export const getSituation = cache(async (slug: string) => {
   return await prisma.situation.findUnique({
     where: { slug },
     include: {
-      verses: {
+      verseMappings: {
         take: 10,
-        orderBy: { reference: 'asc' },
+        orderBy: { relevanceScore: 'desc' },
+        include: {
+          verse: true,
+        },
       },
       relatedSituations: {
         take: 5,
@@ -44,10 +50,6 @@ export const getProfession = cache(async (slug: string) => {
   return await prisma.profession.findUnique({
     where: { slug },
     include: {
-      verses: {
-        take: 10,
-        orderBy: { reference: 'asc' },
-      },
       relatedProfessions: {
         take: 5,
       },
