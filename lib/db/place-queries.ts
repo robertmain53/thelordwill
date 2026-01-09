@@ -6,6 +6,47 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+type PlaceVerseMention = {
+  verse: {
+    id: number;
+    bookId: number;
+    chapter: number;
+    verseNumber: number;
+    textKjv: string | null;
+    textWeb: string | null;
+    textAsv: string | null;
+    textRV: string | null;
+    textBL: string | null;
+  };
+  relevanceScore: number;
+  mentionType: string | null;
+};
+
+type RelatedPlaceEdge = {
+  relatedPlace: {
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+  };
+};
+
+type PlaceQueryResult = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  historicalInfo: string | null;
+  biblicalContext: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  country: string | null;
+  region: string | null;
+  tourHighlight: boolean;
+  verseMentions: PlaceVerseMention[];
+  relatedPlaces: RelatedPlaceEdge[];
+};
+
 export interface PlaceWithVerses {
   id: string;
   slug: string;
@@ -83,7 +124,7 @@ export async function getPlaceBySlug(
           },
         },
       },
-    });
+    }) as PlaceQueryResult | null;
 
     if (!place) {
       return null;
