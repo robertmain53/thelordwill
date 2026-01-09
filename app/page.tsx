@@ -41,7 +41,7 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/bible-verses-for-anxiety"
+            href="/bible-verses-for/anxiety"
             className="p-6 border-2 rounded-lg hover:shadow-xl hover:border-blue-500 transition-all group"
           >
             <div className="text-4xl mb-4">📖</div>
@@ -54,7 +54,7 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/bible-verses-for-teachers"
+            href="/bible-verses-for/teachers"
             className="p-6 border-2 rounded-lg hover:shadow-xl hover:border-blue-500 transition-all group"
           >
             <div className="text-4xl mb-4">💼</div>

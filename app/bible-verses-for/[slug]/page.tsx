@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   if (!process.env.DATABASE_URL) {
     const title = `Bible Verses for ${titleCase(slug)}`;
-    const canonicalUrl = getCanonicalUrl(`/bible-verses-for-${slug}`);
+    const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
 
     return {
       title,
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (situationData) {
     const title = `Bible Verses for ${situationData.title} - Scripture & Comfort`;
     const description = situationData.metaDescription;
-    const canonicalUrl = getCanonicalUrl(`/bible-verses-for-${slug}`);
+    const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
     const imageUrl = getCanonicalUrl(
       `/api/og?situation=${encodeURIComponent(situationData.title)}&type=situation`
     );
@@ -111,7 +111,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `Bible Verses for ${profession.title} - Scripture & Wisdom`;
   const description = profession.metaDescription ?? profession.description;
-  const canonicalUrl = getCanonicalUrl(`/bible-verses-for-${slug}`);
+  const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
   const imageUrl = getCanonicalUrl(
     `/api/og?profession=${encodeURIComponent(profession.title)}&type=profession`
   );
@@ -180,7 +180,7 @@ export default async function SituationVersesPage({ params }: PageProps) {
     }
 
     const description = profession.metaDescription ?? profession.description;
-    const canonicalUrl = getCanonicalUrl(`/bible-verses-for-${slug}`);
+    const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
 
     const schema = {
       "@context": "https://schema.org",
@@ -325,7 +325,7 @@ export default async function SituationVersesPage({ params }: PageProps) {
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": getCanonicalUrl(`/bible-verses-for-${slug}`),
+      "@id": getCanonicalUrl(`/bible-verses-for/${slug}`),
     },
     about: {
       "@type": "Thing",
@@ -334,7 +334,7 @@ export default async function SituationVersesPage({ params }: PageProps) {
     wordCount: introduction.wordCount,
   };
 
-  const canonicalUrl = getCanonicalUrl(`/bible-verses-for-${slug}`);
+  const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
 
   return (
     <>
