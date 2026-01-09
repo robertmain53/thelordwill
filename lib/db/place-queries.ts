@@ -169,7 +169,7 @@ export async function getPlaceBySlug(
  */
 export async function getAllPlaceSlugs(): Promise<string[]> {
   try {
-    const places = await prisma.place.findMany({
+    const places: Array<{ slug: string }> = await prisma.place.findMany({
       select: { slug: true },
       orderBy: { tourPriority: 'desc' },
     });
