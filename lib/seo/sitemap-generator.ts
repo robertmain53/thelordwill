@@ -89,7 +89,7 @@ export async function generateSituationsSitemap(): Promise<MetadataRoute.Sitemap
     const priority = Math.min(0.8, 0.5 + avgRelevance / 200);
 
     return {
-      url: getCanonicalUrl(`/bible-verses-for-${situation.slug}`),
+      url: getCanonicalUrl(`/bible-verses-for/${situation.slug}`),
       lastModified: situation.updatedAt,
       changeFrequency: 'monthly' as const,
       priority,
@@ -130,7 +130,7 @@ export async function generateNamesSitemap(chunk: number = 1): Promise<MetadataR
     const priority = Math.min(0.8, 0.4 + (name._count.mentions / 100));
 
     return {
-      url: getCanonicalUrl(`/meaning-of-${name.slug}-in-the-bible`),
+      url: getCanonicalUrl(`/meaning-of/${name.slug}/in-the-bible`),
       lastModified: name.updatedAt,
       changeFrequency: 'monthly' as const,
       priority,
@@ -158,7 +158,7 @@ export async function generateProfessionsSitemap(): Promise<MetadataRoute.Sitema
 
   return professions.map(
     (profession: { slug: string; updatedAt: Date | string }) => ({
-      url: getCanonicalUrl(`/bible-verses-for-${profession.slug}`),
+      url: getCanonicalUrl(`/bible-verses-for/${profession.slug}`),
       lastModified: profession.updatedAt,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
