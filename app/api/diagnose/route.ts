@@ -4,8 +4,28 @@ import prisma from '@/lib/db/prisma';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+interface DiagnosticsResponse {
+  timestamp: string;
+  environment: {
+    nodeVersion: string;
+    platform: string;
+    databaseUrlSet: boolean;
+  };
+  database: {
+    connected: boolean;
+    tables: Record<string, number | string>;
+    sampleData: Record<string, unknown>;
+  };
+  errors: string[];
+  recommendations?: Array<{
+    severity: string;
+    message: string;
+    action: string;
+  }>;
+}
+
 export async function GET() {
-  const diagnostics: any = {
+  const diagnostics: DiagnosticsResponse = {
     timestamp: new Date().toISOString(),
     environment: {
       nodeVersion: process.version,
@@ -17,7 +37,7 @@ export async function GET() {
       tables: {},
       sampleData: {},
     },
-    errors: [] as string[],
+    errors: [],
   };
 
   try {
