@@ -12,10 +12,8 @@ import {
   generateFAQs,
   validateContentQuality,
 } from "@/lib/content/generator";
-import {
-  TranslationComparison,
-  prepareTranslations,
-} from "@/components/translation-comparison";
+import { TranslationComparison } from "@/components/translation-comparison";
+import { prepareTranslations } from "@/lib/translations";
 import { StrongsDisplay } from "@/components/strongs-display";
 import { FAQSection } from "@/components/faq-section";
 import { Breadcrumbs } from "@/components/breadcrumbs";

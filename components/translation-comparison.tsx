@@ -2,18 +2,13 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import type { Translation } from '@/lib/translations';
 
 /**
  * Translation Comparison Component
  * Displays multiple Bible translations side-by-side or in tabs
  * Provides linguistic depth for SEO and user value
  */
-
-interface Translation {
-  version: string;
-  fullName: string;
-  text: string | null;
-}
 
 interface TranslationComparisonProps {
   reference: string;
@@ -113,40 +108,7 @@ export function TranslationComparison({
 }
 
 /**
- * Helper to map database fields to translation objects
+ * Re-export prepareTranslations from lib/translations
+ * This allows it to be used on the server while keeping backwards compatibility
  */
-export function prepareTranslations(verse: {
-  textKjv: string | null;
-  textWeb: string | null;
-  textAsv: string | null;
-  textBbe: string | null;
-  textYlt: string | null;
-}): Translation[] {
-  return [
-    {
-      version: 'KJV',
-      fullName: 'King James Version',
-      text: verse.textKjv,
-    },
-    {
-      version: 'WEB',
-      fullName: 'World English Bible',
-      text: verse.textWeb,
-    },
-    {
-      version: 'ASV',
-      fullName: 'American Standard Version',
-      text: verse.textAsv,
-    },
-    {
-      version: 'BBE',
-      fullName: 'Bible in Basic English',
-      text: verse.textBbe,
-    },
-    {
-      version: 'YLT',
-      fullName: "Young's Literal Translation",
-      text: verse.textYlt,
-    },
-  ];
-}
+export { prepareTranslations } from '@/lib/translations';
