@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!process.env.DATABASE_URL) {
     const title = `Meaning of ${titleCase(name)} in the Bible - Biblical Name Meaning`;
-    const canonicalUrl = getCanonicalUrl(`/meaning-of-${name}-in-the-bible`);
+    const canonicalUrl = getCanonicalUrl(`/meaning-of/${name}/in-the-bible`);
 
     return {
       title,
@@ -126,7 +126,7 @@ export default async function NameMeaningPage({ params }: PageProps) {
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": getCanonicalUrl(`/meaning-of-${name}-in-the-bible`),
+      "@id": getCanonicalUrl(`/meaning-of/${name}/in-the-bible`),
     },
   };
 
@@ -198,7 +198,7 @@ export default async function NameMeaningPage({ params }: PageProps) {
                   {data.relatedNames.map((related) => (
                     <a
                       key={related.id}
-                      href={`/meaning-of-${related.slug}-in-the-bible`}
+                      href={`/meaning-of/${related.slug}/in-the-bible`}
                       className="block p-4 border rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
                     >
                       <h3 className="font-semibold">{related.name}</h3>

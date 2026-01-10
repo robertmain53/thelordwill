@@ -94,7 +94,7 @@ export const getThematicLinks = cache(
             const situation = mapping.situation;
             if (!situationLinks.has(situation.slug)) {
               situationLinks.set(situation.slug, {
-                href: `/bible-verses-for-${situation.slug}`,
+                href: `/bible-verses-for/${situation.slug}`,
                 title: `Bible Verses for ${situation.title}`,
                 category: 'situation',
                 relevance: mapping.relevanceScore,
@@ -137,7 +137,7 @@ export const getThematicLinks = cache(
             const name = mention.name;
             if (!nameLinks.has(name.slug)) {
               nameLinks.set(name.slug, {
-                href: `/meaning-of-${name.slug}-in-the-bible`,
+                href: `/meaning-of/${name.slug}/in-the-bible`,
                 title: `Meaning of ${name.name} in the Bible`,
                 category: 'name',
               });
@@ -178,7 +178,7 @@ export const getRelatedSituations = cache(
       });
 
       return situations.map((s: { slug: string; title: string }) => ({
-        href: `/bible-verses-for-${s.slug}`,
+        href: `/bible-verses-for/${s.slug}`,
         title: s.title,
         category: 'situation' as const,
       }));
@@ -199,7 +199,7 @@ export const getRelatedSituations = cache(
     });
 
     return related.map((s: { slug: string; title: string }) => ({
-      href: `/bible-verses-for-${s.slug}`,
+      href: `/bible-verses-for/${s.slug}`,
       title: s.title,
       category: 'situation' as const,
     }));
@@ -235,7 +235,7 @@ export const getTrendingNames = cache(async (limit: number = 2): Promise<Interna
   });
 
   return names.map((n: { slug: string; name: string }) => ({
-    href: `/meaning-of-${n.slug}-in-the-bible`,
+    href: `/meaning-of/${n.slug}/in-the-bible`,
     title: `Meaning of ${n.name}`,
     category: 'name' as const,
   }));
@@ -257,7 +257,7 @@ export const getTrendingProfessions = cache(async (limit: number = 2): Promise<I
   });
 
   return professions.map((p: { slug: string; title: string }) => ({
-    href: `/bible-verses-for-${p.slug}`,
+    href: `/bible-verses-for/${p.slug}`,
     title: `Bible Verses for ${p.title}s`,
     category: 'profession' as const,
   }));
@@ -351,7 +351,7 @@ export function generateBreadcrumbs(
       },
       {
         label: title,
-        href: `/bible-verses-for-${slug}`,
+        href: `/bible-verses-for/${slug}`,
         position: 3,
       }
     );
@@ -364,7 +364,7 @@ export function generateBreadcrumbs(
       },
       {
         label: title,
-        href: `/meaning-of-${slug}-in-the-bible`,
+        href: `/meaning-of/${slug}/in-the-bible`,
         position: 3,
       }
     );
@@ -377,7 +377,7 @@ export function generateBreadcrumbs(
       },
       {
         label: title,
-        href: `/bible-verses-for-${slug}`,
+        href: `/bible-verses-for/${slug}`,
         position: 3,
       }
     );
@@ -432,7 +432,7 @@ export const getHubPages = cache(async (): Promise<InternalLink[]> => {
   });
 
   return topSituations.map((s: { slug: string; title: string }) => ({
-    href: `/bible-verses-for-${s.slug}`,
+    href: `/bible-verses-for/${s.slug}`,
     title: s.title,
     category: 'situation' as const,
   }));
