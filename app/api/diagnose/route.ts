@@ -89,7 +89,7 @@ export async function GET() {
     }
 
     // Get sample data if available
-    if (diagnostics.database.tables.situations > 0) {
+    if (typeof diagnostics.database.tables.situations === 'number' && diagnostics.database.tables.situations > 0) {
       try {
         const sampleSituation = await prisma.situation.findFirst({
           select: { slug: true, title: true },
@@ -100,7 +100,7 @@ export async function GET() {
       }
     }
 
-    if (diagnostics.database.tables.names > 0) {
+    if (typeof diagnostics.database.tables.names === 'number' && diagnostics.database.tables.names > 0) {
       try {
         const sampleName = await prisma.name.findFirst({
           select: { slug: true, name: true },
@@ -111,7 +111,7 @@ export async function GET() {
       }
     }
 
-    if (diagnostics.database.tables.books > 0) {
+    if (typeof diagnostics.database.tables.books === 'number' && diagnostics.database.tables.books > 0) {
       try {
         const sampleBook = await prisma.book.findFirst({
           select: { id: true, name: true, slug: true },
@@ -123,7 +123,12 @@ export async function GET() {
     }
 
     // Test a situation query with book relation
-    if (diagnostics.database.tables.situations > 0 && diagnostics.database.tables.books > 0) {
+    if (
+      typeof diagnostics.database.tables.situations === 'number' &&
+      typeof diagnostics.database.tables.books === 'number' &&
+      diagnostics.database.tables.situations > 0 &&
+      diagnostics.database.tables.books > 0
+    ) {
       try {
         const situationWithVerses = await prisma.situation.findFirst({
           include: {
