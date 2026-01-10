@@ -452,9 +452,8 @@ export default async function SituationVersesPage({ params }: PageProps) {
                       const reference = formatVerseReference(verse);
 
                       return (
-                        <>
+                        <div key={verse.id} className="space-y-6">
                           <div
-                            key={verse.id}
                             className="border rounded-lg p-6 bg-card hover:shadow-md transition-shadow"
                           >
                             <div className="flex items-start justify-between mb-3">
@@ -499,7 +498,7 @@ export default async function SituationVersesPage({ params }: PageProps) {
                               )}
                             </div>
                           )}
-                        </>
+                        </div>
                       );
                     })}
                   </div>
