@@ -64,7 +64,7 @@ async function getTodaysPrayerPoint() {
           prayerPointId,
         },
       });
-    } catch (error) {
+    } catch {
       // If creation fails (race condition), fetch the existing record
       dailyRecord = await prisma.dailyPrayerPoint.findUnique({
         where: { date: today },

@@ -9,14 +9,15 @@ import { prepareTranslations } from "@/lib/translations";
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
   const prayerPoint = await prisma.prayerPoint.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     select: {
       title: true,
       metaTitle: true,
@@ -41,8 +42,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PrayerPointPage({ params }: PageProps) {
+  const { slug } = await params;
   const prayerPoint = await prisma.prayerPoint.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: {
       verseMappings: {
         include: {
