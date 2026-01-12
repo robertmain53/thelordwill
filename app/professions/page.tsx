@@ -46,7 +46,7 @@ export default async function ProfessionsPage() {
               className="group border rounded-lg p-6 bg-card hover:shadow-md hover:border-primary transition-all"
             >
               <h2 className="text-2xl font-semibold mb-3 group-hover:text-primary transition-colors">
-                {profession.title}s
+                {profession.title}
               </h2>
               <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                 {profession.metaDescription || profession.description}
