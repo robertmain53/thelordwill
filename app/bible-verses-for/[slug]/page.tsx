@@ -218,7 +218,7 @@ export default async function SituationVersesPage({ params }: PageProps) {
           <article className="max-w-4xl mx-auto">
             <header className="mb-8">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Bible Verses for {profession.title}s
+                Bible Verses for {profession.title}
               </h1>
               <p className="text-xl text-muted-foreground">
                 {description}
