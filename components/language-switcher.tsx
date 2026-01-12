@@ -50,18 +50,21 @@ export function LanguageSwitcher({
   const currentLangOption = LANGUAGES.find((lang) => lang.code === selectedLang);
 
   const handleLanguageChange = (language: Language) => {
+    // Only English is available currently
+    if (language !== 'en') {
+      alert('Spanish and Portuguese translations are coming soon! Please check back later.');
+      setIsOpen(false);
+      return;
+    }
+
     setSelectedLang(language);
     setIsOpen(false);
 
     // Call the callback if provided
     if (onLanguageChange) {
       onLanguageChange(language);
-    } else {
-      // Default behavior: navigate to language-specific URL
-      const currentPath = window.location.pathname;
-      const newPath = `/${language}${currentPath}`;
-      window.location.href = newPath;
     }
+    // No navigation needed for English since it's the default
   };
 
   if (variant === 'compact') {
