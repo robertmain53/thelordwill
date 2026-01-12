@@ -73,6 +73,9 @@ model Verse {
   // Situation mappings
   situationMappings SituationVerseMapping[]
 
+  // Prayer point mappings
+  prayerPointMappings PrayerPointVerseMapping[]
+
   // Place mentions (for Holy Land Tours)
   placeMentions PlaceVerseMapping[]
 
@@ -301,6 +304,99 @@ model ProfessionRelation {
   profession          Profession  @relation("ProfessionRelations", fields: [professionId], references: [id], onDelete: Cascade)
 
   @@unique([professionId, relatedProfessionId])
+}
+
+// ============================================================================
+// PRAYER POINTS (High search volume keywords)
+// ============================================================================
+
+model PrayerPoint {
+  id              String   @id @default(cuid())
+  slug            String   @unique // e.g., "breakthrough", "spiritual-warfare"
+  title           String   @unique // e.g., "Prayer Points for Breakthrough"
+  description     String   @db.Text
+  content         String?  @db.Text
+
+  // Category
+  category        String?  // "spiritual-warfare", "financial", "deliverance", etc.
+
+  // Priority & Rotation
+  priority        Int      @default(50) // 1-100, higher = more important
+  dailyRotation   Boolean  @default(false) // Include in "Prayer Points for Today" rotation
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?  @db.Text
+
+  // Relationships
+  verseMappings   PrayerPointVerseMapping[]
+  relatedPrayerPoints PrayerPointRelation[] @relation("PrayerPointRelations")
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@index([title])
+  @@index([category])
+  @@index([priority])
+  @@index([dailyRotation])
+}
+
+// Prayer Point to Verse mapping with relevance scoring
+model PrayerPointVerseMapping {
+  id             String      @id @default(cuid())
+  prayerPointId  String
+  verseId        Int
+
+  // Relevance scoring (1-100, higher = more relevant)
+  relevanceScore Int         @default(50)
+
+  // Prayer context
+  prayerFocus    String?     // "declaration", "supplication", "intercession", "warfare"
+  contextNote    String?     @db.Text
+
+  // Manual curation
+  isVerified     Boolean     @default(false)
+
+  // Relationships
+  prayerPoint    PrayerPoint @relation(fields: [prayerPointId], references: [id], onDelete: Cascade)
+  verse          Verse       @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([prayerPointId, verseId])
+  @@index([prayerPointId, relevanceScore])
+  @@index([verseId])
+  @@index([relevanceScore])
+  @@index([prayerFocus])
+}
+
+// Related prayer points (e.g., breakthrough → financial breakthrough)
+model PrayerPointRelation {
+  id                   String      @id @default(cuid())
+  prayerPointId        String
+  relatedPrayerPointId String
+
+  prayerPoint          PrayerPoint @relation("PrayerPointRelations", fields: [prayerPointId], references: [id], onDelete: Cascade)
+
+  @@unique([prayerPointId, relatedPrayerPointId])
+  @@index([prayerPointId])
+}
+
+// Daily prayer point rotation tracking
+model DailyPrayerPoint {
+  id            String      @id @default(cuid())
+  date          DateTime    @unique @default(now()) @db.Date
+  prayerPointId String
+
+  // Timestamps
+  createdAt     DateTime    @default(now())
+
+  @@index([date])
+  @@index([prayerPointId])
 }
 
 // ============================================================================

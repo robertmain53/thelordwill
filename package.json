@@ -18,6 +18,8 @@
     "ingest:strongs": "tsx scripts/ingest-strongs.ts",
     "ingest:all": "npm run ingest:bible && npm run ingest:multilang && npm run ingest:strongs",
     "seed:books": "tsx scripts/seed-books-direct.ts",
+    "seed:places": "tsx scripts/seed-biblical-places.ts",
+    "seed:prayer-points": "tsx scripts/seed-prayer-points.ts",
     "check:books": "tsx scripts/check-books.ts"
   },
   "dependencies": {

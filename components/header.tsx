@@ -25,6 +25,9 @@ export function Header() {
           <Link href="/professions" className="hover:text-primary transition-colors">
             Professions
           </Link>
+          <Link href="/prayer-points" className="hover:text-primary transition-colors">
+            Prayer Points
+          </Link>
           <Link href="/about" className="hover:text-primary transition-colors">
             About
           </Link>
@@ -46,6 +49,9 @@ export function Header() {
         </Link>
         <Link href="/professions" className="whitespace-nowrap hover:text-primary transition-colors">
           Professions
+        </Link>
+        <Link href="/prayer-points" className="whitespace-nowrap hover:text-primary transition-colors">
+          Prayer Points
         </Link>
         <Link href="/about" className="whitespace-nowrap hover:text-primary transition-colors">
           About
