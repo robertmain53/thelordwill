@@ -123,8 +123,7 @@ export default async function PlacePage({ params }: PageProps) {
     <div className="container mx-auto px-4 py-8">
       <Breadcrumbs items={breadcrumbs} />
 
-
- /* Structured data: Article + BreadcrumbList */
+      {/* Structured data: Article + BreadcrumbList */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -144,10 +143,7 @@ export default async function PlacePage({ params }: PageProps) {
                 `Biblical context, verses, and travel planning notes for ${place.name}.`,
               url: getCanonicalUrl(`/bible-places/${slug}`),
               imageUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com"}/api/og/place/${slug}.png`,
-              dateModifiedISO:
-                (place as any)?.updatedAt
-                  ? new Date((place as any).updatedAt).toISOString().slice(0, 10)
-                  : new Date().toISOString().slice(0, 10),
+              dateModifiedISO: new Date(place.updatedAt).toISOString().slice(0, 10),
               language: "en",
               category: "Biblical Places",
               aboutName: place.name,
@@ -168,11 +164,7 @@ export default async function PlacePage({ params }: PageProps) {
           authorName="The Lord Will Editorial Team"
           reviewerName="Ugo Candido"
           reviewerCredential="Engineer"
-          lastUpdatedISO={
-            (place as any)?.updatedAt
-              ? new Date((place as any).updatedAt).toISOString().slice(0, 10)
-              : new Date().toISOString().slice(0, 10)
-          }
+          lastUpdatedISO={new Date(place.updatedAt).toISOString().slice(0, 10)}
           categoryLabel="Biblical Places"
         />
 

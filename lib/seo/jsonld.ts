@@ -33,7 +33,37 @@ type ArticleSchemaInput = {
 export function buildArticleSchema(input: ArticleSchemaInput) {
   const publisherUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com";
 
-  const schema: any = {
+  const schema: {
+    "@context": "https://schema.org";
+    "@type": "Article";
+    headline: string;
+    description: string;
+    mainEntityOfPage: {
+      "@type": "WebPage";
+      "@id": string;
+    };
+    publisher: {
+      "@type": "Organization";
+      name: string;
+      url: string;
+      logo: {
+        "@type": "ImageObject";
+        url: string;
+      };
+    };
+    author: {
+      "@type": "Organization";
+      name: string;
+    };
+    dateModified: string;
+    inLanguage: string;
+    image?: string[];
+    about?: {
+      "@type": "Thing";
+      name: string;
+    };
+    articleSection?: string;
+  } = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: input.title,

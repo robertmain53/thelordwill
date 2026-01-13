@@ -124,7 +124,7 @@ export default async function PrayerPointPage({ params }: PageProps) {
   });
 
   // Handle FAQs safely (assuming it might be a JSON field or relation, defaulting if missing)
-  const faqs = (prayerPoint as any).faqs as FAQItem[] | undefined;
+  const faqs = (prayerPoint as { faqs?: FAQItem[] | null }).faqs ?? undefined;
   const displayFaqs = faqs && faqs.length > 0 ? faqs : DEFAULT_PRAYER_POINT_FAQS;
 
   return (
@@ -148,10 +148,7 @@ export default async function PrayerPointPage({ params }: PageProps) {
                   `Scripture-anchored prayer points and practical guidance for ${prayerPoint.title}.`,
                 url: getCanonicalUrl(`/prayer-points/${slug}`),
                 imageUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com"}/api/og/prayer-points/${slug}.png`,
-                dateModifiedISO:
-                  (prayerPoint as any)?.updatedAt
-                    ? new Date((prayerPoint as any).updatedAt).toISOString().slice(0, 10)
-                    : new Date().toISOString().slice(0, 10),
+                dateModifiedISO: new Date(prayerPoint.updatedAt).toISOString().slice(0, 10),
                 language: "en",
                 category: "Prayer Points",
                 aboutName: prayerPoint.title,
@@ -175,11 +172,7 @@ export default async function PrayerPointPage({ params }: PageProps) {
             authorName="The Lord Will Editorial Team"
             reviewerName="Ugo Candido"
             reviewerCredential="Engineer"
-            lastUpdatedISO={
-              (prayerPoint as any)?.updatedAt
-                ? new Date((prayerPoint as any).updatedAt).toISOString().slice(0, 10)
-                : new Date().toISOString().slice(0, 10)
-            }
+            lastUpdatedISO={new Date(prayerPoint.updatedAt).toISOString().slice(0, 10)}
             categoryLabel="Prayer Points"
           />
         </div>

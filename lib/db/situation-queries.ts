@@ -17,6 +17,7 @@ export interface SituationWithVerses {
   metaDescription: string;
   content: string | null;
   category: string | null;
+  updatedAt: Date;
   verseMappings: Array<{
     relevanceScore: number;
     manualNote: string | null;

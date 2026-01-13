@@ -316,8 +316,8 @@ export default async function SituationVersesPage({ params }: PageProps) {
 
   const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
   const lastUpdatedISO =
-    (situationData as any)?.updatedAt
-      ? new Date((situationData as any).updatedAt).toISOString().slice(0, 10)
+    situationData.updatedAt
+      ? new Date(situationData.updatedAt).toISOString().slice(0, 10)
       : todayISO;
 
   return (

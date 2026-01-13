@@ -38,6 +38,7 @@ type PlaceQueryResult = {
   slug: string;
   name: string;
   description: string;
+  updatedAt: Date;
   historicalInfo: string | null;
   biblicalContext: string | null;
   latitude: number | null;
@@ -54,6 +55,7 @@ export interface PlaceWithVerses {
   slug: string;
   name: string;
   description: string;
+  updatedAt: Date;
   historicalInfo: string | null;
   biblicalContext: string | null;
   latitude: number | null;
@@ -139,6 +141,7 @@ export async function getPlaceBySlug(
       slug: place.slug,
       name: place.name,
       description: place.description,
+      updatedAt: place.updatedAt,
       historicalInfo: place.historicalInfo,
       biblicalContext: place.biblicalContext,
       latitude: place.latitude,
