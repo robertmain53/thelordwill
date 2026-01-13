@@ -6,6 +6,8 @@ import {
   formatPlaceVerseReference,
 } from "@/lib/db/place-queries";
 import { TourLeadForm } from "@/components/tour-lead-form";
+import { EEATStrip } from "@/components/eeat-strip";
+import { buildArticleSchema, buildBreadcrumbList } from "@/lib/seo/jsonld";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import Link from "next/link";
 
@@ -121,11 +123,60 @@ export default async function PlacePage({ params }: PageProps) {
     <div className="container mx-auto px-4 py-8">
       <Breadcrumbs items={breadcrumbs} />
 
+
+ /* Structured data: Article + BreadcrumbList */
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbList(breadcrumbs, getCanonicalUrl("/")),
+          ),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildArticleSchema({
+              title: `${place.name} in the Bible`,
+              description:
+                place.description ||
+                `Biblical context, verses, and travel planning notes for ${place.name}.`,
+              url: getCanonicalUrl(`/bible-places/${slug}`),
+              imageUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com"}/api/og/place/${slug}.png`,
+              dateModifiedISO:
+                (place as any)?.updatedAt
+                  ? new Date((place as any).updatedAt).toISOString().slice(0, 10)
+                  : new Date().toISOString().slice(0, 10),
+              language: "en",
+              category: "Biblical Places",
+              aboutName: place.name,
+            }),
+          ),
+        }}
+      />
+
+
       {/* Hero Section */}
       <div className="mt-6 mb-8">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
           {place.name} in the Bible
         </h1>
+
+
+        <EEATStrip
+          authorName="The Lord Will Editorial Team"
+          reviewerName="Ugo Candido"
+          reviewerCredential="Engineer"
+          lastUpdatedISO={
+            (place as any)?.updatedAt
+              ? new Date((place as any).updatedAt).toISOString().slice(0, 10)
+              : new Date().toISOString().slice(0, 10)
+          }
+          categoryLabel="Biblical Places"
+        />
+
+
         <p className="text-xl text-gray-600 leading-relaxed">
           {place.description}
         </p>

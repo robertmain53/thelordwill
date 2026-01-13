@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCanonicalUrl, titleCase } from "@/lib/utils";
+import { EEATStrip } from "@/components/eeat-strip";
 import {
   getSituationWithVerses,
   getTopStrongsFromVerse,
@@ -18,6 +19,7 @@ import { StrongsDisplay } from "@/components/strongs-display";
 import { FAQSection } from "@/components/faq-section";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { InternalLinks, ThematicCluster } from "@/components/internal-links";
+import { buildArticleSchema, buildBreadcrumbList } from "@/lib/seo/jsonld";
 import {
   generateLinkingStrategy,
   generateBreadcrumbs,
@@ -168,6 +170,9 @@ export default async function SituationVersesPage({ params }: PageProps) {
     );
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com";
+  const todayISO = new Date().toISOString().slice(0, 10);
+
   const situationData = await getSituationWithVerses(slug, 10);
 
   if (!situationData) {
@@ -179,39 +184,38 @@ export default async function SituationVersesPage({ params }: PageProps) {
 
     const description = profession.metaDescription ?? profession.description;
     const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
-
-    const schema = {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      headline: `Bible Verses for ${profession.title}`,
-      description,
-      author: {
-        "@type": "Organization",
-        name: "The Lord Will",
-      },
-      publisher: {
-        "@type": "Organization",
-        name: "The Lord Will",
-        logo: {
-          "@type": "ImageObject",
-          url: getCanonicalUrl("/logo.png"),
-        },
-      },
-      mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": canonicalUrl,
-      },
-      about: {
-        "@type": "Thing",
-        name: `${profession.title} profession`,
-      },
-    };
+    const breadcrumbs = [
+      { label: "Home", href: "/", position: 1 },
+      { label: "Bible Verses", href: "/situations", position: 2 },
+      { label: `Bible Verses for ${profession.title}`, href: `/bible-verses-for/${slug}`, position: 3 },
+    ];
 
     return (
       <>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(buildBreadcrumbList(breadcrumbs, siteUrl)),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(
+              buildArticleSchema({
+                title: `Bible Verses for ${profession.title} - Scripture & Wisdom`,
+                description,
+                url: canonicalUrl,
+                imageUrl: getCanonicalUrl(
+                  `/api/og?profession=${encodeURIComponent(profession.title)}&type=profession`
+                ),
+                dateModifiedISO: todayISO,
+                language: "en",
+                category: "Bible Verses",
+                aboutName: `${profession.title} profession`,
+              })
+            ),
+          }}
         />
 
         <main className="min-h-screen py-12 px-4">
@@ -220,6 +224,13 @@ export default async function SituationVersesPage({ params }: PageProps) {
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
                 Bible Verses for {profession.title}
               </h1>
+              <EEATStrip
+                authorName="The Lord Will Editorial Team"
+                reviewerName="Ugo Candido"
+                reviewerCredential="Engineer"
+                lastUpdatedISO={todayISO}
+                categoryLabel="Bible Verses"
+              />
               <p className="text-xl text-muted-foreground">
                 {description}
               </p>
@@ -303,42 +314,38 @@ export default async function SituationVersesPage({ params }: PageProps) {
     console.warn(`Content quality issues for ${slug}:`, qualityReport.issues);
   }
 
-  // JSON-LD Schema for the specific situation page
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: `Bible Verses for ${situationData.title}`,
-    description: situationData.metaDescription,
-    author: {
-      "@type": "Organization",
-      name: "The Lord Will",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "The Lord Will",
-      logo: {
-        "@type": "ImageObject",
-        url: getCanonicalUrl("/logo.png"),
-      },
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": getCanonicalUrl(`/bible-verses-for/${slug}`),
-    },
-    about: {
-      "@type": "Thing",
-      name: situationData.title,
-    },
-    wordCount: introduction.wordCount,
-  };
-
   const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
+  const lastUpdatedISO =
+    (situationData as any)?.updatedAt
+      ? new Date((situationData as any).updatedAt).toISOString().slice(0, 10)
+      : todayISO;
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildBreadcrumbList(breadcrumbs, siteUrl)),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildArticleSchema({
+              title: `Bible Verses for ${situationData.title} - Scripture & Comfort`,
+              description: situationData.metaDescription,
+              url: canonicalUrl,
+              imageUrl: getCanonicalUrl(
+                `/api/og?situation=${encodeURIComponent(situationData.title)}&type=situation`
+              ),
+              dateModifiedISO: lastUpdatedISO,
+              language: "en",
+              category: "Bible Verses",
+              aboutName: situationData.title,
+            })
+          ),
+        }}
       />
 
       <main className="min-h-screen py-12 px-4">
@@ -355,6 +362,14 @@ export default async function SituationVersesPage({ params }: PageProps) {
                 <h1 className="text-4xl md:text-5xl font-bold">
                   Bible Verses for {situationData.title}
                 </h1>
+
+                <EEATStrip
+                  authorName="The Lord Will Editorial Team"
+                  reviewerName="Ugo Candido"
+                  reviewerCredential="Engineer"
+                  lastUpdatedISO={lastUpdatedISO}
+                  categoryLabel="Bible Verses"
+                />
 
                 <p className="text-xl text-muted-foreground leading-relaxed">
                   {situationData.metaDescription}

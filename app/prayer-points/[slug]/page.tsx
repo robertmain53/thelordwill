@@ -5,6 +5,9 @@ import { prisma } from "@/lib/db/prisma";
 import { getCanonicalUrl } from "@/lib/utils";
 import { TranslationComparison } from "@/components/translation-comparison";
 import { prepareTranslations } from "@/lib/translations";
+import { EEATStrip } from "@/components/eeat-strip";
+import { FAQSection, type FAQItem } from "@/components/faq-section";
+import { buildArticleSchema, buildBreadcrumbList } from "@/lib/seo/jsonld";
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +16,21 @@ interface PageProps {
     slug: string;
   }>;
 }
+
+const DEFAULT_PRAYER_POINT_FAQS: FAQItem[] = [
+  {
+    question: "How do I use these prayer points effectively?",
+    answer: "Begin by reading the accompanying Bible verses to build your faith. Meditate on them, then pray the points aloud, personalizing them to your specific situation."
+  },
+  {
+    question: "Do I need to pray these exactly as written?",
+    answer: "No, these serve as a guide. We encourage you to let the Holy Spirit lead you and adapt the prayers to your own words and circumstances."
+  },
+  {
+    question: "What is the best time to pray these points?",
+    answer: "You can pray them anytime. Many find it helpful to pray them early in the morning to set the tone for the day, or at night before rest."
+  }
+];
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -76,6 +94,13 @@ export default async function PrayerPointPage({ params }: PageProps) {
     notFound();
   }
 
+  // Define breadcrumbs for Schema and UI context if needed
+  const breadcrumbs = [
+    { name: "Home", item: getCanonicalUrl("/") },
+    { name: "Prayer Points", item: getCanonicalUrl("/prayer-points") },
+    { name: prayerPoint.title, item: getCanonicalUrl(`/prayer-points/${slug}`) },
+  ];
+
   // If no verses are mapped yet, show placeholder content
   const hasVerses = prayerPoint.verseMappings.length > 0;
 
@@ -98,17 +123,66 @@ export default async function PrayerPointPage({ params }: PageProps) {
     },
   });
 
+  // Handle FAQs safely (assuming it might be a JSON field or relation, defaulting if missing)
+  const faqs = (prayerPoint as any).faqs as FAQItem[] | undefined;
+  const displayFaqs = faqs && faqs.length > 0 ? faqs : DEFAULT_PRAYER_POINT_FAQS;
+
   return (
     <main className="min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* Breadcrumb */}
-        <nav className="mb-6 text-sm text-muted-foreground">
+        {/* Structured Data Scripts */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(buildBreadcrumbList(breadcrumbs)),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(
+              buildArticleSchema({
+                title: `${prayerPoint.title}`,
+                description:
+                  prayerPoint.description ||
+                  `Scripture-anchored prayer points and practical guidance for ${prayerPoint.title}.`,
+                url: getCanonicalUrl(`/prayer-points/${slug}`),
+                imageUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com"}/api/og/prayer-points/${slug}.png`,
+                dateModifiedISO:
+                  (prayerPoint as any)?.updatedAt
+                    ? new Date((prayerPoint as any).updatedAt).toISOString().slice(0, 10)
+                    : new Date().toISOString().slice(0, 10),
+                language: "en",
+                category: "Prayer Points",
+                aboutName: prayerPoint.title,
+              }),
+            ),
+          }}
+        />
+
+        {/* Breadcrumb Navigation */}
+        <nav className="mb-4 text-sm text-muted-foreground flex items-center flex-wrap gap-2">
           <Link href="/prayer-points" className="hover:text-primary">
             Prayer Points
           </Link>
-          <span className="mx-2">›</span>
+          <span>›</span>
           <span>{prayerPoint.title}</span>
         </nav>
+
+        {/* E-E-A-T Signal Strip */}
+        <div className="mb-8">
+          <EEATStrip
+            authorName="The Lord Will Editorial Team"
+            reviewerName="Ugo Candido"
+            reviewerCredential="Engineer"
+            lastUpdatedISO={
+              (prayerPoint as any)?.updatedAt
+                ? new Date((prayerPoint as any).updatedAt).toISOString().slice(0, 10)
+                : new Date().toISOString().slice(0, 10)
+            }
+            categoryLabel="Prayer Points"
+          />
+        </div>
 
         {/* Header */}
         <header className="mb-12">
@@ -221,6 +295,15 @@ export default async function PrayerPointPage({ params }: PageProps) {
               </li>
             </ol>
           </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="mt-12 mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Frequently asked questions</h2>
+          <FAQSection
+            faqs={displayFaqs}
+            pageUrl={getCanonicalUrl(`/prayer-points/${slug}`)}
+          />
         </section>
 
         {/* Related Prayer Points */}
