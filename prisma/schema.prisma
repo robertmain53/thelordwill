@@ -11,6 +11,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 // ============================================================================
@@ -49,20 +50,20 @@ model Verse {
   verseNumber  Int      // Verse number within chapter
 
   // English translations
-  textKjv      String?  @db.Text // King James Version
-  textWeb      String?  @db.Text // World English Bible
-  textAsv      String?  @db.Text // American Standard Version
-  textBbe      String?  @db.Text // Bible in Basic English
-  textYlt      String?  @db.Text // Young's Literal Translation
+  textKjv      String? @db.Text // King James Version
+  textWeb      String? @db.Text // World English Bible
+  textAsv      String? @db.Text // American Standard Version
+  textBbe      String? @db.Text // Bible in Basic English
+  textYlt      String? @db.Text // Young's Literal Translation
 
   // Spanish translations
-  textRV       String?  @db.Text // Reina Valera 1909
+  textRV       String? @db.Text // Reina Valera 1909
 
   // Portuguese translations
-  textBL       String?  @db.Text // Bíblia Livre
+  textBL       String? @db.Text // Bíblia Livre
 
   // Additional metadata
-  wordsCount   Int?     // Word count for analytics
+  wordsCount   Int? // Word count for analytics
 
   // Relationships
   book         Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
@@ -180,7 +181,7 @@ model NameMention {
   verseId   Int
 
   // Context
-  context   String?  @db.Text
+  context   String? @db.Text
 
   // Relationships
   name      Name     @relation(fields: [nameId], references: [id], onDelete: Cascade)
@@ -216,7 +217,7 @@ model Situation {
   content         String?  @db.Text
 
   // Category
-  category        String?  // "emotion", "life-event", "challenge", etc.
+  category        String? // "emotion", "life-event", "challenge", etc.
 
   // Relationships
   verseMappings   SituationVerseMapping[]
@@ -241,7 +242,7 @@ model SituationVerseMapping {
   relevanceScore Int       @default(50)
 
   // Manual curation
-  manualNote     String?   @db.Text
+  manualNote     String? @db.Text
   isVerified     Boolean   @default(false)
 
   // Relationships
@@ -318,7 +319,7 @@ model PrayerPoint {
   content         String?  @db.Text
 
   // Category
-  category        String?  // "spiritual-warfare", "financial", "deliverance", etc.
+  category        String? // "spiritual-warfare", "financial", "deliverance", etc.
 
   // Priority & Rotation
   priority        Int      @default(50) // 1-100, higher = more important
@@ -353,8 +354,8 @@ model PrayerPointVerseMapping {
   relevanceScore Int         @default(50)
 
   // Prayer context
-  prayerFocus    String?     // "declaration", "supplication", "intercession", "warfare"
-  contextNote    String?     @db.Text
+  prayerFocus    String? // "declaration", "supplication", "intercession", "warfare"
+  contextNote    String? @db.Text
 
   // Manual curation
   isVerified     Boolean     @default(false)
@@ -414,9 +415,9 @@ model Place {
   biblicalContext String?  @db.Text
 
   // Geography
-  modernName      String?  // Modern name if different
-  country         String?  // Israel, Jordan, Egypt, etc.
-  region          String?  // Judea, Galilee, etc.
+  modernName      String? // Modern name if different
+  country         String? // Israel, Jordan, Egypt, etc.
+  region          String? // Judea, Galilee, etc.
 
   // Coordinates for map integration
   latitude        Float?
@@ -454,7 +455,7 @@ model PlaceVerseMapping {
   verseId         Int
 
   // Context of the mention
-  mentionType     String?  // "event", "journey", "prophecy", "genealogy"
+  mentionType     String? // "event", "journey", "prophecy", "genealogy"
   relevanceScore  Int      @default(50)
 
   // Relationships
@@ -475,7 +476,7 @@ model PlaceRelation {
   id                String   @id @default(cuid())
   placeId           String
   relatedPlaceId    String
-  relationship      String?  // "near", "route", "regional"
+  relationship      String? // "near", "route", "regional"
 
   place             Place    @relation("PlaceRelations", fields: [placeId], references: [id], onDelete: Cascade)
   relatedPlace      Place    @relation("RelatedPlace", fields: [relatedPlaceId], references: [id], onDelete: Cascade)
@@ -493,7 +494,6 @@ model TourLead {
   email           String
   phone           String?
   country         String?
-
   // Tour preferences
   interestedIn    String[]  // ["jerusalem", "nazareth", "dead-sea"]
   travelDates     String?   // Flexible date range
@@ -503,9 +503,22 @@ model TourLead {
   // Marketing data
   sourcePlace     String?   // Which place page they came from
   sourcePage      String?   // Full URL
+  sourceReferrer  String?   // document.referrer (best-effort)
   utmSource       String?
   utmMedium       String?
   utmCampaign     String?
+  utmTerm         String?
+  utmContent      String?
+  gclid           String?
+  fbclid          String?
+
+  // Page context (place vs itinerary vs hub)
+  contextType     String?   // "place" | "itinerary" | "hub" | "unknown"
+  contextSlug     String?
+  contextName     String?
+
+  // UI selection preservation (do not infer from groupSize)
+  groupSizeRaw    String?
 
   // Affiliate tracking
   affiliateId     String?   // Tour partner ID
@@ -516,7 +529,6 @@ model TourLead {
   notes           String?   @db.Text
   contactedAt     DateTime?
   bookedAt        DateTime?
-
   // Relationships
   place           Place?    @relation(fields: [sourcePlace], references: [slug])
 
@@ -527,6 +539,11 @@ model TourLead {
   @@index([email])
   @@index([status])
   @@index([sourcePlace])
+  @@index([utmSource])
+  @@index([utmCampaign])
+  @@index([gclid])
+  @@index([contextType])
+  @@index([contextSlug])
   @@index([createdAt])
 }
 

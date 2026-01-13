@@ -55,6 +55,14 @@ export default async function TravelItineraryPage({ params }: PageProps) {
     aboutName: it.title,
   });
 
+  const toPlaceSlug = (name: string) =>
+    name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+
   return (
     <>
       <script
@@ -126,7 +134,17 @@ export default async function TravelItineraryPage({ params }: PageProps) {
                   <div className="mt-3 text-sm">
                     <div className="text-muted-foreground">
                       <span className="font-semibold text-foreground">Places:</span>{" "}
-                      {d.places.join(", ")}
+                      {d.places.map((p, idx) => (
+                        <span key={`${p}-${idx}`}>
+                          <Link
+                            href={`/bible-places/${toPlaceSlug(p)}`}
+                            className="underline underline-offset-2 hover:text-foreground"
+                          >
+                            {p}
+                          </Link>
+                          {idx < d.places.length - 1 ? ", " : ""}
+                        </span>
+                      ))}
                     </div>
                     <div className="text-muted-foreground mt-1">
                       <span className="font-semibold text-foreground">Readings:</span>{" "}
@@ -144,7 +162,13 @@ export default async function TravelItineraryPage({ params }: PageProps) {
             <p className="text-muted-foreground mb-6">
               Planning for a church group or a first trip? Submit your preferences and we will propose a practical route.
             </p>
-            <TourLeadForm placeName={it.title} placeSlug={it.slug} />
+            <TourLeadForm
+              placeName={it.title}
+              placeSlug={it.slug}
+              contextSlug={it.slug}
+              contextType="itinerary"
+            />
+
             <p className="text-xs text-muted-foreground mt-3">
               Prefer browsing destinations first?{" "}
               <Link href="/bible-places" className="underline hover:text-foreground">
@@ -155,8 +179,12 @@ export default async function TravelItineraryPage({ params }: PageProps) {
           </section>
 
           <section className="border rounded-xl p-6 bg-card">
-            <h2 className="text-2xl font-bold mb-4">Frequently asked questions</h2>
-            <FAQSection faqs={it.faqs} pageUrl={canonicalUrl} />
+            <FAQSection
+              faqs={it.faqs}
+              pageUrl={canonicalUrl}
+              title="Frequently asked questions about this itinerary"
+              description="Logistics, pacing, and how to use Scripture readings during your trip."
+            />
           </section>
         </article>
       </main>

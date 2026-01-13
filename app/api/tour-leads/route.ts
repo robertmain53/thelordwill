@@ -1,6 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 
+type UTMShape = {
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  gclid?: string;
+  fbclid?: string;
+};
+
+type ContextShape = {
+  type?: string;
+  slug?: string;
+  name?: string;
+};
+
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+function toStr(v: unknown): string | null {
+  if (typeof v === 'string') return v.trim() || null;
+  if (v == null) return null;
+  return String(v).trim() || null;
+}
+
+function normalizeUTM(body: any, request: NextRequest): UTMShape {
+  // Prefer body.utm (sent by client). request.url here is /api/tour-leads and usually has no UTM.
+  if (isObject(body?.utm)) {
+    return {
+      utm_source: toStr(body.utm.utm_source) || undefined,
+      utm_medium: toStr(body.utm.utm_medium) || undefined,
+      utm_campaign: toStr(body.utm.utm_campaign) || undefined,
+      utm_term: toStr(body.utm.utm_term) || undefined,
+      utm_content: toStr(body.utm.utm_content) || undefined,
+      gclid: toStr(body.utm.gclid) || undefined,
+      fbclid: toStr(body.utm.fbclid) || undefined,
+    };
+  }
+
+  // Legacy compatibility
+  const url = new URL(request.url);
+  return {
+    utm_source: toStr(url.searchParams.get('utm_source') || body?.utmSource) || undefined,
+    utm_medium: toStr(url.searchParams.get('utm_medium') || body?.utmMedium) || undefined,
+    utm_campaign: toStr(url.searchParams.get('utm_campaign') || body?.utmCampaign) || undefined,
+  };
+}
+
+function normalizeContext(body: any): ContextShape {
+  if (isObject(body?.context)) {
+    return {
+      type: toStr(body.context.type) || undefined,
+      slug: toStr(body.context.slug) || undefined,
+      name: toStr(body.context.name) || undefined,
+    };
+  }
+  return {};
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -13,11 +73,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extract UTM parameters from URL if present
-    const url = new URL(request.url);
-    const utmSource = url.searchParams.get('utm_source') || body.utmSource;
-    const utmMedium = url.searchParams.get('utm_medium') || body.utmMedium;
-    const utmCampaign = url.searchParams.get('utm_campaign') || body.utmCampaign;
+    const utm = normalizeUTM(body, request);
+    const context = normalizeContext(body);
+    const sourceReferrer = toStr(body?.sourceReferrer);
+    const groupSizeRaw = toStr(body?.groupSizeRaw);
+    const affiliateId = toStr(body?.affiliateId) || 'bein-harim';
 
     // Calculate expected commission (example: 15% of average $5000 tour)
     const avgTourPrice = 5000;
@@ -37,10 +97,19 @@ export async function POST(request: NextRequest) {
         budget: body.budget || null,
         sourcePlace: body.sourcePlace || null,
         sourcePage: body.sourcePage || null,
-        utmSource: utmSource || null,
-        utmMedium: utmMedium || null,
-        utmCampaign: utmCampaign || null,
-        affiliateId: 'bein-harim', // Default tour partner
+        sourceReferrer: sourceReferrer || null,
+        utmSource: utm.utm_source || null,
+        utmMedium: utm.utm_medium || null,
+        utmCampaign: utm.utm_campaign || null,
+        utmTerm: utm.utm_term || null,
+        utmContent: utm.utm_content || null,
+        gclid: utm.gclid || null,
+        fbclid: utm.fbclid || null,
+        contextType: context.type || null,
+        contextSlug: context.slug || null,
+        contextName: context.name || null,
+        groupSizeRaw: groupSizeRaw || null,
+        affiliateId, // Default tour partner, can be overridden safely
         commission: estimatedCommission,
         status: 'new',
       },
@@ -70,6 +139,17 @@ export async function POST(request: NextRequest) {
 // GET endpoint to retrieve tour leads (admin only)
 export async function GET(request: NextRequest) {
   try {
+    // Minimal protection: require an admin token header.
+    // Set ADMIN_TOKEN in env (Vercel/hosting).
+    const adminToken = process.env.ADMIN_TOKEN;
+    const provided = request.headers.get('x-admin-token');
+    if (adminToken && provided !== adminToken) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const url = new URL(request.url);
     const status = url.searchParams.get('status');
     const limit = parseInt(url.searchParams.get('limit') || '50');

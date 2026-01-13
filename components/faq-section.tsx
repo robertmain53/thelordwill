@@ -1,6 +1,5 @@
 /**
  * FAQ Section with JSON-LD Schema
- * Programmatically generated FAQs with structured data for SEO
  * Server component - no client-side JS
  */
 
@@ -12,106 +11,63 @@ export interface FAQItem {
 interface FAQSectionProps {
   faqs: FAQItem[];
   pageUrl: string;
+
+  /** Optional presentation overrides */
+  title?: string;
+  description?: string;
+  /** If true, suppress the visible heading block and render only Q/A list */
+  compact?: boolean;
 }
 
-export function FAQSection({ faqs }: FAQSectionProps) {
-  if (faqs.length === 0) {
-    return null;
-  }
+export function FAQSection({
+  faqs,
+  pageUrl,
+  title = "Frequently Asked Questions",
+  description,
+  compact = false,
+}: FAQSectionProps) {
+  if (!faqs || faqs.length === 0) return null;
 
-  // Generate JSON-LD schema
   const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
     mainEntity: faqs.map((faq) => ({
-      '@type': 'Question',
+      "@type": "Question",
       name: faq.question,
       acceptedAnswer: {
-        '@type': 'Answer',
+        "@type": "Answer",
         text: faq.answer,
       },
     })),
   };
 
   return (
-    <>
-      {/* JSON-LD Schema */}
+    <section className="space-y-4">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      {/* Visual FAQ Display */}
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-muted-foreground">
-            Common questions about these Bible verses
-          </p>
-        </div>
+      {!compact && (
+        <header className="space-y-2">
+          <h2 className="text-2xl font-bold">{title}</h2>
+          {description ? (
+            <p className="text-muted-foreground">{description}</p>
+          ) : null}
+        </header>
+      )}
 
-        <div className="space-y-6">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="border-l-4 border-primary pl-4 py-2"
-              itemScope
-              itemType="https://schema.org/Question"
-            >
-              <h3
-                className="text-lg font-semibold mb-2"
-                itemProp="name"
-              >
-                {faq.question}
-              </h3>
-              <div
-                className="text-muted-foreground leading-relaxed"
-                itemScope
-                itemType="https://schema.org/Answer"
-                itemProp="acceptedAnswer"
-              >
-                <div itemProp="text">{faq.answer}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="space-y-3">
+        {faqs.map((faq) => (
+          <details key={faq.question} className="border rounded-lg bg-card p-4">
+            <summary className="cursor-pointer font-semibold">{faq.question}</summary>
+            <div className="mt-2 text-muted-foreground leading-relaxed">{faq.answer}</div>
+          </details>
+        ))}
       </div>
-    </>
-  );
-}
 
-/**
- * Accordion-style FAQ (client component version if needed)
- */
-export function FAQAccordion({ faqs, pageUrl }: FAQSectionProps) {
-  // This would use 'use client' and add interactive accordion functionality
-  // For now, keeping it server-side for performance
-  return <FAQSection faqs={faqs} pageUrl={pageUrl} />;
-}
-
-/**
- * Generate FAQ schema only (for custom layouts)
- */
-export function FAQSchema({ faqs }: { faqs: FAQItem[] }) {
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-    />
+      {/* Optional canonical reference for internal QA/debugging */}
+      <meta name="tlw:faqPage" content={pageUrl} />
+    </section>
   );
 }

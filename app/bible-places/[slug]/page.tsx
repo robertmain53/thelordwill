@@ -326,11 +326,13 @@ export default async function PlacePage({ params }: PageProps) {
         {/* Sidebar - Tour Lead Form (Sticky) */}
         <div className="lg:col-span-1">
           <div className="sticky top-4">
-            <TourLeadForm
-              placeName={place.name}
-              placeSlug={place.slug}
-              className="shadow-lg"
-            />
+  <TourLeadForm
+  placeName={place.name}
+  placeSlug={place.slug}
+  contextSlug={place.slug}
+  contextType="place"
+/>
+
           </div>
         </div>
       </div>
