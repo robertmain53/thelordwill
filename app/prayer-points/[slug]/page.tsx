@@ -96,9 +96,9 @@ export default async function PrayerPointPage({ params }: PageProps) {
 
   // Define breadcrumbs for Schema and UI context if needed
   const breadcrumbs = [
-    { name: "Home", item: getCanonicalUrl("/") },
-    { name: "Prayer Points", item: getCanonicalUrl("/prayer-points") },
-    { name: prayerPoint.title, item: getCanonicalUrl(`/prayer-points/${slug}`) },
+    { label: "Home", href: "/", position: 1 },
+    { label: "Prayer Points", href: "/prayer-points", position: 2 },
+    { label: prayerPoint.title, href: `/prayer-points/${slug}`, position: 3 },
   ];
 
   // If no verses are mapped yet, show placeholder content
@@ -134,7 +134,9 @@ export default async function PrayerPointPage({ params }: PageProps) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(buildBreadcrumbList(breadcrumbs)),
+            __html: JSON.stringify(
+              buildBreadcrumbList(breadcrumbs, getCanonicalUrl("/")),
+            ),
           }}
         />
         <script
