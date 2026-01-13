@@ -28,6 +28,12 @@ export function Header() {
           <Link href="/prayer-points" className="hover:text-primary transition-colors">
             Prayer Points
           </Link>
+             <Link href="/bible-places" className="hover:text-primary transition-colors">
+            Bible Places
+          </Link>
+            <Link href="/bible-travel" className="hover:text-primary transition-colors">
+            Bible Travel
+          </Link>
           <Link href="/about" className="hover:text-primary transition-colors">
             About
           </Link>
