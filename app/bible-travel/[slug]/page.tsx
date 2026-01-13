@@ -144,7 +144,7 @@ export default async function TravelItineraryPage({ params }: PageProps) {
             <p className="text-muted-foreground mb-6">
               Planning for a church group or a first trip? Submit your preferences and we will propose a practical route.
             </p>
-            <TourLeadForm />
+            <TourLeadForm placeName={it.title} placeSlug={it.slug} />
             <p className="text-xs text-muted-foreground mt-3">
               Prefer browsing destinations first?{" "}
               <Link href="/bible-places" className="underline hover:text-foreground">

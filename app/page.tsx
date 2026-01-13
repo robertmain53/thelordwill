@@ -26,7 +26,7 @@ export default function Home() {
           and walk where Jesus walked in the Holy Land.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mt-12">
           <Link
             href="/bible-places"
             className="p-6 border-2 rounded-lg hover:shadow-xl hover:border-blue-500 transition-all group"
@@ -37,6 +37,19 @@ export default function Home() {
             </h2>
             <p className="text-muted-foreground">
               Explore sacred sites from Scripture and plan your Christian pilgrimage.
+            </p>
+          </Link>
+
+                   <Link
+           href="/bible-travel"
+            className="p-6 border-2 rounded-lg hover:shadow-xl hover:border-blue-500 transition-all group"
+          >
+            <div className="text-4xl mb-4">🧭</div>
+            <h2 className="text-2xl font-semibold mb-3 group-hover:text-blue-600">
+              Bible Travel
+            </h2>
+            <p className="text-muted-foreground">
+              Ready-to-use pilgrimage itineraries with daily readings and practical planning notes.
             </p>
           </Link>
 
