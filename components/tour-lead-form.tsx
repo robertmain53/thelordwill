@@ -23,11 +23,13 @@ export function TourLeadForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submittedAt, setSubmittedAt] = useState<number | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    setSubmittedAt(Date.now());
 
     const formData = new FormData(e.currentTarget);
 
@@ -39,6 +41,8 @@ export function TourLeadForm({
       email: formData.get('email'),
       phone: formData.get('phone'),
       country: formData.get('country'),
+      // Honeypot: should remain empty for humans.
+      hp: formData.get('company'),
       // Keep backward-compatible numeric field, but make it meaningful.
       groupSize: groupSizeMin,
       // Add non-breaking context fields (backend can ignore if not used).
@@ -66,13 +70,17 @@ export function TourLeadForm({
         body: JSON.stringify(data),
       });
 
+      const payload = await response.json().catch(() => ({} as any));
       if (!response.ok) {
-        throw new Error('Failed to submit form');
+        const msg =
+          (payload && typeof payload.error === 'string' && payload.error) ||
+          'Something went wrong. Please try again later.';
+        throw new Error(msg);
       }
 
       setIsSuccess(true);
     } catch (err) {
-      setError('Something went wrong. Please try again later.');
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
@@ -108,6 +116,21 @@ export function TourLeadForm({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Honeypot field (anti-bot). Hidden from users, visible to many bots. */}
+          <div
+            aria-hidden="true"
+            className="absolute left-[-10000px] top-auto w-[1px] h-[1px] overflow-hidden"
+          >
+            <label htmlFor="company">Company</label>
+            <input
+              type="text"
+              id="company"
+              name="company"
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
+
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
               Full Name

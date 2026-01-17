@@ -6,10 +6,10 @@ export const metadata: Metadata = {
  description: "Discover biblical names, Bible verses for every situation and profession, sacred places in Scripture, and practical Bible travel itineraries for Holy Land trips.",
   openGraph: {
     title: "The Lord Will - Biblical Wisdom & Holy Land Tours",
-+    description: "Discover biblical names, verses for life's moments, sacred places, and practical Bible travel itineraries for Holy Land trips.",  },
+    description: "Discover biblical names, verses for life's moments, sacred places, and practical Bible travel itineraries for Holy Land trips.",  },
   twitter: {
     title: "The Lord Will - Biblical Wisdom & Holy Land Tours",
-+    description: "Biblical names, verses for life's moments, sacred places, and Bible travel itineraries for Holy Land trips.",  },
+    description: "Biblical names, verses for life's moments, sacred places, and Bible travel itineraries for Holy Land trips.",  },
 };
 
 export default function Home() {

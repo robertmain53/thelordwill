@@ -27,8 +27,20 @@ function toStr(v: unknown): string | null {
   return String(v).trim() || null;
 }
 
+function clampLen(s: string, max: number): string {
+  return s.length > max ? s.slice(0, max) : s;
+}
+
+function toStrClamped(v: unknown, max: number): string | null {
+  const s = toStr(v);
+  return s ? clampLen(s, max) : null;
+}
+
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 function normalizeUTM(body: any, request: NextRequest): UTMShape {
-  // Prefer body.utm (sent by client). request.url here is /api/tour-leads and usually has no UTM.
   if (isObject(body?.utm)) {
     return {
       utm_source: toStr(body.utm.utm_source) || undefined,
@@ -41,12 +53,16 @@ function normalizeUTM(body: any, request: NextRequest): UTMShape {
     };
   }
 
-  // Legacy compatibility
+  // Legacy compatibility (rarely present on /api URL)
   const url = new URL(request.url);
   return {
     utm_source: toStr(url.searchParams.get('utm_source') || body?.utmSource) || undefined,
     utm_medium: toStr(url.searchParams.get('utm_medium') || body?.utmMedium) || undefined,
     utm_campaign: toStr(url.searchParams.get('utm_campaign') || body?.utmCampaign) || undefined,
+    utm_term: toStr(url.searchParams.get('utm_term') || body?.utmTerm) || undefined,
+    utm_content: toStr(url.searchParams.get('utm_content') || body?.utmContent) || undefined,
+    gclid: toStr(url.searchParams.get('gclid') || body?.gclid) || undefined,
+    fbclid: toStr(url.searchParams.get('fbclid') || body?.fbclid) || undefined,
   };
 }
 
@@ -61,98 +77,145 @@ function normalizeContext(body: any): ContextShape {
   return {};
 }
 
+function normalizeInterestedIn(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  const out: string[] = [];
+  for (const item of v) {
+    const s = toStr(item);
+    if (s && s.length <= 120) out.push(s);
+    if (out.length >= 10) break;
+  }
+  return out;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.name || !body.email) {
-      return NextResponse.json(
-        { error: 'Name and email are required' },
-        { status: 400 }
-      );
+    // Honeypot: if filled, silently accept but do not persist.
+    const hp = toStr(body?.hp);
+    if (hp) {
+      return NextResponse.json({ success: true, message: 'Submitted' }, { status: 200 });
+    }
+
+    const name = toStrClamped(body?.name, 120);
+    const email = toStrClamped(body?.email, 190);
+
+    if (!name || !email) {
+      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
+    }
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
     }
 
     const utm = normalizeUTM(body, request);
     const context = normalizeContext(body);
-    const sourceReferrer = toStr(body?.sourceReferrer);
-    const groupSizeRaw = toStr(body?.groupSizeRaw);
-    const affiliateId = toStr(body?.affiliateId) || 'bein-harim';
 
-    // Calculate expected commission (example: 15% of average $5000 tour)
-    const avgTourPrice = 5000;
-    const commissionRate = 0.15;
-    const estimatedCommission = avgTourPrice * commissionRate;
+    const sourceReferrer =
+      toStrClamped(body?.sourceReferrer, 500) ||
+      toStrClamped(request.headers.get('referer'), 500) ||
+      null;
 
-    // Create tour lead in database
+    const groupSizeRaw = toStrClamped(body?.groupSizeRaw, 40);
+    const affiliateId = toStrClamped(body?.affiliateId, 60) || 'bein-harim';
+
+    // DB rate limit: max 3 submissions / 10 minutes per email
+    const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const recentCount = await prisma.tourLead.count({
+      where: { email, createdAt: { gte: tenMinAgo } },
+    });
+    if (recentCount >= 3) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a few minutes and try again.' },
+        { status: 429 }
+      );
+    }
+
+    // Deduplicate: same email + contextSlug (or sourcePlace) within 24h returns existing
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const dedupeKey = context.slug || toStr(body?.sourcePlace);
+    if (dedupeKey) {
+      const existing = await prisma.tourLead.findFirst({
+        where: { email, contextSlug: dedupeKey, createdAt: { gte: dayAgo } },
+        select: { id: true },
+      });
+      if (existing) {
+        return NextResponse.json({ success: true, id: existing.id, message: 'Already received' }, { status: 200 });
+      }
+    }
+
+    // FK-safe sourcePlace: only set if Place.slug exists, else null.
+    let sourcePlace: string | null = toStrClamped(body?.sourcePlace, 200);
+    if (sourcePlace) {
+      const placeExists = await prisma.place.findUnique({
+        where: { slug: sourcePlace },
+        select: { slug: true },
+      });
+      if (!placeExists) sourcePlace = null;
+    }
+
+    const estimatedCommission = 5000 * 0.15;
+
     const tourLead = await prisma.tourLead.create({
       data: {
-        name: body.name,
-        email: body.email,
-        phone: body.phone || null,
-        country: body.country || null,
-        interestedIn: body.interestedIn || [],
-        travelDates: body.travelDates || null,
-        groupSize: body.groupSize || 1,
-        budget: body.budget || null,
-        sourcePlace: body.sourcePlace || null,
-        sourcePage: body.sourcePage || null,
-        sourceReferrer: sourceReferrer || null,
-        utmSource: utm.utm_source || null,
-        utmMedium: utm.utm_medium || null,
-        utmCampaign: utm.utm_campaign || null,
-        utmTerm: utm.utm_term || null,
-        utmContent: utm.utm_content || null,
-        gclid: utm.gclid || null,
-        fbclid: utm.fbclid || null,
-        contextType: context.type || null,
-        contextSlug: context.slug || null,
-        contextName: context.name || null,
-        groupSizeRaw: groupSizeRaw || null,
-        affiliateId, // Default tour partner, can be overridden safely
+        name,
+        email,
+        phone: toStrClamped(body?.phone, 60),
+        country: toStrClamped(body?.country, 80),
+
+        interestedIn: normalizeInterestedIn(body?.interestedIn),
+        travelDates: toStrClamped(body?.travelDates, 120),
+        groupSize: Number.isFinite(Number(body?.groupSize)) ? Number(body.groupSize) : 1,
+        budget: toStrClamped(body?.budget, 40),
+
+        sourcePlace,
+        sourcePage: toStrClamped(body?.sourcePage, 500),
+        sourceReferrer,
+
+        utmSource: utm.utm_source ? clampLen(utm.utm_source, 120) : null,
+        utmMedium: utm.utm_medium ? clampLen(utm.utm_medium, 120) : null,
+        utmCampaign: utm.utm_campaign ? clampLen(utm.utm_campaign, 120) : null,
+        utmTerm: utm.utm_term ? clampLen(utm.utm_term, 120) : null,
+        utmContent: utm.utm_content ? clampLen(utm.utm_content, 120) : null,
+        gclid: utm.gclid ? clampLen(utm.gclid, 160) : null,
+        fbclid: utm.fbclid ? clampLen(utm.fbclid, 160) : null,
+
+        contextType: context.type ? clampLen(context.type, 40) : null,
+        contextSlug: (context.slug || toStr(body?.sourcePlace)) ? clampLen(String(context.slug || body?.sourcePlace), 200) : null,
+        contextName: context.name ? clampLen(context.name, 140) : null,
+        groupSizeRaw,
+
+        affiliateId,
         commission: estimatedCommission,
         status: 'new',
       },
     });
 
-    // TODO: Send email notification to tour operators
-    // TODO: Send confirmation email to lead
-    // TODO: Add to CRM/marketing automation
-
     return NextResponse.json(
-      {
-        success: true,
-        id: tourLead.id,
-        message: 'Tour inquiry submitted successfully',
-      },
+      { success: true, id: tourLead.id, message: 'Tour inquiry submitted successfully' },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating tour lead:', error);
+    const isDev = process.env.NODE_ENV !== 'production';
     return NextResponse.json(
-      { error: 'Failed to submit tour inquiry' },
+      { error: isDev ? (error?.message ?? String(error)) : 'Failed to submit tour inquiry' },
       { status: 500 }
     );
   }
 }
 
-// GET endpoint to retrieve tour leads (admin only)
 export async function GET(request: NextRequest) {
   try {
-    // Minimal protection: require an admin token header.
-    // Set ADMIN_TOKEN in env (Vercel/hosting).
     const adminToken = process.env.ADMIN_TOKEN;
     const provided = request.headers.get('x-admin-token');
     if (adminToken && provided !== adminToken) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const url = new URL(request.url);
     const status = url.searchParams.get('status');
-    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const limit = parseInt(url.searchParams.get('limit') || '50', 10);
 
     const where = status ? { status } : {};
 
@@ -161,23 +224,16 @@ export async function GET(request: NextRequest) {
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
-        place: {
-          select: {
-            name: true,
-            slug: true,
-          },
-        },
+        place: { select: { name: true, slug: true } },
       },
     });
 
-    return NextResponse.json({
-      leads,
-      count: leads.length,
-    });
-  } catch (error) {
+    return NextResponse.json({ leads, count: leads.length });
+  } catch (error: any) {
     console.error('Error fetching tour leads:', error);
+    const isDev = process.env.NODE_ENV !== 'production';
     return NextResponse.json(
-      { error: 'Failed to fetch tour leads' },
+      { error: isDev ? (error?.message ?? String(error)) : 'Failed to fetch tour leads' },
       { status: 500 }
     );
   }
