@@ -40,38 +40,40 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function normalizeUTM(body: any, request: NextRequest): UTMShape {
-  if (isObject(body?.utm)) {
+function normalizeUTM(body: unknown, request: NextRequest): UTMShape {
+  const bodyObj: Record<string, unknown> = isObject(body) ? body : {};
+  if (isObject(bodyObj.utm)) {
     return {
-      utm_source: toStr(body.utm.utm_source) || undefined,
-      utm_medium: toStr(body.utm.utm_medium) || undefined,
-      utm_campaign: toStr(body.utm.utm_campaign) || undefined,
-      utm_term: toStr(body.utm.utm_term) || undefined,
-      utm_content: toStr(body.utm.utm_content) || undefined,
-      gclid: toStr(body.utm.gclid) || undefined,
-      fbclid: toStr(body.utm.fbclid) || undefined,
+      utm_source: toStr(bodyObj.utm.utm_source) || undefined,
+      utm_medium: toStr(bodyObj.utm.utm_medium) || undefined,
+      utm_campaign: toStr(bodyObj.utm.utm_campaign) || undefined,
+      utm_term: toStr(bodyObj.utm.utm_term) || undefined,
+      utm_content: toStr(bodyObj.utm.utm_content) || undefined,
+      gclid: toStr(bodyObj.utm.gclid) || undefined,
+      fbclid: toStr(bodyObj.utm.fbclid) || undefined,
     };
   }
 
   // Legacy compatibility (rarely present on /api URL)
   const url = new URL(request.url);
   return {
-    utm_source: toStr(url.searchParams.get('utm_source') || body?.utmSource) || undefined,
-    utm_medium: toStr(url.searchParams.get('utm_medium') || body?.utmMedium) || undefined,
-    utm_campaign: toStr(url.searchParams.get('utm_campaign') || body?.utmCampaign) || undefined,
-    utm_term: toStr(url.searchParams.get('utm_term') || body?.utmTerm) || undefined,
-    utm_content: toStr(url.searchParams.get('utm_content') || body?.utmContent) || undefined,
-    gclid: toStr(url.searchParams.get('gclid') || body?.gclid) || undefined,
-    fbclid: toStr(url.searchParams.get('fbclid') || body?.fbclid) || undefined,
+    utm_source: toStr(url.searchParams.get('utm_source') || bodyObj.utmSource) || undefined,
+    utm_medium: toStr(url.searchParams.get('utm_medium') || bodyObj.utmMedium) || undefined,
+    utm_campaign: toStr(url.searchParams.get('utm_campaign') || bodyObj.utmCampaign) || undefined,
+    utm_term: toStr(url.searchParams.get('utm_term') || bodyObj.utmTerm) || undefined,
+    utm_content: toStr(url.searchParams.get('utm_content') || bodyObj.utmContent) || undefined,
+    gclid: toStr(url.searchParams.get('gclid') || bodyObj.gclid) || undefined,
+    fbclid: toStr(url.searchParams.get('fbclid') || bodyObj.fbclid) || undefined,
   };
 }
 
-function normalizeContext(body: any): ContextShape {
-  if (isObject(body?.context)) {
+function normalizeContext(body: unknown): ContextShape {
+  const bodyObj: Record<string, unknown> = isObject(body) ? body : {};
+  if (isObject(bodyObj.context)) {
     return {
-      type: toStr(body.context.type) || undefined,
-      slug: toStr(body.context.slug) || undefined,
-      name: toStr(body.context.name) || undefined,
+      type: toStr(bodyObj.context.type) || undefined,
+      slug: toStr(bodyObj.context.slug) || undefined,
+      name: toStr(bodyObj.context.name) || undefined,
     };
   }
   return {};
@@ -195,11 +197,18 @@ export async function POST(request: NextRequest) {
       { success: true, id: tourLead.id, message: 'Tour inquiry submitted successfully' },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating tour lead:', error);
     const isDev = process.env.NODE_ENV !== 'production';
     return NextResponse.json(
-      { error: isDev ? (error?.message ?? String(error)) : 'Failed to submit tour inquiry' },
+      {
+        error:
+          isDev && error instanceof Error
+            ? error.message
+            : isDev
+              ? String(error)
+              : 'Failed to submit tour inquiry',
+      },
       { status: 500 }
     );
   }
@@ -220,7 +229,7 @@ export async function GET(request: NextRequest) {
     const where = status ? { status } : {};
 
     const leads = await prisma.tourLead.findMany({
-      where: { status: "published" },
+      where,
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
@@ -229,11 +238,18 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ leads, count: leads.length });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching tour leads:', error);
     const isDev = process.env.NODE_ENV !== 'production';
     return NextResponse.json(
-      { error: isDev ? (error?.message ?? String(error)) : 'Failed to fetch tour leads' },
+      {
+        error:
+          isDev && error instanceof Error
+            ? error.message
+            : isDev
+              ? String(error)
+              : 'Failed to fetch tour leads',
+      },
       { status: 500 }
     );
   }

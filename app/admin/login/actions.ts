@@ -25,7 +25,8 @@ export async function adminLogin(formData: FormData) {
     redirect(`/admin/login?error=1&next=${encodeURIComponent(nextPath)}`);
   }
 
-  cookies().set("tlw_admin", token!, {
+  const cookieStore = await cookies();
+  cookieStore.set("tlw_admin", token!, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -36,6 +37,7 @@ export async function adminLogin(formData: FormData) {
 }
 
 export async function adminLogout() {
-  cookies().delete("tlw_admin");
+  const cookieStore = await cookies();
+  cookieStore.delete("tlw_admin");
   redirect("/admin/login");
 }

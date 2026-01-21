@@ -1,5 +1,6 @@
 // app/admin/leads/page.tsx
 import Link from "next/link";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
 export const dynamic = "force-dynamic";
@@ -24,8 +25,8 @@ function toInt(v: string | undefined, fallback: number) {
   return Number.isFinite(n) && n > 0 ? Math.trunc(n) : fallback;
 }
 
-function buildWhere(status: StatusOpt, q: string, contextType: string) {
-  const AND: any[] = [];
+function buildWhere(status: StatusOpt, q: string, contextType: string): Prisma.TourLeadWhereInput {
+  const AND: Prisma.TourLeadWhereInput[] = [];
 
   if (status !== "all") AND.push({ status });
   if (contextType) AND.push({ contextType });
@@ -79,7 +80,7 @@ export default async function AdminLeadsPage({
   const [total, leads] = await Promise.all([
     prisma.tourLead.count({ where }),
     prisma.tourLead.findMany({
-      where: { status: "published" },
+      where,
       orderBy: { createdAt: "desc" },
       take,
       skip,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getCanonicalUrl, titleCase } from "@/lib/utils";
+import { getCanonicalUrl } from "@/lib/utils";
 import { getPlaceBySlug, formatPlaceVerseReference } from "@/lib/db/place-queries";
 import { TourLeadForm } from "@/components/tour-lead-form";
 import { EEATStrip } from "@/components/eeat-strip";
@@ -19,7 +19,7 @@ interface PageProps {
 type PlaceResult = Awaited<ReturnType<typeof getPlaceBySlug>>;
 
 // Centralized publish-gate (prevents draft leakage)
-function assertPublished(place: PlaceResult, slug: string): asserts place is NonNullable<PlaceResult> {
+function assertPublished(place: PlaceResult): asserts place is NonNullable<PlaceResult> {
   if (!place) notFound();
 
   // `getPlaceBySlug` should ideally filter on status itself, but we enforce it here regardless.
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const place = await getPlaceBySlug(slug, 20);
   // Fail closed: draft/unknown status => not found for metadata too.
-  assertPublished(place, slug);
+  assertPublished(place);
 
   const title = `${place.name} in the Bible - Scriptures & Holy Land Tours`;
   const description = `Discover ${place.name} in the Bible: ${place.description.substring(
@@ -94,7 +94,7 @@ export default async function PlacePage({ params }: PageProps) {
 
   const place = await getPlaceBySlug(slug, 20);
   // Fail closed: do not render drafts
-  assertPublished(place, slug);
+  assertPublished(place);
 
   const breadcrumbs = [
     { label: "Home", href: "/", position: 1 },

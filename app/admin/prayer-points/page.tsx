@@ -1,5 +1,6 @@
 // app/admin/prayer-points/page.tsx
 import Link from "next/link";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
 export const dynamic = "force-dynamic";
@@ -24,23 +25,21 @@ export default async function AdminPrayerPointsList({
   const q = (sp?.q || "").trim();
   const status = normalizeStatus(sp?.status);
 
-  const where =
-    q || status !== "all"
-      ? {
-          AND: [
-            status === "all" ? {} : { status },
-            q
-              ? {
-                  OR: [
-                    { title: { contains: q, mode: "insensitive" } },
-                    { slug: { contains: q, mode: "insensitive" } },
-                    { category: { contains: q, mode: "insensitive" } },
-                  ],
-                }
-              : {},
-          ],
-        }
-      : undefined;
+  const where: Prisma.PrayerPointWhereInput | undefined = (() => {
+    const AND: Prisma.PrayerPointWhereInput[] = [];
+    if (status !== "all") AND.push({ status });
+    if (q) {
+      const mode = "insensitive" as const;
+      AND.push({
+        OR: [
+          { title: { contains: q, mode } },
+          { slug: { contains: q, mode } },
+          { category: { contains: q, mode } },
+        ],
+      });
+    }
+    return AND.length ? { AND } : undefined;
+  })();
 
   const items = await prisma.prayerPoint.findMany({
     where,

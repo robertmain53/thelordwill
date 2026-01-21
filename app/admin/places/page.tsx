@@ -1,5 +1,6 @@
 // app/admin/places/page.tsx
 import Link from "next/link";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
 type SP = { q?: string; status?: string };
@@ -21,24 +22,22 @@ export default async function AdminPlacesList({
   const q = (sp?.q || "").trim();
   const status = normalizeStatus(sp?.status);
 
-  const where =
-    q || status !== "all"
-      ? {
-          AND: [
-            status === "all" ? {} : { status },
-            q
-              ? {
-                  OR: [
-                    { name: { contains: q, mode: "insensitive" } },
-                    { slug: { contains: q, mode: "insensitive" } },
-                    { country: { contains: q, mode: "insensitive" } },
-                    { region: { contains: q, mode: "insensitive" } },
-                  ],
-                }
-              : {},
-          ],
-        }
-      : undefined;
+  const where: Prisma.PlaceWhereInput | undefined = (() => {
+    const AND: Prisma.PlaceWhereInput[] = [];
+    if (status !== "all") AND.push({ status });
+    if (q) {
+      const mode = "insensitive" as const;
+      AND.push({
+        OR: [
+          { name: { contains: q, mode } },
+          { slug: { contains: q, mode } },
+          { country: { contains: q, mode } },
+          { region: { contains: q, mode } },
+        ],
+      });
+    }
+    return AND.length ? { AND } : undefined;
+  })();
 
   const items = await prisma.place.findMany({
     where,

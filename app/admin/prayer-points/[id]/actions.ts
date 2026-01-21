@@ -3,6 +3,7 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { redirect } from "next/navigation";
+import { runQualityChecks } from "@/lib/quality/checks";
 
 function toStr(v: FormDataEntryValue | null, max: number) {
   const s = typeof v === "string" ? v.trim() : "";
@@ -49,6 +50,35 @@ export async function updatePrayerPointById(id: string, formData: FormData) {
 }
 
 export async function publishPrayerPointById(id: string) {
+  // Fetch the record for quality check
+  const record = await prisma.prayerPoint.findUnique({
+    where: { id },
+    select: {
+      title: true,
+      description: true,
+      content: true,
+    },
+  });
+
+  if (!record) {
+    redirect(`/admin/prayer-points/${id}?error=not_found`);
+  }
+
+  // Run quality checks
+  const result = runQualityChecks({
+    entityType: "prayerPoint",
+    record,
+  });
+
+  // Block publishing if quality check fails
+  if (!result.ok) {
+    const errorMessage = `QUALITY_GATE_FAILED: ${result.reasons.join("; ")}`;
+    redirect(
+      `/admin/prayer-points/${id}?quality_error=${encodeURIComponent(errorMessage)}`
+    );
+  }
+
+  // Quality passed, publish the record
   await prisma.prayerPoint.update({
     where: { id },
     data: {

@@ -10,6 +10,12 @@ type AdminLink = {
   badgeIfMissing?: string; // e.g. "Planned"
 };
 
+type ResolvedAdminLink = AdminLink & {
+  exists: boolean;
+  disabled?: boolean;
+  badge?: string;
+};
+
 const SECTIONS: Array<{ title: string; links: AdminLink[] }> = [
   {
     title: "Content",
@@ -123,7 +129,7 @@ function LinkCard({
 
 export default function AdminHomePage() {
   // Compute existence on server at render time
-  const resolved = SECTIONS.map((section) => ({
+  const resolved: Array<{ title: string; links: ResolvedAdminLink[] }> = SECTIONS.map((section) => ({
     ...section,
     links: section.links.map((l) => {
       const exists = adminRouteExists(l.href);
@@ -154,8 +160,8 @@ export default function AdminHomePage() {
                   href={l.href}
                   title={l.title}
                   description={l.description}
-                  badge={(l as any).badge}
-                  disabled={(l as any).disabled}
+                  badge={l.badge}
+                  disabled={l.disabled}
                 />
               ))}
             </div>

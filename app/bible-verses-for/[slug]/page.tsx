@@ -11,7 +11,6 @@ import { getProfession } from "@/lib/db/queries";
 import {
   generateIntroduction,
   generateFAQs,
-  validateContentQuality,
 } from "@/lib/content/generator";
 import { TranslationComparison } from "@/components/translation-comparison";
 import { prepareTranslations } from "@/lib/translations";
@@ -23,7 +22,6 @@ import { buildArticleSchema, buildBreadcrumbList } from "@/lib/seo/jsonld";
 import {
   generateLinkingStrategy,
   generateBreadcrumbs,
-  validateLinkingDensity,
   getTrendingNames,
 } from "@/lib/seo/internal-linking";
 
@@ -298,22 +296,6 @@ export default async function SituationVersesPage({ params }: PageProps) {
   // Get trending names for additional links
   const trendingNames = await getTrendingNames(2);
 
-  // Validate linking density
-  const linkingDensity = validateLinkingDensity(linkingStrategy.totalLinks);
-
-  // Validate content quality
-  const qualityReport = validateContentQuality({
-    introduction: introduction.content,
-    translationCount: prepareTranslations(primaryVerse).filter(t => t.text).length,
-    strongsCount: topStrongs.length,
-    faqCount: faqs.length,
-  });
-
-  // Log quality issues in development
-  if (!qualityReport.meetsMinimumStandards && process.env.NODE_ENV === 'development') {
-    console.warn(`Content quality issues for ${slug}:`, qualityReport.issues);
-  }
-
   const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
   const lastUpdatedISO =
     situationData.updatedAt
@@ -375,21 +357,6 @@ export default async function SituationVersesPage({ params }: PageProps) {
                   {situationData.metaDescription}
                 </p>
 
-                {/* Content quality & linking density badges (dev only) */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div className="flex gap-4 text-xs">
-                    <div className="flex gap-2">
-                      <span className={qualityReport.meetsMinimumStandards ? 'text-green-600' : 'text-red-600'}>
-                        Quality: {qualityReport.meetsMinimumStandards ? '✓' : '✗'}
-                      </span>
-                      <span>Words: {qualityReport.wordCount}</span>
-                      <span>Uniqueness: {qualityReport.uniquenessScore}%</span>
-                    </div>
-                    <div className={linkingDensity.isValid ? 'text-green-600' : 'text-red-600'}>
-                      Links: {linkingStrategy.totalLinks} ({linkingDensity.isValid ? '✓' : '✗'})
-                    </div>
-                  </div>
-                )}
               </header>
 
               {/* Ad Slot 1: ATF Leaderboard (728x90 or responsive) */}

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
+import { runQualityChecks } from "@/lib/quality/checks";
+import { QualityPanel } from "@/components/admin/QualityPanel";
 import { HtmlPreview } from "./HtmlPreview";
 import { deletePlace, publishPlace, unpublishPlace, updatePlace } from "./actions";
 
@@ -8,10 +10,12 @@ export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string; quality_error?: string }>;
 };
 
-export default async function AdminPlaceEdit({ params }: PageProps) {
+export default async function AdminPlaceEdit({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const { error, quality_error } = await searchParams;
 
   const p = await prisma.place.findUnique({
     where: { id },
@@ -47,6 +51,12 @@ export default async function AdminPlaceEdit({ params }: PageProps) {
 
   if (!p) notFound();
 
+  // Run quality checks
+  const qualityResult = runQualityChecks({
+    entityType: "place",
+    record: p,
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -78,7 +88,20 @@ export default async function AdminPlaceEdit({ params }: PageProps) {
             </form>
           ) : (
             <form action={publishPlace.bind(null, p.id)}>
-              <button className="px-4 py-2 rounded bg-primary text-primary-foreground font-semibold" type="submit">
+              <button
+                className={`px-4 py-2 rounded font-semibold ${
+                  qualityResult.ok
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+                type="submit"
+                disabled={!qualityResult.ok}
+                title={
+                  qualityResult.ok
+                    ? "Publish this place"
+                    : "Fix quality issues before publishing"
+                }
+              >
                 Publish
               </button>
             </form>
@@ -107,6 +130,22 @@ export default async function AdminPlaceEdit({ params }: PageProps) {
           </form>
         </div>
       </div>
+
+      {/* Quality gate error message */}
+      {quality_error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          <div className="font-semibold">Publishing blocked</div>
+          <div className="text-sm mt-1">{decodeURIComponent(quality_error)}</div>
+        </div>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          <div className="font-semibold">Error</div>
+          <div className="text-sm mt-1">{error}</div>
+        </div>
+      )}
 
       {/* Main form */}
       <form action={updatePlace.bind(null, p.id)} className="space-y-8">
@@ -254,12 +293,22 @@ export default async function AdminPlaceEdit({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Right: previews */}
+          {/* Right: quality panel + previews */}
           <div className="space-y-4">
+            <QualityPanel result={qualityResult} />
+
+            <div className="border rounded-lg p-4 text-xs text-muted-foreground space-y-2">
+              <div className="font-semibold text-foreground">Quality Requirements</div>
+              <ul className="list-disc list-inside space-y-1">
+                <li>300+ words total</li>
+                <li>Introduction (first paragraph 50+ words)</li>
+                <li>Conclusion (last paragraph 30+ words)</li>
+                <li>3+ internal links</li>
+                <li>Entity links to related content</li>
+              </ul>
+            </div>
+
             <div className="text-sm font-semibold">Preview (before saving)</div>
-            {/* These will update only after submit by defaultValue.
-               If you want real-time binding, we can convert form fields to a client form.
-               For now: preview is useful as a snapshot and for HTML sanity checks. */}
             <HtmlPreview title="Description" value={p.description} />
             <HtmlPreview title="Biblical context" value={p.biblicalContext || ""} />
             <HtmlPreview title="Historical info" value={p.historicalInfo || ""} />

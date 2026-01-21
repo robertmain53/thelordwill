@@ -40,3 +40,6 @@ next-env.d.ts
 
 # prisma
 prisma/.env
+
+# cache (QA scripts)
+.cache/

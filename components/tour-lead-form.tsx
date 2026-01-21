@@ -23,13 +23,11 @@ export function TourLeadForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submittedAt, setSubmittedAt] = useState<number | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
-    setSubmittedAt(Date.now());
 
     const formData = new FormData(e.currentTarget);
 
@@ -70,11 +68,16 @@ export function TourLeadForm({
         body: JSON.stringify(data),
       });
 
-      const payload = await response.json().catch(() => ({} as any));
+      const payload = (await response.json().catch(() => null)) as unknown;
+      const errorMessage =
+        typeof payload === 'object' &&
+        payload !== null &&
+        'error' in payload &&
+        typeof (payload as { error?: unknown }).error === 'string'
+          ? (payload as { error?: string }).error
+          : '';
       if (!response.ok) {
-        const msg =
-          (payload && typeof payload.error === 'string' && payload.error) ||
-          'Something went wrong. Please try again later.';
+        const msg = errorMessage || 'Something went wrong. Please try again later.';
         throw new Error(msg);
       }
 

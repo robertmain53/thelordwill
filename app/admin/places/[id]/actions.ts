@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { runQualityChecks } from "@/lib/quality/checks";
 
 function toStr(v: FormDataEntryValue | null): string {
   return typeof v === "string" ? v.trim() : "";
@@ -73,11 +75,40 @@ export async function updatePlace(id: string, formData: FormData) {
   // Public pages (both list and detail)
   revalidatePath("/bible-places");
   revalidatePath(`/bible-places/${slug}`);
-
-  return { ok: true };
 }
 
 export async function publishPlace(id: string) {
+  // Fetch the record for quality check
+  const record = await prisma.place.findUnique({
+    where: { id },
+    select: {
+      name: true,
+      description: true,
+      historicalInfo: true,
+      biblicalContext: true,
+      slug: true,
+    },
+  });
+
+  if (!record) {
+    redirect(`/admin/places/${id}?error=not_found`);
+  }
+
+  // Run quality checks
+  const result = runQualityChecks({
+    entityType: "place",
+    record,
+  });
+
+  // Block publishing if quality check fails
+  if (!result.ok) {
+    const errorMessage = `QUALITY_GATE_FAILED: ${result.reasons.join("; ")}`;
+    redirect(
+      `/admin/places/${id}?quality_error=${encodeURIComponent(errorMessage)}`
+    );
+  }
+
+  // Quality passed, publish the record
   const place = await prisma.place.update({
     where: { id },
     data: {
@@ -91,8 +122,6 @@ export async function publishPlace(id: string) {
   revalidatePath(`/admin/places/${id}`);
   revalidatePath("/bible-places");
   revalidatePath(`/bible-places/${place.slug}`);
-
-  return { ok: true };
 }
 
 export async function unpublishPlace(id: string) {
@@ -109,8 +138,6 @@ export async function unpublishPlace(id: string) {
   revalidatePath(`/admin/places/${id}`);
   revalidatePath("/bible-places");
   revalidatePath(`/bible-places/${place.slug}`);
-
-  return { ok: true };
 }
 
 export async function deletePlace(id: string) {
@@ -121,5 +148,5 @@ export async function deletePlace(id: string) {
   revalidatePath("/bible-places");
   if (existing?.slug) revalidatePath(`/bible-places/${existing.slug}`);
 
-  return { ok: true };
+  redirect("/admin/places?deleted=1");
 }

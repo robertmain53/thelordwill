@@ -20,7 +20,12 @@
     "seed:books": "tsx scripts/seed-books-direct.ts",
     "seed:places": "tsx scripts/seed-biblical-places.ts",
     "seed:prayer-points": "tsx scripts/seed-prayer-points.ts",
-    "check:books": "tsx scripts/check-books.ts"
+    "check:books": "tsx scripts/check-books.ts",
+    "qa:manifest": "node scripts/build-url-manifest.mjs",
+    "qa:quality": "node scripts/qa-quality.mjs",
+    "qa:graph": "node scripts/qa-graph-depth.mjs",
+    "qa:all": "npm run qa:manifest && npm run qa:quality && npm run qa:graph",
+    "test:all": "npm run lint && npm run qa:all && npm run build"
   },
   "dependencies": {
     "next": "^15.1.3",
