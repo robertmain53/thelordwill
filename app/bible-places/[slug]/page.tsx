@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCanonicalUrl, titleCase } from "@/lib/utils";
-import {
-  getPlaceBySlug,
-  formatPlaceVerseReference,
-} from "@/lib/db/place-queries";
+import { getPlaceBySlug, formatPlaceVerseReference } from "@/lib/db/place-queries";
 import { TourLeadForm } from "@/components/tour-lead-form";
 import { EEATStrip } from "@/components/eeat-strip";
 import { buildArticleSchema, buildBreadcrumbList } from "@/lib/seo/jsonld";
@@ -12,43 +9,45 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import Link from "next/link";
 
 // Force SSR - disable static generation
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 interface PageProps {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
+}
+
+type PlaceResult = Awaited<ReturnType<typeof getPlaceBySlug>>;
+
+// Centralized publish-gate (prevents draft leakage)
+function assertPublished(place: PlaceResult, slug: string): asserts place is NonNullable<PlaceResult> {
+  if (!place) notFound();
+
+  // `getPlaceBySlug` should ideally filter on status itself, but we enforce it here regardless.
+  // If it returns a `status` field, we use it. If it doesn't, we fail closed by requiring published.
+  const anyPlace = place as unknown as { status?: string };
+  if (!anyPlace?.status || anyPlace.status !== "published") {
+    // Fail closed: if status is missing or not published, do not render publicly.
+    notFound();
+  }
 }
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  if (!process.env.DATABASE_URL) {
-    const title = `${titleCase(slug)} - Biblical Place | Holy Land Tours`;
-    const canonicalUrl = getCanonicalUrl(`/bible-places/${slug}`);
-
-    return {
-      title,
-      alternates: {
-        canonical: canonicalUrl,
-      },
-    };
-  }
-
   const place = await getPlaceBySlug(slug, 20);
-
-  if (!place) {
-    return {
-      title: "Place Not Found",
-    };
-  }
+  // Fail closed: draft/unknown status => not found for metadata too.
+  assertPublished(place, slug);
 
   const title = `${place.name} in the Bible - Scriptures & Holy Land Tours`;
-  const description = `Discover ${place.name} in the Bible: ${place.description.substring(0, 150)}... Explore verses mentioning this sacred location and plan your Christian pilgrimage.`;
+  const description = `Discover ${place.name} in the Bible: ${place.description.substring(
+    0,
+    150,
+  )}... Explore verses mentioning this sacred location and plan your Christian pilgrimage.`;
   const canonicalUrl = getCanonicalUrl(`/bible-places/${slug}`);
-  const imageUrl = getCanonicalUrl(`/api/og?place=${encodeURIComponent(place.name)}&type=place`);
+  const imageUrl = getCanonicalUrl(
+    `/api/og?place=${encodeURIComponent(place.name)}&type=place`,
+  );
 
   return {
     title,
@@ -93,25 +92,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PlacePage({ params }: PageProps) {
   const { slug } = await params;
 
-  // Development mode fallback
-  if (!process.env.DATABASE_URL) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-4">
-          {titleCase(slug)} - Biblical Place
-        </h1>
-        <p className="text-gray-600">
-          Database connection required to display place data.
-        </p>
-      </div>
-    );
-  }
-
   const place = await getPlaceBySlug(slug, 20);
-
-  if (!place) {
-    notFound();
-  }
+  // Fail closed: do not render drafts
+  assertPublished(place, slug);
 
   const breadcrumbs = [
     { label: "Home", href: "/", position: 1 },
@@ -127,9 +110,7 @@ export default async function PlacePage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
-            buildBreadcrumbList(breadcrumbs, getCanonicalUrl("/")),
-          ),
+          __html: JSON.stringify(buildBreadcrumbList(breadcrumbs, getCanonicalUrl("/"))),
         }}
       />
       <script
@@ -139,8 +120,7 @@ export default async function PlacePage({ params }: PageProps) {
             buildArticleSchema({
               title: `${place.name} in the Bible`,
               description:
-                place.description ||
-                `Biblical context, verses, and travel planning notes for ${place.name}.`,
+                place.description || `Biblical context, verses, and travel planning notes for ${place.name}.`,
               url: getCanonicalUrl(`/bible-places/${slug}`),
               imageUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com"}/api/og/place/${slug}.png`,
               dateModifiedISO: new Date(place.updatedAt).toISOString().slice(0, 10),
@@ -152,13 +132,9 @@ export default async function PlacePage({ params }: PageProps) {
         }}
       />
 
-
       {/* Hero Section */}
       <div className="mt-6 mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-          {place.name} in the Bible
-        </h1>
-
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">{place.name} in the Bible</h1>
 
         <EEATStrip
           authorName="The Lord Will Editorial Team"
@@ -168,10 +144,7 @@ export default async function PlacePage({ params }: PageProps) {
           categoryLabel="Biblical Places"
         />
 
-
-        <p className="text-xl text-gray-600 leading-relaxed">
-          {place.description}
-        </p>
+        <p className="text-xl text-gray-600 leading-relaxed">{place.description}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -180,13 +153,9 @@ export default async function PlacePage({ params }: PageProps) {
           {/* Biblical Context */}
           {place.biblicalContext && (
             <section className="mb-10">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-                Biblical Significance
-              </h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Biblical Significance</h2>
               <div className="prose prose-lg max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {place.biblicalContext}
-                </p>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{place.biblicalContext}</p>
               </div>
             </section>
           )}
@@ -194,13 +163,9 @@ export default async function PlacePage({ params }: PageProps) {
           {/* Historical Information */}
           {place.historicalInfo && (
             <section className="mb-10">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-                Historical Context
-              </h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Historical Context</h2>
               <div className="prose prose-lg max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {place.historicalInfo}
-                </p>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{place.historicalInfo}</p>
               </div>
             </section>
           )}
@@ -208,15 +173,17 @@ export default async function PlacePage({ params }: PageProps) {
           {/* Location Information */}
           {(place.latitude || place.country) && (
             <section className="mb-10 p-6 bg-blue-50 rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Location Details
-              </h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Location Details</h3>
               <div className="space-y-2 text-gray-700">
                 {place.country && (
-                  <p><strong>Country:</strong> {place.country}</p>
+                  <p>
+                    <strong>Country:</strong> {place.country}
+                  </p>
                 )}
                 {place.region && (
-                  <p><strong>Region:</strong> {place.region}</p>
+                  <p>
+                    <strong>Region:</strong> {place.region}
+                  </p>
                 )}
                 {place.latitude && place.longitude && (
                   <p>
@@ -230,15 +197,10 @@ export default async function PlacePage({ params }: PageProps) {
           {/* Bible Verses Mentioning This Place */}
           {place.verses.length > 0 && (
             <section className="mb-10">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Bible Verses About {place.name}
-              </h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Bible Verses About {place.name}</h2>
               <div className="space-y-6">
                 {place.verses.map((verse) => (
-                  <div
-                    key={verse.id}
-                    className="border-l-4 border-blue-500 pl-4 py-2"
-                  >
+                  <div key={verse.id} className="border-l-4 border-blue-500 pl-4 py-2">
                     <div className="mb-2">
                       <Link
                         href={`/verse/${verse.bookId}/${verse.chapter}/${verse.verseNumber}`}
@@ -247,14 +209,10 @@ export default async function PlacePage({ params }: PageProps) {
                         {formatPlaceVerseReference(verse.bookId, verse.chapter, verse.verseNumber)}
                       </Link>
                       {verse.mentionType && (
-                        <span className="ml-2 text-xs text-gray-500 italic">
-                          ({verse.mentionType})
-                        </span>
+                        <span className="ml-2 text-xs text-gray-500 italic">({verse.mentionType})</span>
                       )}
                     </div>
-                    <p className="text-gray-800 leading-relaxed">
-                      {verse.textKjv || verse.textWeb || 'Text not available'}
-                    </p>
+                    <p className="text-gray-800 leading-relaxed">{verse.textKjv || verse.textWeb || "Text not available"}</p>
                   </div>
                 ))}
               </div>
@@ -264,9 +222,7 @@ export default async function PlacePage({ params }: PageProps) {
           {/* Related Places */}
           {place.relatedPlaces.length > 0 && (
             <section className="mb-10">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Nearby Biblical Locations
-              </h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Nearby Biblical Locations</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {place.relatedPlaces.map((relatedPlace) => (
                   <Link
@@ -274,12 +230,8 @@ export default async function PlacePage({ params }: PageProps) {
                     href={`/bible-places/${relatedPlace.slug}`}
                     className="block p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
                   >
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      {relatedPlace.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {relatedPlace.description}
-                    </p>
+                    <h3 className="font-semibold text-gray-900 mb-2">{relatedPlace.name}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-2">{relatedPlace.description}</p>
                   </Link>
                 ))}
               </div>
@@ -288,17 +240,15 @@ export default async function PlacePage({ params }: PageProps) {
 
           {/* FAQ Section */}
           <section className="mb-10">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              Frequently Asked Questions
-            </h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Frequently Asked Questions</h2>
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How long should I spend visiting {place.name}?
                 </h3>
                 <p className="text-gray-700">
-                  Most guided tours allocate 1-2 hours for {place.name}, allowing time for exploration,
-                  reflection, and photography. Private tours can be customized to spend more time.
+                  Most guided tours allocate 1-2 hours for {place.name}, allowing time for exploration, reflection, and
+                  photography. Private tours can be customized to spend more time.
                 </p>
               </div>
               <div>
@@ -306,8 +256,8 @@ export default async function PlacePage({ params }: PageProps) {
                   What is the best time to visit {place.name}?
                 </h3>
                 <p className="text-gray-700">
-                  Spring (March-May) and fall (September-November) offer ideal weather for visiting the Holy Land.
-                  Early morning visits typically have fewer crowds and better lighting for photos.
+                  Spring (March-May) and fall (September-November) offer ideal weather for visiting the Holy Land. Early
+                  morning visits typically have fewer crowds and better lighting for photos.
                 </p>
               </div>
               <div>
@@ -315,8 +265,8 @@ export default async function PlacePage({ params }: PageProps) {
                   Can I visit {place.name} on a Christian pilgrimage tour?
                 </h3>
                 <p className="text-gray-700">
-                  Yes! {place.name} is included in many Christian pilgrimage itineraries. Use the form
-                  to connect with experienced tour operators who can create a personalized journey.
+                  Yes. {place.name} is included in many Christian pilgrimage itineraries. Use the form to connect with
+                  experienced tour operators who can create a personalized journey.
                 </p>
               </div>
             </div>
@@ -326,13 +276,7 @@ export default async function PlacePage({ params }: PageProps) {
         {/* Sidebar - Tour Lead Form (Sticky) */}
         <div className="lg:col-span-1">
           <div className="sticky top-4">
-  <TourLeadForm
-  placeName={place.name}
-  placeSlug={place.slug}
-  contextSlug={place.slug}
-  contextType="place"
-/>
-
+            <TourLeadForm placeName={place.name} placeSlug={place.slug} contextSlug={place.slug} contextType="place" />
           </div>
         </div>
       </div>

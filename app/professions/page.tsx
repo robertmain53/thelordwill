@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default async function ProfessionsPage() {
   const professions = await prisma.profession.findMany({
+    where: { status: "published" },
     select: {
       slug: true,
       title: true,

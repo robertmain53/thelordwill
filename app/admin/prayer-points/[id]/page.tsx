@@ -1,0 +1,209 @@
+// app/admin/prayer-points/[id]/page.tsx
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/db/prisma";
+import {
+  updatePrayerPointById,
+  publishPrayerPointById,
+  unpublishPrayerPointById,
+  deletePrayerPointById,
+} from "./actions";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export default async function AdminPrayerPointEdit({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const p = await prisma.prayerPoint.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      description: true,
+      content: true,
+      metaTitle: true,
+      metaDescription: true,
+      category: true,
+      priority: true,
+      dailyRotation: true,
+      status: true,
+      publishedAt: true,
+      updatedAt: true,
+      createdAt: true,
+    },
+  });
+
+  if (!p) notFound();
+
+  const isPublished = p.status === "published";
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="text-sm text-muted-foreground">
+            <Link href="/admin/prayer-points" className="underline">
+              Prayer Points
+            </Link>{" "}
+            / Edit
+          </div>
+
+          <h1 className="text-2xl font-bold">{p.title}</h1>
+
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span className="inline-flex items-center px-2 py-0.5 rounded border bg-muted">
+              {p.status}
+            </span>
+            {p.publishedAt ? (
+              <span className="text-muted-foreground">
+                Published: {p.publishedAt.toISOString().slice(0, 10)}
+              </span>
+            ) : null}
+            <span className="text-muted-foreground">
+              Updated: {p.updatedAt.toISOString().slice(0, 10)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          {isPublished ? (
+            <form action={unpublishPrayerPointById.bind(null, p.id)}>
+              <button className="border rounded px-4 py-2 hover:bg-muted" type="submit">
+                Unpublish
+              </button>
+            </form>
+          ) : (
+            <form action={publishPrayerPointById.bind(null, p.id)}>
+              <button className="rounded px-4 py-2 bg-primary text-primary-foreground font-semibold" type="submit">
+                Publish
+              </button>
+            </form>
+          )}
+
+          <form
+            action={deletePrayerPointById.bind(null, p.id)}
+            onSubmit={undefined}
+          >
+            <button
+              className="border border-red-300 text-red-700 rounded px-4 py-2 hover:bg-red-50"
+              type="submit"
+            >
+              Delete
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* IMPORTANT: bind the imported server action (not an undefined symbol) */}
+      <form action={updatePrayerPointById.bind(null, p.id)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Title *</label>
+            <input
+              name="title"
+              defaultValue={p.title}
+              className="w-full border rounded px-3 py-2"
+              required
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Slug *</label>
+            <input
+              name="slug"
+              defaultValue={p.slug}
+              className="w-full border rounded px-3 py-2"
+              required
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Category</label>
+            <input
+              name="category"
+              defaultValue={p.category || ""}
+              className="w-full border rounded px-3 py-2"
+              placeholder="e.g. breakthrough"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Priority</label>
+            <input
+              name="priority"
+              type="number"
+              defaultValue={p.priority}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+
+          <div className="space-y-1 md:col-span-2">
+            <label className="text-sm font-medium">Description *</label>
+            <textarea
+              name="description"
+              defaultValue={p.description}
+              className="w-full border rounded px-3 py-2 min-h-[120px]"
+              required
+            />
+          </div>
+
+          <div className="space-y-1 md:col-span-2">
+            <label className="text-sm font-medium">Content (HTML)</label>
+            <textarea
+              name="content"
+              defaultValue={p.content || ""}
+              className="w-full border rounded px-3 py-2 min-h-[240px] font-mono text-sm"
+              placeholder="<p>...</p>"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Meta title</label>
+            <input
+              name="metaTitle"
+              defaultValue={p.metaTitle || ""}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Meta description</label>
+            <input
+              name="metaDescription"
+              defaultValue={p.metaDescription || ""}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              id="dailyRotation"
+              name="dailyRotation"
+              type="checkbox"
+              defaultChecked={p.dailyRotation}
+              className="h-4 w-4"
+            />
+            <label htmlFor="dailyRotation" className="text-sm">
+              Daily rotation
+            </label>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <button className="rounded px-4 py-2 bg-primary text-primary-foreground font-semibold" type="submit">
+            Save
+          </button>
+          <Link className="border rounded px-4 py-2 hover:bg-muted" href="/admin/prayer-points">
+            Back
+          </Link>
+        </div>
+      </form>
+    </div>
+  );
+}

@@ -220,7 +220,7 @@ export async function GET(request: NextRequest) {
     const where = status ? { status } : {};
 
     const leads = await prisma.tourLead.findMany({
-      where,
+      where: { status: "published" },
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {

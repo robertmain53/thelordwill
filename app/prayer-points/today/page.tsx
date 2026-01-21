@@ -34,7 +34,9 @@ async function getTodaysPrayerPoint() {
   } else {
     // Select a random prayer point from the daily rotation pool
     const rotationPool = await prisma.prayerPoint.findMany({
-      where: { dailyRotation: true },
+      where: { dailyRotation: true,
+        status: "published"
+       },
       select: { id: true },
     });
 

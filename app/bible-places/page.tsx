@@ -4,7 +4,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getCanonicalUrl } from "@/lib/utils";
 import prisma from "@/lib/db/prisma";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 type PlaceListItem = {
@@ -22,7 +22,8 @@ type PlaceListItem = {
 
 export const metadata: Metadata = {
   title: "Biblical Places - Holy Land Sites & Christian Pilgrimage Tours",
-  description: "Explore biblical places mentioned in Scripture. Discover the historical and spiritual significance of Jerusalem, Bethlehem, Nazareth, and other Holy Land locations. Plan your Christian pilgrimage.",
+  description:
+    "Explore biblical places mentioned in Scripture. Discover the historical and spiritual significance of Jerusalem, Bethlehem, Nazareth, and other Holy Land locations. Plan your Christian pilgrimage.",
   alternates: {
     canonical: getCanonicalUrl("/bible-places"),
   },
@@ -40,10 +41,8 @@ export const metadata: Metadata = {
 async function getPlaces(): Promise<PlaceListItem[]> {
   try {
     const places = await prisma.place.findMany({
-      orderBy: [
-        { tourPriority: 'desc' },
-        { name: 'asc' },
-      ],
+      where: { status: "published" }, // ✅ correct: publish-state filtering belongs in `where`
+      orderBy: [{ tourPriority: "desc" }, { name: "asc" }],
       select: {
         id: true,
         slug: true,
@@ -62,7 +61,7 @@ async function getPlaces(): Promise<PlaceListItem[]> {
 
     return places;
   } catch (error) {
-    console.error('Error fetching places:', error);
+    console.error("Error fetching places:", error);
     return [];
   }
 }
@@ -135,17 +134,16 @@ export default async function BiblePlacesPage() {
 
                 {(place.region || place.country) && (
                   <div className="text-sm text-gray-500 mb-3">
-                    {[place.region, place.country].filter(Boolean).join(', ')}
+                    {[place.region, place.country].filter(Boolean).join(", ")}
                   </div>
                 )}
 
-                <p className="text-gray-700 mb-4 line-clamp-3">
-                  {place.description}
-                </p>
+                <p className="text-gray-700 mb-4 line-clamp-3">{place.description}</p>
 
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">
-                    {place._count.verseMentions} verse{place._count.verseMentions !== 1 ? 's' : ''}
+                    {place._count.verseMentions} verse
+                    {place._count.verseMentions !== 1 ? "s" : ""}
                   </span>
                   <span className="text-blue-600 font-semibold group-hover:underline">
                     Explore →
@@ -170,22 +168,19 @@ export default async function BiblePlacesPage() {
                 href={`/bible-places/${place.slug}`}
                 className="block p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
               >
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {place.name}
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{place.name}</h3>
 
                 {(place.region || place.country) && (
                   <div className="text-xs text-gray-500 mb-2">
-                    {[place.region, place.country].filter(Boolean).join(', ')}
+                    {[place.region, place.country].filter(Boolean).join(", ")}
                   </div>
                 )}
 
-                <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                  {place.description}
-                </p>
+                <p className="text-sm text-gray-600 line-clamp-2 mb-2">{place.description}</p>
 
                 <div className="text-xs text-gray-500">
-                  {place._count.verseMentions} verse{place._count.verseMentions !== 1 ? 's' : ''}
+                  {place._count.verseMentions} verse
+                  {place._count.verseMentions !== 1 ? "s" : ""}
                 </div>
               </Link>
             ))}
@@ -200,16 +195,14 @@ export default async function BiblePlacesPage() {
             No places available yet
           </h2>
           <p className="text-gray-500">
-            Biblical places will appear here once they are added to the database.
+            Biblical places will appear here once they are published in the database.
           </p>
         </div>
       )}
 
       {/* Call to Action */}
       <section className="mt-16 p-8 bg-blue-600 text-white rounded-lg text-center">
-        <h2 className="text-3xl font-bold mb-4">
-          Ready to Experience the Holy Land?
-        </h2>
+        <h2 className="text-3xl font-bold mb-4">Ready to Experience the Holy Land?</h2>
         <p className="text-lg mb-6 max-w-2xl mx-auto">
           Join thousands of Christians who have walked in the footsteps of Jesus.
           Our trusted tour partners offer personalized pilgrimage experiences with

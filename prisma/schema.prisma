@@ -130,20 +130,27 @@ model NameRelation {
 }
 
 model Situation {
-  id                String                  @id @default(cuid())
-  slug              String                  @unique
-  title             String                  @unique
-  metaDescription   String
-  content           String?
-  category          String?
-  createdAt         DateTime                @default(now())
-  updatedAt         DateTime                @updatedAt
-  relatedSituations SituationRelation[]     @relation("SituationRelations")
+  id              String  @id @default(cuid())
+  slug            String  @unique
+  title           String  @unique
+  metaDescription String  @db.Text
+  content         String? @db.Text
+  category        String?
+
+  // Publish state
+  status      String    @default("draft") // "draft" | "published"
+  publishedAt DateTime?
+
   verseMappings     SituationVerseMapping[]
+  relatedSituations SituationRelation[]     @relation("SituationRelations")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([title])
   @@index([category])
+  @@index([status])
 }
 
 model SituationVerseMapping {
@@ -175,19 +182,26 @@ model SituationRelation {
 }
 
 model Profession {
-  id                 String               @id @default(cuid())
-  slug               String               @unique
-  title              String               @unique
-  description        String
-  content            String?
-  metaTitle          String?
-  metaDescription    String?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
+  id              String  @id @default(cuid())
+  slug            String  @unique
+  title           String  @unique
+  description     String  @db.Text
+  content         String? @db.Text
+  metaTitle       String?
+  metaDescription String?
+
+  // Publish state
+  status      String    @default("draft") // "draft" | "published"
+  publishedAt DateTime?
+
   relatedProfessions ProfessionRelation[] @relation("ProfessionRelations")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([title])
+  @@index([status])
 }
 
 model ProfessionRelation {
@@ -200,26 +214,39 @@ model ProfessionRelation {
 }
 
 model PrayerPoint {
-  id                  String                    @id @default(cuid())
-  slug                String                    @unique
-  title               String                    @unique
-  description         String
-  content             String?
-  category            String?
-  priority            Int                       @default(50)
-  dailyRotation       Boolean                   @default(false)
-  metaTitle           String?
-  metaDescription     String?
-  createdAt           DateTime                  @default(now())
-  updatedAt           DateTime                  @updatedAt
-  relatedPrayerPoints PrayerPointRelation[]     @relation("PrayerPointRelations")
-  verseMappings       PrayerPointVerseMapping[]
+  id              String  @id @default(cuid())
+  slug            String  @unique
+  title           String
+  description     String  @db.Text
+  content         String? @db.Text
+  metaTitle       String?
+  metaDescription String? @db.Text
+  category        String?
+  priority        Int     @default(50)
+  dailyRotation   Boolean @default(false)
+
+  openingPrayer String? @db.Text
+  prayerPoints  Json?
+
+  // Publish state
+  status      String    @default("draft") // "draft" | "published"
+  publishedAt DateTime?
+
+  // Relations
+  verseMappings PrayerPointVerseMapping[]
+
+  // Self-relation edges (OUTGOING and INCOMING)
+  relatedPrayerPoints   PrayerPointRelation[] @relation("PrayerPointRelations")
+  relatedToPrayerPoints PrayerPointRelation[] @relation("RelatedPrayerPointRelations")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
-  @@index([title])
   @@index([category])
   @@index([priority])
   @@index([dailyRotation])
+  @@index([status])
 }
 
 model PrayerPointVerseMapping {
@@ -243,13 +270,22 @@ model PrayerPointVerseMapping {
 }
 
 model PrayerPointRelation {
-  id                   String      @id @default(cuid())
+  id                   String @id @default(cuid())
   prayerPointId        String
   relatedPrayerPointId String
-  prayerPoint          PrayerPoint @relation("PrayerPointRelations", fields: [prayerPointId], references: [id], onDelete: Cascade)
+
+  // OUTGOING edge: PrayerPoint -> relatedPrayerPoint
+  prayerPoint PrayerPoint @relation("PrayerPointRelations", fields: [prayerPointId], references: [id], onDelete: Cascade)
+
+  // INCOMING edge counterpart: relatedPrayerPoint <- PrayerPoint
+  relatedPrayerPoint PrayerPoint @relation("RelatedPrayerPointRelations", fields: [relatedPrayerPointId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([prayerPointId, relatedPrayerPointId])
   @@index([prayerPointId])
+  @@index([relatedPrayerPointId])
 }
 
 model DailyPrayerPoint {
@@ -263,33 +299,41 @@ model DailyPrayerPoint {
 }
 
 model Place {
-  id              String              @id @default(cuid())
-  slug            String              @unique
-  name            String              @unique
-  description     String
-  historicalInfo  String?
-  biblicalContext String?
+  id              String  @id @default(cuid())
+  slug            String  @unique
+  name            String  @unique
+  description     String  @db.Text
+  historicalInfo  String? @db.Text
+  biblicalContext String? @db.Text
   modernName      String?
   country         String?
   region          String?
   latitude        Float?
   longitude       Float?
   metaTitle       String?
-  metaDescription String?
-  tourHighlight   Boolean             @default(false)
-  tourPriority    Int                 @default(50)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  metaDescription String? @db.Text
+  tourHighlight   Boolean @default(false)
+  tourPriority    Int     @default(50)
+
+  // Publish state
+  status      String    @default("draft") // "draft" | "published"
+  publishedAt DateTime?
+
+  // Relationships
+  verseMentions   PlaceVerseMapping[]
   relatedPlaces   PlaceRelation[]     @relation("PlaceRelations")
   relatedToPlaces PlaceRelation[]     @relation("RelatedPlace")
-  verseMentions   PlaceVerseMapping[]
   tourLeads       TourLead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([name])
   @@index([country])
   @@index([tourHighlight])
   @@index([tourPriority])
+  @@index([status])
 }
 
 model PlaceVerseMapping {
@@ -401,4 +445,80 @@ model IngestionLog {
 
   @@index([source, status])
   @@index([startedAt])
+}
+
+model TravelItinerary {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  metaTitle       String?
+  metaDescription String?
+  days            Int
+  region          String
+  bestSeason      String?
+  whoItsFor       String?
+  highlights      String[] @default([])
+
+  content   String?  @db.Text // optional introduction HTML
+  // publishing
+  status    String   @default("draft") // "draft" | "published"
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  dayPlans TravelItineraryDay[]
+  faqs     TravelItineraryFaq[]
+
+  @@index([status])
+  @@index([slug])
+}
+
+model TravelItineraryDay {
+  id          String   @id @default(cuid())
+  itineraryId String
+  day         Int
+  title       String
+  places      String[] @default([])
+  readings    String[] @default([])
+  notes       String?  @db.Text
+
+  itinerary TravelItinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+
+  @@unique([itineraryId, day])
+  @@index([itineraryId])
+}
+
+model TravelItineraryFaq {
+  id          String @id @default(cuid())
+  itineraryId String
+  question    String
+  answer      String @db.Text
+  order       Int    @default(0)
+
+  itinerary TravelItinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+
+  @@index([itineraryId])
+}
+
+model TaxonomyLabel {
+  id        String   @id @default(cuid())
+
+  // Which content type this label belongs to (future-proof)
+  scope     String   // e.g. "prayerPointCategory", "placeRegion", ...
+
+  // Stable key stored in content rows (e.g. PrayerPoint.category)
+  key       String
+
+  // Human-facing label shown on the site and in admin
+  label     String
+
+  // Optional extra fields if you want later
+  sortOrder Int      @default(100)
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([scope, key])
+  @@index([scope])
+  @@index([isActive])
 }
