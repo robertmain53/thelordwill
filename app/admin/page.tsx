@@ -1,243 +1,152 @@
-'use client';
+// app/admin/page.tsx
+import Link from "next/link";
 
-import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { Globe } from 'lucide-react';
+type AdminLink = {
+  href: string;
+  title: string;
+  description: string;
+  implemented?: boolean;   // explicit, deterministic
+  badgeIfMissing?: string; // e.g. "Planned"
+};
 
-type Language = 'en' | 'es' | 'pt';
-
-interface LanguageOption {
-  code: Language;
-  label: string;
-  nativeLabel: string;
-  flag: string;
-}
-
-const LANGUAGES: LanguageOption[] = [
+const SECTIONS: Array<{ title: string; links: AdminLink[] }> = [
   {
-    code: 'en',
-    label: 'English',
-    nativeLabel: 'English',
-    flag: '🇺🇸',
+    title: "Content",
+    links: [
+      {
+        href: "/admin/prayer-points",
+        title: "Prayer Points",
+        description: "Create, edit, publish, and manage verse mappings.",
+        implemented: true,
+      },
+      {
+        href: "/admin/places",
+        title: "Places",
+        description: "Edit Bible Places content and publish state.",
+        implemented: true,
+      },
+      {
+        href: "/admin/situations",
+        title: "Situations",
+        description: "Edit Situations content and publish state.",
+        implemented: true, // set to false if not ready
+        badgeIfMissing: "Planned",
+      },
+      {
+        href: "/admin/professions",
+        title: "Professions",
+        description: "Edit Professions content and publish state.",
+        implemented: true, // set to false if not ready
+        badgeIfMissing: "Planned",
+      },
+      {
+        href: "/admin/travel-itineraries",
+        title: "Travel Itineraries",
+        description: "DB-backed itinerary management and publishing.",
+        implemented: true, // set to false if not ready
+        badgeIfMissing: "Planned",
+      },
+    ],
   },
   {
-    code: 'es',
-    label: 'Spanish',
-    nativeLabel: 'Español',
-    flag: '🇪🇸',
-  },
-  {
-    code: 'pt',
-    label: 'Portuguese',
-    nativeLabel: 'Português',
-    flag: '🇧🇷',
+    title: "Operations",
+    links: [
+      {
+        href: "/admin/leads",
+        title: "Leads",
+        description: "Review tour leads captured from public pages.",
+        implemented: true,
+      },
+    ],
   },
 ];
 
-interface LanguageSwitcherProps {
-  currentLanguage?: Language;
-  onLanguageChange?: (language: Language) => void;
-  variant?: 'dropdown' | 'compact';
-}
+function LinkCard({
+  href,
+  title,
+  description,
+  badge,
+  disabled,
+}: {
+  href: string;
+  title: string;
+  description: string;
+  badge?: string;
+  disabled?: boolean;
+}) {
+  const content = (
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <div className="font-semibold">{title}</div>
+        <div className="text-sm text-muted-foreground mt-1">{description}</div>
+      </div>
 
-export function LanguageSwitcher({
-  currentLanguage = 'en',
-  onLanguageChange,
-  variant = 'dropdown',
-}: LanguageSwitcherProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState<Language>(currentLanguage);
+      {badge ? (
+        <span className="shrink-0 text-xs border rounded px-2 py-0.5 bg-muted">
+          {badge}
+        </span>
+      ) : null}
+    </div>
+  );
 
-  const pathname = usePathname();
-
-  // Keep selectedLang in sync if parent passes a different currentLanguage later.
-  useEffect(() => {
-    setSelectedLang(currentLanguage);
-  }, [currentLanguage]);
-
-  // Critical fix: close dropdown on navigation so the fullscreen backdrop
-  // can't remain mounted and block clicks on the next page.
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
-
-  const currentLangOption = LANGUAGES.find((lang) => lang.code === selectedLang);
-
-  const handleLanguageChange = (language: Language) => {
-    // Only English is available currently
-    if (language !== 'en') {
-      alert('Spanish and Portuguese translations are coming soon! Please check back later.');
-      setIsOpen(false);
-      return;
-    }
-
-    setSelectedLang(language);
-    setIsOpen(false);
-
-    // Call the callback if provided
-    if (onLanguageChange) {
-      onLanguageChange(language);
-    }
-    // No navigation needed for English since it's the default
-  };
-
-  if (variant === 'compact') {
+  if (disabled) {
     return (
-      <div className="relative inline-block">
-        <button
-          onClick={() => setIsOpen((v) => !v)}
-          className="flex items-center gap-2 px-3 py-2 text-sm border rounded-md hover:bg-muted transition-colors"
-          aria-label="Change language"
-          aria-expanded={isOpen}
-          aria-haspopup="menu"
-        >
-          <Globe className="h-4 w-4" />
-          <span className="font-medium">
-            {currentLangOption?.flag} {currentLangOption?.code.toUpperCase()}
-          </span>
-        </button>
-
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 z-10 bg-transparent"
-              onClick={() => setIsOpen(false)}
-              aria-hidden="true"
-            />
-
-            {/* Dropdown */}
-            <div className="absolute right-0 mt-2 w-48 bg-background border rounded-md shadow-lg z-20">
-              <div className="py-1">
-                {LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => handleLanguageChange(lang.code)}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2 ${
-                      lang.code === selectedLang ? 'bg-muted font-semibold' : ''
-                    }`}
-                    role="menuitem"
-                  >
-                    <span className="text-lg">{lang.flag}</span>
-                    <span>{lang.nativeLabel}</span>
-                    {lang.code === selectedLang && <span className="ml-auto text-primary">✓</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+      <div
+        className="block rounded-lg border p-4 bg-muted/30 text-muted-foreground cursor-not-allowed"
+        aria-disabled="true"
+        title="This admin section is not implemented yet."
+      >
+        {content}
       </div>
     );
   }
 
-  // Default dropdown variant
   return (
-    <div className="relative inline-block">
-      <button
-        onClick={() => setIsOpen((v) => !v)}
-        className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted transition-colors"
-        aria-label="Change language"
-        aria-expanded={isOpen}
-        aria-haspopup="menu"
-      >
-        <Globe className="h-5 w-5" />
-        <div className="text-left">
-          <div className="text-xs text-muted-foreground">Language</div>
-          <div className="font-medium flex items-center gap-1">
-            <span>{currentLangOption?.flag}</span>
-            <span>{currentLangOption?.nativeLabel}</span>
-          </div>
-        </div>
-      </button>
-
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-10 bg-transparent"
-            onClick={() => setIsOpen(false)}
-            aria-hidden="true"
-          />
-
-          {/* Dropdown */}
-          <div className="absolute right-0 mt-2 w-64 bg-background border rounded-lg shadow-lg z-20">
-            <div className="p-2">
-              <div className="text-xs text-muted-foreground mb-2 px-2">Select Language</div>
-              {LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => handleLanguageChange(lang.code)}
-                  className={`w-full text-left px-3 py-2.5 rounded-md hover:bg-muted transition-colors flex items-center gap-3 ${
-                    lang.code === selectedLang ? 'bg-muted' : ''
-                  }`}
-                  role="menuitem"
-                >
-                  <span className="text-2xl">{lang.flag}</span>
-                  <div className="flex-1">
-                    <div className="font-medium">{lang.nativeLabel}</div>
-                    <div className="text-xs text-muted-foreground">{lang.label}</div>
-                  </div>
-                  {lang.code === selectedLang && <span className="text-primary font-bold">✓</span>}
-                </button>
-              ))}
-            </div>
-
-            <div className="border-t p-3 bg-muted/30">
-              <p className="text-xs text-muted-foreground">
-                Biblical content will be displayed in your selected language using verified translations.
-              </p>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+    <Link
+      href={href}
+      className="block rounded-lg border p-4 hover:bg-muted transition-colors"
+    >
+      {content}
+    </Link>
   );
 }
 
-/**
- * Compact Language Toggle (for mobile header)
- */
-export function LanguageToggle({ currentLanguage = 'en' }: { currentLanguage?: Language }) {
-  return <LanguageSwitcher currentLanguage={currentLanguage} variant="compact" />;
-}
+export default function AdminHomePage() {
+  return (
+    <div className="space-y-8">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-bold">Admin</h1>
+        <p className="text-muted-foreground">
+          Manage content, publishing, and operational workflows.
+        </p>
+      </header>
 
-/**
- * Get translation IDs for Bolls Bible API
- */
-export function getBollsTranslationId(language: Language): string {
-  const translationMap: Record<Language, string> = {
-    en: 'kjv', // King James Version (English)
-    es: 'rv1909', // Reina Valera 1909 (Spanish)
-    pt: 'almeida', // João Ferreira de Almeida (Portuguese)
-  };
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {SECTIONS.map((section) => (
+          <section key={section.title} className="border rounded-xl bg-card p-6">
+            <h2 className="text-lg font-semibold mb-4">{section.title}</h2>
 
-  return translationMap[language];
-}
+            <div className="space-y-3">
+              {section.links.map((l) => {
+                const implemented = l.implemented !== false;
+                const disabled = !implemented && !!l.badgeIfMissing;
+                const badge = !implemented && l.badgeIfMissing ? l.badgeIfMissing : undefined;
 
-/**
- * Get available translations for a language
- */
-export function getAvailableTranslations(language: Language): Array<{ id: string; name: string }> {
-  const translations: Record<Language, Array<{ id: string; name: string }>> = {
-    en: [
-      { id: 'kjv', name: 'King James Version' },
-      { id: 'web', name: 'World English Bible' },
-      { id: 'asv', name: 'American Standard Version' },
-      { id: 'bbe', name: 'Bible in Basic English' },
-      { id: 'ylt', name: "Young's Literal Translation" },
-    ],
-    es: [
-      { id: 'rv1909', name: 'Reina Valera 1909' },
-      { id: 'rv1960', name: 'Reina Valera 1960' },
-      { id: 'lbla', name: 'La Biblia de las Américas' },
-    ],
-    pt: [
-      { id: 'almeida', name: 'João Ferreira de Almeida' },
-      { id: 'arc', name: 'Almeida Revista e Corrigida' },
-      { id: 'nvi-pt', name: 'Nova Versão Internacional' },
-    ],
-  };
-
-  return translations[language] || translations.en;
+                return (
+                  <LinkCard
+                    key={l.href}
+                    href={l.href}
+                    title={l.title}
+                    description={l.description}
+                    badge={badge}
+                    disabled={disabled}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
 }
