@@ -25,6 +25,17 @@ export async function adminLogin(formData: FormData) {
     redirect(`/admin/login?error=1&next=${encodeURIComponent(nextPath)}`);
   }
 
+
+
+  import { cookies } from "next/headers";
+
+cookies().set("admin_session", "1", {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/admin",
+  maxAge: 60 * 60 * 24 * 7, // 7 days
+});
   const cookieStore = await cookies();
   cookieStore.set("tlw_admin", token!, {
     httpOnly: true,
