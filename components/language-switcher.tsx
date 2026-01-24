@@ -1,13 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Globe } from 'lucide-react';
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 
 type Language = 'en' | 'es' | 'pt';
-
-
 
 interface LanguageOption {
   code: Language;
@@ -44,19 +41,25 @@ interface LanguageSwitcherProps {
 }
 
 export function LanguageSwitcher({
-
-  const pathname = usePathname();
-
-useEffect(() => {
-  setIsOpen(false);
-}, [pathname]);
-
   currentLanguage = 'en',
   onLanguageChange,
   variant = 'dropdown',
 }: LanguageSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState<Language>(currentLanguage);
+
+  const pathname = usePathname();
+
+  // Keep selectedLang in sync if parent passes a different currentLanguage later.
+  useEffect(() => {
+    setSelectedLang(currentLanguage);
+  }, [currentLanguage]);
+
+  // Critical fix: close dropdown on navigation so the fullscreen backdrop
+  // can't remain mounted and block clicks on the next page.
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   const currentLangOption = LANGUAGES.find((lang) => lang.code === selectedLang);
 
@@ -82,20 +85,23 @@ useEffect(() => {
     return (
       <div className="relative inline-block">
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsOpen((v) => !v)}
           className="flex items-center gap-2 px-3 py-2 text-sm border rounded-md hover:bg-muted transition-colors"
           aria-label="Change language"
           aria-expanded={isOpen}
+          aria-haspopup="menu"
         >
           <Globe className="h-4 w-4" />
-          <span className="font-medium">{currentLangOption?.flag} {currentLangOption?.code.toUpperCase()}</span>
+          <span className="font-medium">
+            {currentLangOption?.flag} {currentLangOption?.code.toUpperCase()}
+          </span>
         </button>
 
         {isOpen && (
           <>
             {/* Backdrop */}
             <div
-              className="fixed inset-0 z-10"
+              className="fixed inset-0 z-10 bg-transparent"
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />
@@ -110,12 +116,11 @@ useEffect(() => {
                     className={`w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2 ${
                       lang.code === selectedLang ? 'bg-muted font-semibold' : ''
                     }`}
+                    role="menuitem"
                   >
                     <span className="text-lg">{lang.flag}</span>
                     <span>{lang.nativeLabel}</span>
-                    {lang.code === selectedLang && (
-                      <span className="ml-auto text-primary">✓</span>
-                    )}
+                    {lang.code === selectedLang && <span className="ml-auto text-primary">✓</span>}
                   </button>
                 ))}
               </div>
@@ -130,10 +135,11 @@ useEffect(() => {
   return (
     <div className="relative inline-block">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen((v) => !v)}
         className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted transition-colors"
         aria-label="Change language"
         aria-expanded={isOpen}
+        aria-haspopup="menu"
       >
         <Globe className="h-5 w-5" />
         <div className="text-left">
@@ -149,7 +155,7 @@ useEffect(() => {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-10"
+            className="fixed inset-0 z-10 bg-transparent"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
@@ -165,15 +171,14 @@ useEffect(() => {
                   className={`w-full text-left px-3 py-2.5 rounded-md hover:bg-muted transition-colors flex items-center gap-3 ${
                     lang.code === selectedLang ? 'bg-muted' : ''
                   }`}
+                  role="menuitem"
                 >
                   <span className="text-2xl">{lang.flag}</span>
                   <div className="flex-1">
                     <div className="font-medium">{lang.nativeLabel}</div>
                     <div className="text-xs text-muted-foreground">{lang.label}</div>
                   </div>
-                  {lang.code === selectedLang && (
-                    <span className="text-primary font-bold">✓</span>
-                  )}
+                  {lang.code === selectedLang && <span className="text-primary font-bold">✓</span>}
                 </button>
               ))}
             </div>
