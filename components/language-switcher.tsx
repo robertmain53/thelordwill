@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Globe } from 'lucide-react';
 
@@ -47,6 +47,7 @@ export function LanguageSwitcher({
 }: LanguageSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState<Language>(currentLanguage);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const pathname = usePathname();
 
@@ -60,6 +61,26 @@ export function LanguageSwitcher({
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const targetNode = event.target as Node | null;
+      if (!containerRef.current || !targetNode) return;
+      if (!containerRef.current.contains(targetNode)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+    };
+  }, [isOpen]);
 
   const currentLangOption = LANGUAGES.find((lang) => lang.code === selectedLang);
 
@@ -83,7 +104,7 @@ export function LanguageSwitcher({
 
   if (variant === 'compact') {
     return (
-      <div className="relative inline-block">
+      <div className="relative inline-block" ref={containerRef}>
         <button
           onClick={() => setIsOpen((v) => !v)}
           className="flex items-center gap-2 px-3 py-2 text-sm border rounded-md hover:bg-muted transition-colors"
@@ -99,13 +120,6 @@ export function LanguageSwitcher({
 
         {isOpen && (
           <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 z-10 bg-transparent"
-              onClick={() => setIsOpen(false)}
-              aria-hidden="true"
-            />
-
             {/* Dropdown */}
             <div className="absolute right-0 mt-2 w-48 bg-background border rounded-md shadow-lg z-20">
               <div className="py-1">
@@ -133,7 +147,7 @@ export function LanguageSwitcher({
 
   // Default dropdown variant
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block" ref={containerRef}>
       <button
         onClick={() => setIsOpen((v) => !v)}
         className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted transition-colors"
@@ -153,13 +167,6 @@ export function LanguageSwitcher({
 
       {isOpen && (
         <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-10 bg-transparent"
-            onClick={() => setIsOpen(false)}
-            aria-hidden="true"
-          />
-
           {/* Dropdown */}
           <div className="absolute right-0 mt-2 w-64 bg-background border rounded-lg shadow-lg z-20">
             <div className="p-2">
