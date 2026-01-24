@@ -70,7 +70,7 @@ export async function publishPrayerPointById(id: string) {
     record,
   });
 
-  // Block publishing if quality check fails
+  // Block publishing if  quality check fails
   if (!result.ok) {
     const errorMessage = `QUALITY_GATE_FAILED: ${result.reasons.join("; ")}`;
     redirect(
