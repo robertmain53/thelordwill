@@ -216,7 +216,7 @@ export function getBollsTranslationId(language: Language): string {
 }
 
 /**
- * Get available translations for a language
+ * Get available translations for  a language
  */
 export function getAvailableTranslations(language: Language): Array<{ id: string; name: string }> {
   const translations: Record<Language, Array<{ id: string; name: string }>> = {
