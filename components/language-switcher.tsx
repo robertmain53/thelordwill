@@ -2,8 +2,12 @@
 
 import { useState } from 'react';
 import { Globe } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Language = 'en' | 'es' | 'pt';
+
+
 
 interface LanguageOption {
   code: Language;
@@ -40,6 +44,13 @@ interface LanguageSwitcherProps {
 }
 
 export function LanguageSwitcher({
+
+  const pathname = usePathname();
+
+useEffect(() => {
+  setIsOpen(false);
+}, [pathname]);
+
   currentLanguage = 'en',
   onLanguageChange,
   variant = 'dropdown',
