@@ -1,6 +1,4 @@
 // middleware.ts
-// Protect /admin/* in production. In dev, allow access without headers.
-
 import { NextRequest, NextResponse } from "next/server";
 
 export const config = {
@@ -8,16 +6,21 @@ export const config = {
 };
 
 export function middleware(req: NextRequest) {
-  // Dev bypass: browsers won't send x-admin-token when you just navigate
-  if (process.env.NODE_ENV !== "production") {
-    return NextResponse.next();
+  // Allow the login page (and its assets) through
+  const pathname = req.nextUrl.pathname;
+  if (pathname === "/admin/login") return NextResponse.next();
+
+  // Dev bypass
+  if (process.env.NODE_ENV !== "production") return NextResponse.next();
+
+  const token = process.env.ADMIN_TOKEN;
+  const provided = req.headers.get("x-admin-token");
+
+  if (!token) {
+    // Fail closed if not configured
+    return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  // Production protection
-  const token = process.env.ADMIN_TOKEN;
-  if (!token) return NextResponse.next();
-
-  const provided = req.headers.get("x-admin-token");
   if (provided !== token) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
