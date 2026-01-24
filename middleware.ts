@@ -6,23 +6,40 @@ export const config = {
 };
 
 export function middleware(req: NextRequest) {
-  // Allow the login page (and its assets) through
   const pathname = req.nextUrl.pathname;
+
+  // Always allow login page (and optionally logout action endpoints)
   if (pathname === "/admin/login") return NextResponse.next();
 
-  // Dev bypass
+  // Dev bypass: allow local navigation without auth
   if (process.env.NODE_ENV !== "production") return NextResponse.next();
 
-  const token = process.env.ADMIN_TOKEN;
-  const provided = req.headers.get("x-admin-token");
- 
-
-  if (!token) {
+  const adminToken = process.env.ADMIN_TOKEN;
+  if (!adminToken) {
     // Fail closed if not configured
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  if (provided !== token) {
+  // Accept either:
+  // 1) browser session cookie set by /admin/login
+  // 2) x-admin-token header (useful for API clients)
+  const cookie = req.cookies.get("tlw_admin")?.value;
+  const header = req.headers.get("x-admin-token");
+
+  const ok = cookie === "1" || header === adminToken;
+
+  if (!ok) {
+    // Redirect to login for browser navigations; keep 401 for fetches
+    const accept = req.headers.get("accept") || "";
+    const isHtml = accept.includes("text/html");
+
+    if (isHtml) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/admin/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+
     return new NextResponse("Unauthorized", { status: 401 });
   }
 

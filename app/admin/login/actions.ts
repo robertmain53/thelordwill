@@ -6,7 +6,6 @@ import { redirect } from "next/navigation";
 
 function safeNextPath(nextPath?: string | null) {
   if (!nextPath) return "/admin";
-  // Prevent open redirects: only allow internal admin paths
   if (!nextPath.startsWith("/admin")) return "/admin";
   return nextPath;
 }
@@ -17,7 +16,7 @@ export async function adminLogin(formData: FormData) {
   const nextPath = safeNextPath(String(formData.get("next") || ""));
 
   if (!token) {
-    // If no token is set, just allow access (local dev).
+    // Local dev / not configured: allow
     redirect(nextPath);
   }
 
@@ -25,23 +24,13 @@ export async function adminLogin(formData: FormData) {
     redirect(`/admin/login?error=1&next=${encodeURIComponent(nextPath)}`);
   }
 
-
-
-  import { cookies } from "next/headers";
-
-cookies().set("admin_session", "1", {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
-  path: "/admin",
-  maxAge: 60 * 60 * 24 * 7, // 7 days
-});
   const cookieStore = await cookies();
-  cookieStore.set("tlw_admin", token!, {
+  cookieStore.set("tlw_admin", "1", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/",
+    path: "/admin",          // scope cookie to admin only
+    maxAge: 60 * 60 * 24 * 7 // 7 days
   });
 
   redirect(nextPath);
