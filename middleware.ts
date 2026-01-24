@@ -15,9 +15,7 @@ export function middleware(req: NextRequest) {
 
   const token = process.env.ADMIN_TOKEN;
   const provided = req.headers.get("x-admin-token");
-
-  const session = req.cookies.get("admin_session")?.value;
-if (session !== "1") return new NextResponse("Unauthorized", { status: 401 });
+ 
 
   if (!token) {
     // Fail closed if not configured
