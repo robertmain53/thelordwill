@@ -57,6 +57,12 @@ const SECTIONS: Array<{ title: string; links: AdminLink[] }> = [
         description: "Review tour leads captured from public pages.",
         implemented: true,
       },
+      {
+        href: "/admin/coverage",
+        title: "Content Coverage",
+        description: "View content completeness stats across all entity types.",
+        implemented: true,
+      },
     ],
   },
 ];

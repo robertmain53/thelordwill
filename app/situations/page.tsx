@@ -114,7 +114,7 @@ export default async function SituationsPage() {
                   {items.map((s) => (
                     <Link
                       key={s.slug}
-                      href={`/situations/${s.slug}`}
+                      href={`/bible-verses-for/${s.slug}`}
                       className="border rounded-lg p-5 bg-card hover:shadow-md hover:border-primary transition-all"
                     >
                       <div className="flex items-start justify-between gap-3">

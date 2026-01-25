@@ -253,8 +253,12 @@ export async function generateMetadata({
 export default async function PrayerPointPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const prayerPoint = await prisma.prayerPoint.findUnique({
-    where: { slug },
+  // Only fetch published prayer points for public pages
+  const prayerPoint = await prisma.prayerPoint.findFirst({
+    where: {
+      slug,
+      status: "published",
+    },
     include: {
       verseMappings: {
         include: {
@@ -264,20 +268,17 @@ export default async function PrayerPointPage({ params }: PageProps) {
         },
         orderBy: { relevanceScore: "desc" },
       },
-
-      // IMPORTANT:
-      // After fixing the Prisma self-relation, the target should be `relatedPrayerPoint`,
-      // not `prayerPoint`.
       relatedPrayerPoints: {
         include: {
           relatedPrayerPoint: {
-            select: { slug: true, title: true, description: true },
+            select: { slug: true, title: true, description: true, status: true },
           },
         },
       },
     },
   });
 
+  // 404 for drafts or non-existent items
   if (!prayerPoint) notFound();
 
   const clusterKey = prayerPoint.slug || prayerPoint.category || slug;

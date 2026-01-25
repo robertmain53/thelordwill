@@ -1,10 +1,36 @@
 import Link from "next/link";
+import { prisma } from "@/lib/db/prisma";
 import { TRAVEL_ITINERARIES } from "@/data/travel-itineraries";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export default function BibleTravelHubPage() {
-  const featured = TRAVEL_ITINERARIES;
+type ItineraryListItem = {
+  slug: string;
+  title: string;
+  metaDescription: string | null;
+  days: number;
+  region: string;
+  _count: { dayPlans: number };
+};
+
+export default async function BibleTravelHubPage() {
+  // Fetch published itineraries from DB
+  const dbItineraries: ItineraryListItem[] = await prisma.travelItinerary.findMany({
+    where: { status: "published" },
+    select: {
+      slug: true,
+      title: true,
+      metaDescription: true,
+      days: true,
+      region: true,
+      _count: { select: { dayPlans: true } },
+    },
+    orderBy: [{ days: "asc" }, { title: "asc" }],
+  });
+
+  // Fallback to static data if no DB itineraries exist
+  const hasDbItineraries = dbItineraries.length > 0;
 
   return (
     <main className="min-h-screen py-12 px-4">
@@ -18,27 +44,66 @@ export default function BibleTravelHubPage() {
         </header>
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {featured.map((it) => (
-            <Link
-              key={it.slug}
-              href={`/bible-travel/${it.slug}`}
-              className="group border rounded-lg p-6 bg-card hover:shadow-md hover:border-primary transition-all"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <h2 className="text-2xl font-semibold group-hover:text-primary transition-colors">
-                  {it.title}
-                </h2>
-                <span className="text-xs px-2 py-1 rounded bg-primary/10 text-primary">
-                  {it.days} days
-                </span>
-              </div>
-              <p className="mt-3 text-muted-foreground">{it.metaDescription}</p>
-              <div className="mt-4 text-sm text-muted-foreground">
-                Region: <span className="text-foreground">{it.region}</span>
-              </div>
-            </Link>
-          ))}
+          {hasDbItineraries ? (
+            // Render DB-backed itineraries
+            dbItineraries.map((it) => (
+              <Link
+                key={it.slug}
+                href={`/bible-travel/${it.slug}`}
+                className="group border rounded-lg p-6 bg-card hover:shadow-md hover:border-primary transition-all"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <h2 className="text-2xl font-semibold group-hover:text-primary transition-colors">
+                    {it.title}
+                  </h2>
+                  <span className="text-xs px-2 py-1 rounded bg-primary/10 text-primary">
+                    {it.days} days
+                  </span>
+                </div>
+                <p className="mt-3 text-muted-foreground line-clamp-3">
+                  {it.metaDescription || `A ${it.days}-day pilgrimage itinerary in ${it.region}.`}
+                </p>
+                <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Region: <span className="text-foreground">{it.region}</span></span>
+                  {it._count.dayPlans > 0 && (
+                    <span>{it._count.dayPlans} day plans</span>
+                  )}
+                </div>
+              </Link>
+            ))
+          ) : (
+            // Fallback: render static itineraries
+            TRAVEL_ITINERARIES.map((it) => (
+              <Link
+                key={it.slug}
+                href={`/bible-travel/${it.slug}`}
+                className="group border rounded-lg p-6 bg-card hover:shadow-md hover:border-primary transition-all"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <h2 className="text-2xl font-semibold group-hover:text-primary transition-colors">
+                    {it.title}
+                  </h2>
+                  <span className="text-xs px-2 py-1 rounded bg-primary/10 text-primary">
+                    {it.days} days
+                  </span>
+                </div>
+                <p className="mt-3 text-muted-foreground">{it.metaDescription}</p>
+                <div className="mt-4 text-sm text-muted-foreground">
+                  Region: <span className="text-foreground">{it.region}</span>
+                </div>
+              </Link>
+            ))
+          )}
         </section>
+
+        {/* Empty state */}
+        {!hasDbItineraries && TRAVEL_ITINERARIES.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
+              No travel itineraries available yet. Check back soon!
+            </p>
+          </div>
+        )}
 
         <section className="mt-10 border rounded-xl p-8 bg-gradient-to-br from-primary/10 via-primary/5 to-background">
           <h2 className="text-2xl font-bold mb-3">Want help planning a discipleship-first tour?</h2>

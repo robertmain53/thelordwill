@@ -40,10 +40,14 @@ export const getBiblicalName = cache(async (slug: string) => {
 
 /**
  * Get situation by slug (cached for performance)
+ * Only returns published situations
  */
 export const getSituation = cache(async (slug: string) => {
-  return await prisma.situation.findUnique({
-    where: { slug },
+  return await prisma.situation.findFirst({
+    where: {
+      slug,
+      status: "published",
+    },
     include: {
       verseMappings: {
         take: 10,
@@ -61,10 +65,14 @@ export const getSituation = cache(async (slug: string) => {
 
 /**
  * Get profession by slug (cached for performance)
+ * Only returns published professions
  */
 export const getProfession = cache(async (slug: string) => {
-  return await prisma.profession.findUnique({
-    where: { slug },
+  return await prisma.profession.findFirst({
+    where: {
+      slug,
+      status: "published",
+    },
     include: {
       relatedProfessions: {
         take: 5,

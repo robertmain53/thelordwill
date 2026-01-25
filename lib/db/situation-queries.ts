@@ -53,6 +53,7 @@ export interface SituationWithVerses {
 /**
  * Get situation with top verses and Strong's numbers
  * Cached for performance
+ * Only returns published situations
  */
 export const getSituationWithVerses = cache(
   async (slug: string, limit: number = 10): Promise<SituationWithVerses | null> => {
@@ -61,8 +62,11 @@ export const getSituationWithVerses = cache(
     }
 
     const prisma = await getPrisma();
-    return await prisma.situation.findUnique({
-      where: { slug },
+    return await prisma.situation.findFirst({
+      where: {
+        slug,
+        status: "published",
+      },
       include: {
         verseMappings: {
           orderBy: { relevanceScore: 'desc' },
@@ -116,7 +120,7 @@ export function formatVerseReference(verse: {
 }
 
 /**
- * Get related situations
+ * Get related situations (published only)
  */
 export const getRelatedSituations = cache(async (currentSlug: string, limit: number = 5) => {
   if (!process.env.DATABASE_URL) {
@@ -124,8 +128,11 @@ export const getRelatedSituations = cache(async (currentSlug: string, limit: num
   }
 
   const prisma = await getPrisma();
-  const current = await prisma.situation.findUnique({
-    where: { slug: currentSlug },
+  const current = await prisma.situation.findFirst({
+    where: {
+      slug: currentSlug,
+      status: "published",
+    },
     select: { category: true },
   });
 
@@ -137,6 +144,7 @@ export const getRelatedSituations = cache(async (currentSlug: string, limit: num
     where: {
       category: current.category,
       slug: { not: currentSlug },
+      status: "published",
     },
     take: limit,
     select: {
