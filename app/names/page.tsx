@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCanonicalUrl } from "@/lib/utils";
 import { prisma } from "@/lib/db/prisma";
+import { getHubLinks } from "@/lib/internal-linking";
+import { ExploreMore } from "@/components/related-section";
 
 export const dynamic = 'force-dynamic';
 
@@ -112,6 +114,9 @@ export default async function NamesPage() {
             </p>
           </div>
         )}
+
+        {/* Explore More Section - Links to other hubs */}
+        <ExploreMore currentSection="/names" hubs={getHubLinks()} />
       </div>
     </main>
   );

@@ -1,6 +1,8 @@
 // app/situations/page.tsx
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
+import { getHubLinks } from "@/lib/internal-linking";
+import { ExploreMore } from "@/components/related-section";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -133,6 +135,9 @@ export default async function SituationsPage() {
             );
           })
         )}
+
+        {/* Explore More Section - Links to other hubs */}
+        <ExploreMore currentSection="/situations" hubs={getHubLinks()} />
       </div>
     </main>
   );

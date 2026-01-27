@@ -30,5 +30,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: getCanonicalUrl('/sitemap-professions.xml'),
       lastModified: new Date(),
     },
+    {
+      url: getCanonicalUrl('/sitemap-places.xml'),
+      lastModified: new Date(),
+    },
   ];
 }

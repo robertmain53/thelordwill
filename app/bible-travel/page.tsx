@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { TRAVEL_ITINERARIES } from "@/data/travel-itineraries";
+import { getHubLinks } from "@/lib/internal-linking";
+import { ExploreMore } from "@/components/related-section";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -118,6 +120,9 @@ export default async function BibleTravelHubPage() {
             <span>→</span>
           </Link>
         </section>
+
+        {/* Explore More Section - Links to other hubs */}
+        <ExploreMore currentSection="/bible-travel" hubs={getHubLinks()} />
       </div>
     </main>
   );

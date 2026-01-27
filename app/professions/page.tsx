@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCanonicalUrl } from "@/lib/utils";
 import { prisma } from "@/lib/db/prisma";
+import { getHubLinks } from "@/lib/internal-linking";
+import { ExploreMore } from "@/components/related-section";
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +80,9 @@ export default async function ProfessionsPage() {
             "And whatsoever ye do, do it heartily, as to the Lord, and not unto men" (Colossians 3:23, KJV)
           </p>
         </section>
+
+        {/* Explore More Section - Links to other hubs */}
+        <ExploreMore currentSection="/professions" hubs={getHubLinks()} />
       </div>
     </main>
   );

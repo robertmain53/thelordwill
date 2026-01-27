@@ -6,8 +6,10 @@ import { TRAVEL_ITINERARIES } from "@/data/travel-itineraries";
 import { EEATStrip } from "@/components/eeat-strip";
 import { FAQSection } from "@/components/faq-section";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { buildArticleSchema } from "@/lib/seo/jsonld";
+import { buildItineraryEntitySchema } from "@/lib/seo/jsonld";
 import { TourLeadForm } from "@/components/tour-lead-form";
+import { RelatedSection } from "@/components/related-section";
+import { getRelatedLinks } from "@/lib/internal-linking";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +36,14 @@ export default async function TravelItineraryPage({ params }: PageProps) {
   const it = TRAVEL_ITINERARIES.find((x) => x.slug === slug);
   if (!it) notFound();
 
+  // Get related links based on region
+  const relatedLinks = await getRelatedLinks("itinerary", {
+    id: it.slug, // Use slug as id for static data
+    slug: it.slug,
+    title: it.title,
+    region: it.region,
+  });
+
   const canonicalUrl = getCanonicalUrl(`/bible-travel/${it.slug}`);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com";
   const lastUpdatedISO = new Date().toISOString().slice(0, 10);
@@ -44,15 +54,16 @@ export default async function TravelItineraryPage({ params }: PageProps) {
     { label: it.title, href: `/bible-travel/${it.slug}`, position: 3 },
   ];
 
-  const articleSchema = buildArticleSchema({
+  const entitySchema = buildItineraryEntitySchema({
+    id: it.slug,
+    slug: it.slug,
     title: it.metaTitle,
     description: it.metaDescription,
     url: canonicalUrl,
     imageUrl: `${siteUrl}/api/og/travel/${it.slug}.png`,
     dateModifiedISO: lastUpdatedISO,
-    language: "en",
-    category: "Bible Travel",
-    aboutName: it.title,
+    duration: it.days,
+    dayCount: it.dailyPlan.length,
   });
 
   const toPlaceSlug = (name: string) =>
@@ -67,7 +78,7 @@ export default async function TravelItineraryPage({ params }: PageProps) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(entitySchema) }}
       />
 
       <main className="min-h-screen py-12 px-4">
@@ -186,6 +197,11 @@ export default async function TravelItineraryPage({ params }: PageProps) {
               description="Logistics, pacing, and how to use Scripture readings during your trip."
             />
           </section>
+
+          {/* Related Content Section - Deterministic Internal Linking */}
+          {relatedLinks.length > 0 && (
+            <RelatedSection title="Related Content" links={relatedLinks} />
+          )}
         </article>
       </main>
     </>

@@ -46,7 +46,7 @@ type PlaceQueryResult = {
   country: string | null;
   region: string | null;
   tourHighlight: boolean;
-  status?: string; // optional; present if we select it
+  status: string; // Always selected for publish-gate checks
   verseMentions: PlaceVerseMention[];
   relatedPlaces: RelatedPlaceEdge[];
 };
@@ -64,6 +64,7 @@ export interface PlaceWithVerses {
   country: string | null;
   region: string | null;
   tourHighlight: boolean;
+  status: string; // Required for publish-gate checks
   verses: Array<{
     id: number;
     bookId: number;
@@ -106,7 +107,20 @@ async function getPlaceBySlugInternal(
 
   const place = (await prisma.place.findFirst({
     where,
-    include: {
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      updatedAt: true,
+      historicalInfo: true,
+      biblicalContext: true,
+      latitude: true,
+      longitude: true,
+      country: true,
+      region: true,
+      tourHighlight: true,
+      status: true, // Required for publish-gate checks
       verseMentions: {
         take: verseLimit,
         orderBy: { relevanceScore: "desc" },
@@ -168,6 +182,7 @@ async function getPlaceBySlugInternal(
     country: place.country,
     region: place.region,
     tourHighlight: place.tourHighlight,
+    status: place.status || "draft", // Default to draft if somehow missing
     verses: place.verseMentions.map((vm) => ({
       id: vm.verse.id,
       bookId: vm.verse.bookId,

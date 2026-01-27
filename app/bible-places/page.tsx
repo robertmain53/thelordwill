@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { EEATStrip } from "@/components/eeat-strip";
 import { getCanonicalUrl } from "@/lib/utils";
 import prisma from "@/lib/db/prisma";
+import { getHubLinks } from "@/lib/internal-linking";
+import { ExploreMore } from "@/components/related-section";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -82,10 +85,21 @@ export default async function BiblePlacesPage() {
       <Breadcrumbs items={breadcrumbs} />
 
       {/* Hero Section */}
-      <div className="mt-6 mb-12 text-center">
+      <div className="mt-6 mb-8 text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
           Biblical Places & Holy Land Tours
         </h1>
+
+        <div className="flex justify-center mb-4">
+          <EEATStrip
+            authorName="The Lord Will Editorial Team"
+            reviewerName="Ugo Candido"
+            reviewerCredential="Engineer"
+            lastUpdatedISO={new Date().toISOString().slice(0, 10)}
+            categoryLabel="Biblical Places"
+          />
+        </div>
+
         <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
           Discover the locations where biblical history unfolded. Explore verses mentioning
           each sacred site and plan your Christian pilgrimage to walk where Jesus walked.
@@ -215,14 +229,17 @@ export default async function BiblePlacesPage() {
           >
             Explore Jerusalem
           </Link>
-          <a
-            href="#"
+          <Link
+            href="/bible-travel"
             className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Request Tour Quote
-          </a>
+            View Travel Itineraries
+          </Link>
         </div>
       </section>
+
+      {/* Explore More Section - Links to other hubs */}
+      <ExploreMore currentSection="/bible-places" hubs={getHubLinks()} />
     </div>
   );
 }

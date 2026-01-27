@@ -14,6 +14,7 @@ export type QualityResult = {
     entityLinksPresent: boolean;
     hasIntro: boolean;
     hasConclusion: boolean;
+    entityDensityScore: number; // 0–10 score for entity linking density
   };
 };
 
@@ -134,6 +135,171 @@ function hasConclusion(html: string): boolean {
   }
 
   return false;
+}
+
+// -----------------------------------------------------------------------------
+// Entity Density Scoring (deterministic, per entity type)
+// -----------------------------------------------------------------------------
+
+/**
+ * ENTITY DENSITY SCORING (0-10 scale):
+ *
+ * Different entity types require different link patterns:
+ *
+ * Situation/PrayerPoint (Article + about pattern):
+ *   - +3 points: has link to /bible-places/
+ *   - +3 points: has link to /meaning-of/ OR /names/
+ *   - +2 points: has link to /verse/
+ *   - +2 points: has link to another situation/prayer-point
+ *
+ * Place (Place schema):
+ *   - +4 points: has link to /verse/
+ *   - +3 points: has link to another /bible-places/
+ *   - +3 points: has link to /bible-travel/ OR /bible-verses-for/
+ *
+ * Profession (DefinedTerm schema):
+ *   - +4 points: has link to /bible-verses-for/
+ *   - +3 points: has link to /meaning-of/ OR /names/
+ *   - +3 points: has link to /bible-places/
+ *
+ * Itinerary (TouristTrip schema):
+ *   - +4 points: has link to /bible-places/
+ *   - +3 points: has link to /verse/
+ *   - +3 points: has link to /bible-verses-for/ OR /prayer-points/
+ *
+ * Publish gate: score < 4 fails (configurable)
+ */
+type EntityLinkPatterns = {
+  pattern: RegExp;
+  points: number;
+  label: string;
+};
+
+const SITUATION_PRAYER_PATTERNS: EntityLinkPatterns[] = [
+  { pattern: /href\s*=\s*["']\/bible-places\//i, points: 3, label: "bible-places" },
+  { pattern: /href\s*=\s*["']\/(meaning-of|names)\//i, points: 3, label: "names" },
+  { pattern: /href\s*=\s*["']\/verse\//i, points: 2, label: "verse" },
+  { pattern: /href\s*=\s*["']\/(bible-verses-for|prayer-points)\//i, points: 2, label: "related" },
+];
+
+const PLACE_PATTERNS: EntityLinkPatterns[] = [
+  { pattern: /href\s*=\s*["']\/verse\//i, points: 4, label: "verse" },
+  { pattern: /href\s*=\s*["']\/bible-places\//i, points: 3, label: "bible-places" },
+  { pattern: /href\s*=\s*["']\/(bible-travel|bible-verses-for)\//i, points: 3, label: "travel-or-verses" },
+];
+
+const PROFESSION_PATTERNS: EntityLinkPatterns[] = [
+  { pattern: /href\s*=\s*["']\/bible-verses-for\//i, points: 4, label: "bible-verses-for" },
+  { pattern: /href\s*=\s*["']\/(meaning-of|names)\//i, points: 3, label: "names" },
+  { pattern: /href\s*=\s*["']\/bible-places\//i, points: 3, label: "bible-places" },
+];
+
+const ITINERARY_PATTERNS: EntityLinkPatterns[] = [
+  { pattern: /href\s*=\s*["']\/bible-places\//i, points: 4, label: "bible-places" },
+  { pattern: /href\s*=\s*["']\/verse\//i, points: 3, label: "verse" },
+  { pattern: /href\s*=\s*["']\/(bible-verses-for|prayer-points)\//i, points: 3, label: "verses-or-prayer" },
+];
+
+/**
+ * Calculate entity density score (0-10) based on entity type and HTML content.
+ * Deterministic: same input always produces same output.
+ */
+function calculateEntityDensityScore(entityType: EntityType, html: string): number {
+  let patterns: EntityLinkPatterns[];
+
+  switch (entityType) {
+    case "situation":
+    case "prayerPoint":
+      patterns = SITUATION_PRAYER_PATTERNS;
+      break;
+    case "place":
+      patterns = PLACE_PATTERNS;
+      break;
+    case "profession":
+      patterns = PROFESSION_PATTERNS;
+      break;
+    case "itinerary":
+      patterns = ITINERARY_PATTERNS;
+      break;
+    default:
+      return 0;
+  }
+
+  let score = 0;
+  for (const { pattern, points } of patterns) {
+    if (pattern.test(html)) {
+      score += points;
+    }
+  }
+
+  // Cap at 10
+  return Math.min(score, 10);
+}
+
+/**
+ * Get entity density failure reasons based on entity type.
+ * Returns specific actionable feedback for each type.
+ */
+function getEntityDensityFailureReasons(
+  entityType: EntityType,
+  html: string,
+  score: number
+): string[] {
+  if (score >= 4) return [];
+
+  const reasons: string[] = [];
+  const missingPatterns: string[] = [];
+
+  switch (entityType) {
+    case "situation":
+    case "prayerPoint": {
+      if (!/href\s*=\s*["']\/bible-places\//i.test(html)) {
+        missingPatterns.push("/bible-places/");
+      }
+      if (!/href\s*=\s*["']\/(meaning-of|names)\//i.test(html)) {
+        missingPatterns.push("/meaning-of/ or /names/");
+      }
+      if (!/href\s*=\s*["']\/verse\//i.test(html)) {
+        missingPatterns.push("/verse/");
+      }
+      break;
+    }
+    case "place": {
+      if (!/href\s*=\s*["']\/verse\//i.test(html)) {
+        missingPatterns.push("/verse/");
+      }
+      if (!/href\s*=\s*["']\/bible-places\//i.test(html)) {
+        missingPatterns.push("another /bible-places/");
+      }
+      break;
+    }
+    case "profession": {
+      if (!/href\s*=\s*["']\/bible-verses-for\//i.test(html)) {
+        missingPatterns.push("/bible-verses-for/");
+      }
+      if (!/href\s*=\s*["']\/(meaning-of|names)\//i.test(html)) {
+        missingPatterns.push("/meaning-of/ or /names/");
+      }
+      break;
+    }
+    case "itinerary": {
+      if (!/href\s*=\s*["']\/bible-places\//i.test(html)) {
+        missingPatterns.push("/bible-places/");
+      }
+      if (!/href\s*=\s*["']\/verse\//i.test(html)) {
+        missingPatterns.push("/verse/");
+      }
+      break;
+    }
+  }
+
+  if (missingPatterns.length > 0) {
+    reasons.push(
+      `Entity density too low (${score}/10 < 4). Add links to: ${missingPatterns.join(", ")}`
+    );
+  }
+
+  return reasons;
 }
 
 // -----------------------------------------------------------------------------
@@ -294,12 +460,14 @@ export function runQualityChecks(args: {
   }
 
   // Calculate metrics
+  const entityDensityScore = calculateEntityDensityScore(entityType, combinedHtml);
   const metrics: QualityResult["metrics"] = {
     wordCount: wordCount(combinedText),
     internalLinkCount: countInternalLinks(combinedHtml),
     entityLinksPresent: hasEntityLinks(combinedHtml),
     hasIntro: hasIntroduction(combinedHtml),
     hasConclusion: hasConclusion(combinedHtml),
+    entityDensityScore,
   };
 
   // Determine failure reasons (deterministic order)
@@ -326,6 +494,14 @@ export function runQualityChecks(args: {
   if (!metrics.entityLinksPresent) {
     reasons.push("No entity links (links to /bible-verses-for/, /prayer-points/, etc.)");
   }
+
+  // Check entity density (publish gate: score < 4 fails)
+  const entityDensityReasons = getEntityDensityFailureReasons(
+    entityType,
+    combinedHtml,
+    entityDensityScore
+  );
+  reasons.push(...entityDensityReasons);
 
   // Calculate score
   const score = calculateScore(metrics);

@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCanonicalUrl, titleCase } from "@/lib/utils";
 import { getBiblicalName } from "@/lib/db/queries";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { RelatedSection } from "@/components/related-section";
+import { getRelatedLinks } from "@/lib/internal-linking";
 
 // Force SSR - disable static generation
 export const dynamic = 'force-dynamic';
@@ -106,6 +109,20 @@ export default async function NameMeaningPage({ params }: PageProps) {
     notFound();
   }
 
+  // Breadcrumbs for navigation
+  const breadcrumbs = [
+    { label: "Home", href: "/", position: 1 },
+    { label: "Biblical Names", href: "/names", position: 2 },
+    { label: data.name, href: `/meaning-of/${name}/in-the-bible`, position: 3 },
+  ];
+
+  // Get cross-entity related links
+  const relatedLinks = await getRelatedLinks("name", {
+    id: data.id,
+    slug: data.slug,
+    name: data.name,
+  });
+
   // JSON-LD Schema for the specific name page
   const schema = {
     "@context": "https://schema.org",
@@ -139,7 +156,9 @@ export default async function NameMeaningPage({ params }: PageProps) {
 
       <main className="min-h-screen py-12 px-4">
         <article className="max-w-4xl mx-auto">
-          <header className="mb-8">
+          <Breadcrumbs items={breadcrumbs} />
+
+          <header className="mb-8 mt-6">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Meaning of {data.name} in the Bible
             </h1>
@@ -206,6 +225,13 @@ export default async function NameMeaningPage({ params }: PageProps) {
                     </a>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Cross-Entity Related Content */}
+            {relatedLinks.length > 0 && (
+              <div className="mt-8">
+                <RelatedSection title="Related Content" links={relatedLinks} />
               </div>
             )}
           </section>

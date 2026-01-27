@@ -1,6 +1,8 @@
 // app/prayer-points/page.tsx
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
+import { getHubLinks } from "@/lib/internal-linking";
+import { ExploreMore } from "@/components/related-section";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -117,6 +119,9 @@ export default async function PrayerPointsPage() {
         {prayerPoints.length === 0 && (
           <div className="text-muted-foreground">No published prayer points yet.</div>
         )}
+
+        {/* Explore More Section - Links to other hubs */}
+        <ExploreMore currentSection="/prayer-points" hubs={getHubLinks()} />
       </div>
     </main>
   );

@@ -4,8 +4,10 @@ import { getCanonicalUrl } from "@/lib/utils";
 import { getPlaceBySlug, formatPlaceVerseReference } from "@/lib/db/place-queries";
 import { TourLeadForm } from "@/components/tour-lead-form";
 import { EEATStrip } from "@/components/eeat-strip";
-import { buildArticleSchema, buildBreadcrumbList } from "@/lib/seo/jsonld";
+import { buildBreadcrumbList, buildPlaceEntitySchema } from "@/lib/seo/jsonld";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { RelatedSection } from "@/components/related-section";
+import { getRelatedLinks } from "@/lib/internal-linking";
 import Link from "next/link";
 
 // Force SSR - disable static generation
@@ -22,11 +24,8 @@ type PlaceResult = Awaited<ReturnType<typeof getPlaceBySlug>>;
 function assertPublished(place: PlaceResult): asserts place is NonNullable<PlaceResult> {
   if (!place) notFound();
 
-  // `getPlaceBySlug` should ideally filter on status itself, but we enforce it here regardless.
-  // If it returns a `status` field, we use it. If it doesn't, we fail closed by requiring published.
-  const anyPlace = place as unknown as { status?: string };
-  if (!anyPlace?.status || anyPlace.status !== "published") {
-    // Fail closed: if status is missing or not published, do not render publicly.
+  // Double-check status field for fail-closed safety
+  if (place.status !== "published") {
     notFound();
   }
 }
@@ -96,6 +95,15 @@ export default async function PlacePage({ params }: PageProps) {
   // Fail closed: do not render drafts
   assertPublished(place);
 
+  // Get deterministic related links based on DB relations
+  const relatedLinks = await getRelatedLinks("place", {
+    id: place.id,
+    slug: place.slug,
+    name: place.name,
+    region: place.region,
+    country: place.country,
+  });
+
   const breadcrumbs = [
     { label: "Home", href: "/", position: 1 },
     { label: "Bible Places", href: "/bible-places", position: 2 },
@@ -106,7 +114,7 @@ export default async function PlacePage({ params }: PageProps) {
     <div className="container mx-auto px-4 py-8">
       <Breadcrumbs items={breadcrumbs} />
 
-      {/* Structured data: Article + BreadcrumbList */}
+      {/* Structured data: Article + BreadcrumbList + Place */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -117,16 +125,19 @@ export default async function PlacePage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(
-            buildArticleSchema({
-              title: `${place.name} in the Bible`,
-              description:
-                place.description || `Biblical context, verses, and travel planning notes for ${place.name}.`,
+            buildPlaceEntitySchema({
+              id: place.id,
+              slug: place.slug,
+              name: place.name,
+              description: place.description || `Biblical place: ${place.name}`,
               url: getCanonicalUrl(`/bible-places/${slug}`),
               imageUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com"}/api/og/place/${slug}.png`,
+              latitude: place.latitude,
+              longitude: place.longitude,
+              country: place.country,
+              region: place.region,
               dateModifiedISO: new Date(place.updatedAt).toISOString().slice(0, 10),
-              language: "en",
-              category: "Biblical Places",
-              aboutName: place.name,
+              verseCount: place.verses.length,
             }),
           ),
         }}
@@ -271,6 +282,11 @@ export default async function PlacePage({ params }: PageProps) {
               </div>
             </div>
           </section>
+
+          {/* Related Content Section - Deterministic Internal Linking */}
+          {relatedLinks.length > 0 && (
+            <RelatedSection title="Related Content" links={relatedLinks} />
+          )}
         </div>
 
         {/* Sidebar - Tour Lead Form (Sticky) */}

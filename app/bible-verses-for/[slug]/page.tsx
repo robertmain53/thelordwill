@@ -24,6 +24,9 @@ import {
   generateBreadcrumbs,
   getTrendingNames,
 } from "@/lib/seo/internal-linking";
+import { RelatedSection } from "@/components/related-section";
+import { getRelatedLinks } from "@/lib/internal-linking";
+import { PosterSectionServer } from "@/components/poster-section";
 
 // Force SSR - disable static generation
 export const dynamic = 'force-dynamic';
@@ -296,6 +299,14 @@ export default async function SituationVersesPage({ params }: PageProps) {
   // Get trending names for additional links
   const trendingNames = await getTrendingNames(2);
 
+  // Get cross-entity related links (places, itineraries sharing verses)
+  const crossEntityLinks = await getRelatedLinks("situation", {
+    id: situationData.id,
+    slug: situationData.slug,
+    title: situationData.title,
+    category: situationData.category,
+  });
+
   const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
   const lastUpdatedISO =
     situationData.updatedAt
@@ -414,6 +425,16 @@ export default async function SituationVersesPage({ params }: PageProps) {
             </section>
           )}
 
+          {/* Verse Poster Section */}
+          <section>
+            <PosterSectionServer
+              slug={slug}
+              situationTitle={situationData.title}
+              verseRef={primaryReference}
+              verseText={primaryVerse.textKjv || primaryVerse.textWeb || ""}
+            />
+          </section>
+
               {/* Additional Verses */}
               {situationData.verseMappings.length > 1 && (
                 <section className="space-y-6">
@@ -522,6 +543,11 @@ export default async function SituationVersesPage({ params }: PageProps) {
                     showCategory={false}
                   />
                 </section>
+              )}
+
+              {/* Cross-Entity Related Content (places, itineraries sharing verses) */}
+              {crossEntityLinks.length > 0 && (
+                <RelatedSection title="Related Content" links={crossEntityLinks} />
               )}
 
               {/* Call to Action */}

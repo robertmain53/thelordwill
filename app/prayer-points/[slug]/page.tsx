@@ -7,7 +7,9 @@ import { TranslationComparison } from "@/components/translation-comparison";
 import { prepareTranslations } from "@/lib/translations";
 import { EEATStrip } from "@/components/eeat-strip";
 import { FAQSection, type FAQItem } from "@/components/faq-section";
-import { buildArticleSchema, buildBreadcrumbList } from "@/lib/seo/jsonld";
+import { buildBreadcrumbList, buildPrayerPointEntitySchema } from "@/lib/seo/jsonld";
+import { RelatedSection } from "@/components/related-section";
+import { getRelatedLinks } from "@/lib/internal-linking";
 
 export const dynamic = "force-dynamic";
 
@@ -305,6 +307,14 @@ export default async function PrayerPointPage({ params }: PageProps) {
       })
     : [];
 
+  // Get cross-entity related links (places, situations, etc.)
+  const crossEntityLinks = await getRelatedLinks("prayer-point", {
+    id: prayerPoint.id,
+    slug: prayerPoint.slug,
+    title: prayerPoint.title,
+    category: prayerPoint.category,
+  });
+
   const faqs = (prayerPoint as { faqs?: FAQItem[] | null }).faqs ?? undefined;
   const displayFaqs =
     faqs && faqs.length > 0 ? faqs : DEFAULT_PRAYER_POINT_FAQS;
@@ -345,15 +355,16 @@ export default async function PrayerPointPage({ params }: PageProps) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(
-              buildArticleSchema({
-                title: `${prayerPoint.title}`,
+              buildPrayerPointEntitySchema({
+                id: prayerPoint.id,
+                slug: prayerPoint.slug,
+                title: prayerPoint.title,
                 description: descriptionText,
                 url: canonicalUrl,
                 imageUrl: `${siteUrl}/api/og/prayer-points/${slug}.png`,
                 dateModifiedISO: lastUpdatedISO,
-                language: "en",
-                category: "Prayer Points",
-                aboutName: prayerPoint.title,
+                category: prayerPoint.category,
+                verseCount: prayerPoint.verseMappings.length,
               }),
             ),
           }}
@@ -584,6 +595,11 @@ export default async function PrayerPointPage({ params }: PageProps) {
               ))}
             </div>
           </section>
+        )}
+
+        {/* Cross-Entity Related Content */}
+        {crossEntityLinks.length > 0 && (
+          <RelatedSection title="Related Content" links={crossEntityLinks} />
         )}
 
         {/* CTA Section */}

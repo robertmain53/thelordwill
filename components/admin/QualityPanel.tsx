@@ -101,7 +101,7 @@ export function QualityPanel({
         </div>
 
         {/* Has Conclusion */}
-        <div className="border rounded p-2 col-span-2">
+        <div className="border rounded p-2">
           <div className="text-xs text-muted-foreground">Conclusion</div>
           <div className="font-semibold flex items-center justify-between">
             <span>{result.metrics.hasConclusion ? "Yes" : "No"}</span>
@@ -111,6 +111,21 @@ export function QualityPanel({
               }`}
             >
               {result.metrics.hasConclusion ? "✓" : "✗"}
+            </span>
+          </div>
+        </div>
+
+        {/* Entity Density Score */}
+        <div className="border rounded p-2">
+          <div className="text-xs text-muted-foreground">Entity Density</div>
+          <div className="font-semibold flex items-center justify-between">
+            <span>{result.metrics.entityDensityScore}/10</span>
+            <span
+              className={`text-xs ${
+                result.metrics.entityDensityScore >= 4 ? passColor : failColor
+              }`}
+            >
+              {result.metrics.entityDensityScore >= 4 ? "✓" : "< 4"}
             </span>
           </div>
         </div>

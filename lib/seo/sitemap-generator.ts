@@ -33,6 +33,12 @@ export async function generateStaticSitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
+      url: getCanonicalUrl('/bible-places'),
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
       url: getCanonicalUrl('/situations'),
       lastModified: new Date(),
       changeFrequency: 'weekly',
@@ -46,6 +52,18 @@ export async function generateStaticSitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: getCanonicalUrl('/professions'),
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: getCanonicalUrl('/bible-travel'),
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: getCanonicalUrl('/prayer-points'),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.9,
@@ -149,6 +167,7 @@ export async function generateProfessionsSitemap(): Promise<MetadataRoute.Sitema
 
   const prisma = await getPrisma();
   const professions = await prisma.profession.findMany({
+    where: { status: "published" },
     select: {
       slug: true,
       updatedAt: true,
@@ -163,6 +182,52 @@ export async function generateProfessionsSitemap(): Promise<MetadataRoute.Sitema
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     })
+  );
+}
+
+/**
+ * Generate sitemap for places (published only)
+ */
+export async function generatePlacesSitemap(): Promise<MetadataRoute.Sitemap> {
+  if (!process.env.DATABASE_URL) {
+    return [];
+  }
+
+  const prisma = await getPrisma();
+  const places = await prisma.place.findMany({
+    where: { status: "published" },
+    select: {
+      slug: true,
+      updatedAt: true,
+      tourHighlight: true,
+      _count: {
+        select: {
+          verseMentions: true,
+        },
+      },
+    },
+    orderBy: [{ tourPriority: "desc" }, { updatedAt: "desc" }],
+  });
+
+  return places.map(
+    (place: {
+      slug: string;
+      updatedAt: Date | string;
+      tourHighlight: boolean;
+      _count: { verseMentions: number };
+    }) => {
+      // Priority based on tour highlight and verse count
+      let priority = 0.6;
+      if (place.tourHighlight) priority = 0.8;
+      if (place._count.verseMentions > 50) priority = Math.min(priority + 0.1, 0.9);
+
+      return {
+        url: getCanonicalUrl(`/bible-places/${place.slug}`),
+        lastModified: place.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority,
+      };
+    }
   );
 }
 
@@ -208,6 +273,7 @@ export async function generateSitemapIndex(): Promise<string> {
     `${baseUrl}/sitemap-static.xml`,
     `${baseUrl}/sitemap-situations.xml`,
     `${baseUrl}/sitemap-professions.xml`,
+    `${baseUrl}/sitemap-places.xml`,
   ];
 
   // Add name sitemap chunks
@@ -241,6 +307,7 @@ export async function getSitemapStats(): Promise<{
     situations: number;
     names: number;
     professions: number;
+    places: number;
   };
 }> {
   if (!process.env.DATABASE_URL) {
@@ -252,27 +319,30 @@ export async function getSitemapStats(): Promise<{
         situations: 0,
         names: 0,
         professions: 0,
+        places: 0,
       },
     };
   }
 
   const prisma = await getPrisma();
-  const [namesCount, situationsCount, professionsCount] = await Promise.all([
+  const [namesCount, situationsCount, professionsCount, placesCount] = await Promise.all([
     prisma.name.count(),
-    prisma.situation.count(),
-    prisma.profession.count(),
+    prisma.situation.count({ where: { status: "published" } }),
+    prisma.profession.count({ where: { status: "published" } }),
+    prisma.place.count({ where: { status: "published" } }),
   ]);
 
-  const staticPages = 4; // home, situations, names, professions
+  const staticPages = 5; // home, situations, names, professions, bible-places
 
   return {
-    totalUrls: staticPages + namesCount + situationsCount + professionsCount,
-    totalChunks: Math.ceil(namesCount / CHUNK_SIZE) + 3,
+    totalUrls: staticPages + namesCount + situationsCount + professionsCount + placesCount,
+    totalChunks: Math.ceil(namesCount / CHUNK_SIZE) + 4, // +4 for static, situations, professions, places
     breakdown: {
       static: staticPages,
       situations: situationsCount,
       names: namesCount,
       professions: professionsCount,
+      places: placesCount,
     },
   };
 }
