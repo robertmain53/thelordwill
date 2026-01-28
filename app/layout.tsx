@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/header";
+import { DebugPreventDefault } from "@/components/debug-prevent-default";
 import { LinkFallback } from "@/components/link-fallback";
 import "./globals.css";
 
@@ -123,6 +124,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Header />
+        <DebugPreventDefault />
         <LinkFallback />
         {children}
       </body>
