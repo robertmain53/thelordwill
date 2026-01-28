@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import BasePage, { metadata as baseMetadata } from "@/app/about/page";
+import BasePage, { metadata as baseMetadata } from "@/app/editorial-process/page";
 import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  const alternates = buildAlternates("/about", locale);
+  const alternates = buildAlternates("/editorial-process", locale);
   const isTranslated = locale === DEFAULT_LOCALE;
 
   return {
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function LocaleAboutPage({ params }: PageProps) {
+export default async function LocaleEditorialProcessPage({ params }: PageProps) {
   const { locale: localeParam } = await params;
 
   if (!isValidLocale(localeParam)) {
@@ -42,7 +42,10 @@ export default async function LocaleAboutPage({ params }: PageProps) {
   return (
     <>
       {!isTranslated && (
-        <LocaleFallbackBanner locale={locale} currentPath={`/${locale}/about`} />
+        <LocaleFallbackBanner
+          locale={locale}
+          currentPath={`/${locale}/editorial-process`}
+        />
       )}
       <BasePage />
     </>
