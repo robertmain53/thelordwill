@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-## Performance-First Architecture for 50,000+ Pages
+## Performance-First Architecture for  50,000+ Pages
  
 
 This document outlines the architectural decisions made to achieve optimal performance and SEO for a large-scale Bible pSEO engine.
