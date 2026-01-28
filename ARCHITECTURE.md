@@ -260,7 +260,7 @@ DIRECT_URL="postgresql://direct-url"  # For migrations
 NEXT_PUBLIC_SITE_URL="https://thelordwill.com"
 ```
 
-## Scaling Considerations
+## Scaling  Considerations
 
 ### Current Capacity: 50,000 Pages
 
