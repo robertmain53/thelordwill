@@ -36,6 +36,9 @@ export async function generateStaticSitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/prayer-points/today', changeFrequency: 'daily' as const, priority: 0.8 },
     { path: '/about', changeFrequency: 'yearly' as const, priority: 0.4 },
     { path: '/editorial-process', changeFrequency: 'yearly' as const, priority: 0.4 },
+    { path: '/cookie', changeFrequency: 'yearly' as const, priority: 0.3 },
+    { path: '/terms', changeFrequency: 'yearly' as const, priority: 0.3 },
+    { path: '/privacy', changeFrequency: 'yearly' as const, priority: 0.3 },
   ];
 
   const locales = ['en', 'es', 'pt'] as const;

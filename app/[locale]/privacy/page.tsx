@@ -1,0 +1,50 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import BasePage, { metadata as baseMetadata } from "@/app/privacy/page";
+import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
+import { buildAlternates } from "@/lib/i18n/links";
+import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+
+  if (!isValidLocale(locale)) {
+    return {};
+  }
+
+  const alternates = buildAlternates("/privacy", locale);
+  const isTranslated = locale === DEFAULT_LOCALE;
+
+  return {
+    ...baseMetadata,
+    alternates,
+    robots: getFallbackRobotsMeta(locale, isTranslated),
+  };
+}
+
+export default async function LocalePrivacyPage({ params }: PageProps) {
+  const { locale: localeParam } = await params;
+
+  if (!isValidLocale(localeParam)) {
+    notFound();
+  }
+
+  const locale = localeParam as Locale;
+  const isTranslated = locale === DEFAULT_LOCALE;
+
+  return (
+    <>
+      {!isTranslated && (
+        <LocaleFallbackBanner locale={locale} currentPath={`/${locale}/privacy`} />
+      )}
+      <BasePage />
+    </>
+  );
+}
