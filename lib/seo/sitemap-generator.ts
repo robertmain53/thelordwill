@@ -25,50 +25,42 @@ export interface SitemapEntry {
  * Generate sitemap for static pages
  */
 export async function generateStaticSitemap(): Promise<MetadataRoute.Sitemap> {
-  return [
-    {
-      url: getCanonicalUrl('/'),
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1.0,
-    },
-    {
-      url: getCanonicalUrl('/bible-places'),
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: getCanonicalUrl('/situations'),
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: getCanonicalUrl('/names'),
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: getCanonicalUrl('/professions'),
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: getCanonicalUrl('/bible-travel'),
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: getCanonicalUrl('/prayer-points'),
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
+  const staticPaths = [
+    { path: '/', changeFrequency: 'daily' as const, priority: 1.0 },
+    { path: '/bible-places', changeFrequency: 'weekly' as const, priority: 0.9 },
+    { path: '/situations', changeFrequency: 'weekly' as const, priority: 0.9 },
+    { path: '/names', changeFrequency: 'weekly' as const, priority: 0.9 },
+    { path: '/professions', changeFrequency: 'weekly' as const, priority: 0.9 },
+    { path: '/bible-travel', changeFrequency: 'weekly' as const, priority: 0.9 },
+    { path: '/prayer-points', changeFrequency: 'weekly' as const, priority: 0.9 },
+    { path: '/prayer-points/today', changeFrequency: 'daily' as const, priority: 0.8 },
+    { path: '/about', changeFrequency: 'yearly' as const, priority: 0.4 },
+    { path: '/editorial-process', changeFrequency: 'yearly' as const, priority: 0.4 },
   ];
+
+  const locales = ['en', 'es', 'pt'] as const;
+  const now = new Date();
+  const entries: MetadataRoute.Sitemap = [];
+
+  for (const item of staticPaths) {
+    entries.push({
+      url: getCanonicalUrl(item.path),
+      lastModified: now,
+      changeFrequency: item.changeFrequency,
+      priority: item.priority,
+    });
+
+    for (const locale of locales) {
+      entries.push({
+        url: getCanonicalUrl(`/${locale}${item.path === '/' ? '' : item.path}`),
+        lastModified: now,
+        changeFrequency: item.changeFrequency,
+        priority: item.priority,
+      });
+    }
+  }
+
+  return entries;
 }
 
 /**
