@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -13,6 +14,7 @@ function normalizeStatus(v: string): "draft" | "published" {
 }
 
 export async function createPlace(formData: FormData) {
+  await requireAdmin();
   const slug = toStr(formData.get("slug"));
   const name = toStr(formData.get("name"));
   const description = toStr(formData.get("description"));

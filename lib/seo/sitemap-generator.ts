@@ -81,6 +81,7 @@ export async function generateSituationsSitemap(): Promise<MetadataRoute.Sitemap
 
   const prisma = await getPrisma();
   const situations = await prisma.situation.findMany({
+    where: { status: "published" },
     select: {
       slug: true,
       updatedAt: true,

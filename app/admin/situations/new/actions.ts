@@ -1,6 +1,7 @@
 // app/admin/situations/new/actions.ts
 "use server";
 
+import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -32,6 +33,7 @@ async function ensureUniqueSlug(baseSlug: string): Promise<string> {
 }
 
 export async function createSituation(formData: FormData) {
+  await requireAdmin();
   const title = toStr(formData.get("title"), 200);
   const metaDescription = toStr(formData.get("metaDescription"), 500);
   const category = toStr(formData.get("category"), 120);

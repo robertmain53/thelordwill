@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -10,6 +11,7 @@ function toStr(v: FormDataEntryValue | null): string {
 }
 
 export async function updateProfession(id: string, formData: FormData) {
+  await requireAdmin();
   const title = toStr(formData.get("title"));
   const slug = toStr(formData.get("slug"));
   const description = toStr(formData.get("description"));
@@ -40,6 +42,7 @@ export async function updateProfession(id: string, formData: FormData) {
   }
 
 export async function publishProfession(id: string) {
+  await requireAdmin();
   // Fetch the record for quality check
   const record = await prisma.profession.findUnique({
     where: { id },
@@ -86,6 +89,7 @@ export async function publishProfession(id: string) {
   }
 
 export async function unpublishProfession(id: string) {
+  await requireAdmin();
   const profession = await prisma.profession.update({
     where: { id },
     data: {
@@ -102,6 +106,7 @@ export async function unpublishProfession(id: string) {
   }
 
 export async function deleteProfession(id: string) {
+  await requireAdmin();
   const existing = await prisma.profession.findUnique({ where: { id }, select: { slug: true } });
   await prisma.profession.delete({ where: { id } });
 

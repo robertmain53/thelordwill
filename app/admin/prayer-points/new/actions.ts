@@ -1,6 +1,7 @@
 // app/admin/prayer-points/new/actions.ts
 "use server";
 
+import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/db/prisma";
 import { redirect } from "next/navigation";
 
@@ -37,6 +38,7 @@ async function ensureUniqueSlug(baseSlug: string) {
 }
 
 export async function createPrayerPoint(formData: FormData) {
+  await requireAdmin();
   const title = toStr(formData.get("title"), 200);
   const description = toStr(formData.get("description"), 5000);
 

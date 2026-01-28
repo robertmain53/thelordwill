@@ -1,6 +1,7 @@
 // app/admin/professions/new/actions.ts
 "use server";
 
+import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -32,6 +33,7 @@ async function ensureUniqueSlug(baseSlug: string): Promise<string> {
 }
 
 export async function createProfession(formData: FormData) {
+  await requireAdmin();
   const title = toStr(formData.get("title"), 200);
   const description = toStr(formData.get("description"), 5000);
   const metaTitle = toStr(formData.get("metaTitle"), 200);

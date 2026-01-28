@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getHubLinks } from "@/lib/internal-linking";
+import { getHubLinks, getPopularPrayerPoints, getFeaturedPlaces, getPopularSituations } from "@/lib/internal-linking";
 
 export const metadata: Metadata = {
   title: "The Lord Will - Biblical Wisdom & Holy Land Tours",
@@ -18,9 +18,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
   // Get hub links deterministically - ensures Home → Hub depth of 1
   const hubLinks = getHubLinks();
+
+  // Fetch popular content for direct deep linking (reduces click depth)
+  const [popularPrayerPoints, featuredPlaces, popularSituations] = await Promise.all([
+    getPopularPrayerPoints(6),
+    getFeaturedPlaces(4),
+    getPopularSituations(4),
+  ]);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
@@ -50,18 +59,74 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Quick Links Section - Popular deep pages for direct access */}
-        <div className="mt-16 pt-8 border-t">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">
-            Popular Pages
+        {/* Popular Prayer Points - Direct links for reduced click depth */}
+        {popularPrayerPoints.length > 0 && (
+          <div className="mt-16 pt-8 border-t">
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              Popular Prayer Topics
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {popularPrayerPoints.map((pp) => (
+                <Link
+                  key={pp.href}
+                  href={pp.href}
+                  className="p-3 border rounded-lg hover:border-blue-500 hover:shadow-sm transition-all group"
+                >
+                  <span className="font-medium group-hover:text-blue-600 transition-colors">
+                    {pp.title}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Featured Places - Direct links */}
+        {featuredPlaces.length > 0 && (
+          <div className="mt-10">
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              Featured Biblical Places
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {featuredPlaces.map((place) => (
+                <Link
+                  key={place.href}
+                  href={place.href}
+                  className="px-4 py-2 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors text-sm font-medium"
+                >
+                  {place.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Popular Situations - Direct links */}
+        {popularSituations.length > 0 && (
+          <div className="mt-10">
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              Bible Verses for Life&apos;s Moments
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {popularSituations.map((sit) => (
+                <Link
+                  key={sit.href}
+                  href={sit.href}
+                  className="px-4 py-2 bg-green-50 text-green-700 rounded-full hover:bg-green-100 transition-colors text-sm font-medium"
+                >
+                  {sit.title.replace("Verses for ", "")}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Links Section - Static pages */}
+        <div className="mt-10 pt-6 border-t">
+          <h3 className="text-sm font-semibold mb-3 text-muted-foreground">
+            Quick Links
           </h3>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              href="/bible-places/jerusalem"
-              className="px-4 py-2 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors text-sm font-medium"
-            >
-              Jerusalem
-            </Link>
             <Link
               href="/prayer-points/today"
               className="px-4 py-2 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors text-sm font-medium"
@@ -69,10 +134,10 @@ export default function Home() {
               Today&apos;s Prayer
             </Link>
             <Link
-              href="/bible-travel"
-              className="px-4 py-2 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors text-sm font-medium"
+              href="/search"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors text-sm font-medium"
             >
-              Travel Itineraries
+              Search
             </Link>
             <Link
               href="/about"

@@ -28,7 +28,10 @@
     "qa:manifest": "node scripts/build-url-manifest.mjs",
     "qa:quality": "node scripts/qa-quality.mjs",
     "qa:graph": "node scripts/qa-graph-depth.mjs",
-    "qa:all": "npm run qa:manifest && npm run qa:quality && npm run qa:graph",
+    "qa:sitemaps": "node scripts/qa-sitemaps.mjs",
+    "qa:indexing": "node scripts/qa-indexing.mjs",
+    "qa:click-depth": "node scripts/qa-click-depth.mjs",
+    "qa:all": "npm run qa:manifest && npm run qa:quality && npm run qa:graph && npm run qa:indexing",
     "test:all": "npm run lint && npm run qa:all && npm run build"
   },
   "dependencies": {

@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -15,6 +16,7 @@ function toInt(v: string, fallback: number): number {
 }
 
 export async function updateItinerary(id: string, formData: FormData) {
+  await requireAdmin();
   const title = toStr(formData.get("title"));
   const slug = toStr(formData.get("slug"));
   const days = toInt(toStr(formData.get("days")), 1);
@@ -56,6 +58,7 @@ export async function updateItinerary(id: string, formData: FormData) {
   }
 
 export async function publishItinerary(id: string) {
+  await requireAdmin();
   // Fetch the record for quality check
   const record = await prisma.travelItinerary.findUnique({
     where: { id },
@@ -101,6 +104,7 @@ export async function publishItinerary(id: string) {
   }
 
 export async function unpublishItinerary(id: string) {
+  await requireAdmin();
   const itinerary = await prisma.travelItinerary.update({
     where: { id },
     data: {
@@ -116,6 +120,7 @@ export async function unpublishItinerary(id: string) {
   }
 
 export async function deleteItinerary(id: string) {
+  await requireAdmin();
   const existing = await prisma.travelItinerary.findUnique({ where: { id }, select: { slug: true } });
   await prisma.travelItinerary.delete({ where: { id } });
 

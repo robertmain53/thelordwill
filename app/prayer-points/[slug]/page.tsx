@@ -293,12 +293,13 @@ export default async function PrayerPointPage({ params }: PageProps) {
 
   const hasVerses = prayerPoint.verseMappings.length > 0;
 
-  // Related list is "same category" (since PrayerPoint currently has no publish state).
+  // Related list is "same category", filtered to published only
   const relatedPoints = prayerPoint.category
     ? await prisma.prayerPoint.findMany({
         where: {
           category: prayerPoint.category,
           slug: { not: prayerPoint.slug },
+          status: "published",
           OR: [{ content: { not: null } }, { description: { not: "" } }],
         },
         select: { slug: true, title: true, description: true },

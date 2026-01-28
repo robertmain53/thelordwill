@@ -2,6 +2,7 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import { formatCategoryForAdmin } from "@/lib/content/category-labels";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -133,7 +134,21 @@ export default async function AdminPrayerPointsList({
                 </Link>
               </div>
               <div className="col-span-3 text-muted-foreground">{p.slug}</div>
-              <div className="col-span-2 text-muted-foreground">{p.category || "-"}</div>
+              <div className="col-span-2">
+                {(() => {
+                  const cat = formatCategoryForAdmin(p.category);
+                  return cat.slug === "other" && !p.category ? (
+                    <span className="text-muted-foreground">-</span>
+                  ) : (
+                    <span title={cat.slug}>
+                      {cat.label}
+                      {cat.slug !== cat.label.toLowerCase().replace(/\s+/g, "-") && (
+                        <span className="ml-1 text-xs text-muted-foreground">({cat.slug})</span>
+                      )}
+                    </span>
+                  );
+                })()}
+              </div>
               <div className="col-span-1 text-right">{p.priority}</div>
               <div className="col-span-1 text-center">{p.dailyRotation ? "✓" : ""}</div>
               <div className="col-span-1 text-center">

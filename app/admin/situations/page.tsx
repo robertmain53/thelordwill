@@ -2,6 +2,7 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import { formatCategoryForAdmin } from "@/lib/content/category-labels";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -133,7 +134,21 @@ export default async function AdminSituationsPage({
                 </Link>
               </div>
               <div className="col-span-3 text-muted-foreground">{s.slug}</div>
-              <div className="col-span-2 text-muted-foreground">{s.category || "-"}</div>
+              <div className="col-span-2">
+                {(() => {
+                  const cat = formatCategoryForAdmin(s.category);
+                  return cat.slug === "other" && !s.category ? (
+                    <span className="text-muted-foreground">-</span>
+                  ) : (
+                    <span title={cat.slug}>
+                      {cat.label}
+                      {cat.slug !== cat.label.toLowerCase().replace(/\s+/g, "-") && (
+                        <span className="ml-1 text-xs text-muted-foreground">({cat.slug})</span>
+                      )}
+                    </span>
+                  );
+                })()}
+              </div>
               <div className="col-span-2 text-muted-foreground">
                 {s.updatedAt.toISOString().slice(0, 10)}
               </div>

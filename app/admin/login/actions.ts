@@ -1,8 +1,13 @@
 // app/admin/login/actions.ts
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import {
+  verifyAdminPassword,
+  setAdminSessionCookie,
+  clearAdminSessionCookie,
+  getAdminPassword,
+} from "@/lib/admin/auth";
 
 function safeNextPath(nextPath?: string | null) {
   if (!nextPath) return "/admin";
@@ -11,33 +16,30 @@ function safeNextPath(nextPath?: string | null) {
 }
 
 export async function adminLogin(formData: FormData) {
-  const token = process.env.ADMIN_TOKEN;
-  const provided = String(formData.get("token") || "").trim();
+  const provided = String(formData.get("password") || formData.get("token") || "").trim();
   const nextPath = safeNextPath(String(formData.get("next") || ""));
 
-  if (!token) {
-    // Local dev / not configured: allow
+  // Check if password is configured
+  const hasPassword = !!getAdminPassword();
+  const hasSessionSecret = !!process.env.ADMIN_SESSION_SECRET;
+
+  // In dev without config, allow login
+  if (!hasPassword && !hasSessionSecret && process.env.NODE_ENV !== "production") {
     redirect(nextPath);
   }
 
-  if (provided !== token) {
+  // Verify password
+  if (!verifyAdminPassword(provided)) {
     redirect(`/admin/login?error=1&next=${encodeURIComponent(nextPath)}`);
   }
 
-  const cookieStore = await cookies();
-  cookieStore.set("tlw_admin", "1", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/admin",          // scope cookie to admin only
-    maxAge: 60 * 60 * 24 * 7 // 7 days
-  });
+  // Set session cookie
+  await setAdminSessionCookie();
 
   redirect(nextPath);
 }
 
 export async function adminLogout() {
-  const cookieStore = await cookies();
-  cookieStore.delete("tlw_admin");
+  await clearAdminSessionCookie();
   redirect("/admin/login");
 }

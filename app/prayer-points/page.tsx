@@ -3,6 +3,10 @@ import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { getHubLinks } from "@/lib/internal-linking";
 import { ExploreMore } from "@/components/related-section";
+import {
+  groupByCategorySlugWithDbLabels,
+  normalizeCategorySlug,
+} from "@/lib/content/category-labels";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -15,11 +19,6 @@ type PrayerPointListItem = {
   priority: number;
   _count: { verseMappings: number };
 };
-
-function normalizeKey(v: string | null | undefined): string {
-  const s = (v || "").trim();
-  return s || "other";
-}
 
 export default async function PrayerPointsPage() {
   const prayerPoints: PrayerPointListItem[] = await prisma.prayerPoint.findMany({
@@ -36,50 +35,27 @@ export default async function PrayerPointsPage() {
     take: 200,
   });
 
-  // Collect distinct category keys from content
-  const keys = Array.from(
-    new Set(prayerPoints.map((p) => normalizeKey(p.category))),
+  // Collect distinct category slugs from content
+  const slugs = Array.from(
+    new Set(prayerPoints.map((p) => normalizeCategorySlug(p.category))),
   );
 
-  // Resolve labels from DB (fully decoupled)
-  const labels = await prisma.taxonomyLabel.findMany({
+  // Resolve labels from DB (overrides static fallbacks)
+  const dbLabels = await prisma.taxonomyLabel.findMany({
     where: {
       scope: "prayerPointCategory",
-      key: { in: keys },
+      key: { in: slugs },
       isActive: true,
     },
     select: { key: true, label: true, sortOrder: true },
-    orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
   });
 
-  const labelMap = new Map<string, { label: string; sortOrder: number }>();
-  for (const l of labels) labelMap.set(l.key, { label: l.label, sortOrder: l.sortOrder });
-
-  // Group by key; show label from DB; fallback if missing label record
-  const groups = new Map<
-    string,
-    { key: string; label: string; sortOrder: number; items: PrayerPointListItem[] }
-  >();
-
-  for (const p of prayerPoints) {
-    const key = normalizeKey(p.category);
-    const meta = labelMap.get(key);
-
-    const label = meta?.label || "Other";
-    const sortOrder = meta?.sortOrder ?? 999;
-
-    const existing = groups.get(key);
-    if (!existing) {
-      groups.set(key, { key, label, sortOrder, items: [p] });
-    } else {
-      existing.items.push(p);
-    }
-  }
-
-  const categories = Array.from(groups.values()).sort((a, b) => {
-    if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
-    return a.label.localeCompare(b.label, "en");
-  });
+  // Group by slug using centralized helper (merges DB + static fallbacks)
+  const categories = groupByCategorySlugWithDbLabels(
+    prayerPoints,
+    (p) => p.category,
+    dbLabels,
+  );
 
   return (
     <main className="min-h-screen py-12 px-4">
@@ -92,8 +68,7 @@ export default async function PrayerPointsPage() {
         </header>
 
         {categories.map((c) => (
-          <section key={c.key} className="space-y-4">
-            {/* DB label (decoupled) */}
+          <section key={c.slug} className="space-y-4">
             <h2 className="text-2xl font-bold">{c.label}</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

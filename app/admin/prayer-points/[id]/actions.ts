@@ -1,6 +1,7 @@
 // app/admin/prayer-points/[id]/actions.ts
 "use server";
 
+import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/db/prisma";
 import { redirect } from "next/navigation";
 import { runQualityChecks } from "@/lib/quality/checks";
@@ -17,6 +18,7 @@ function toInt(v: FormDataEntryValue | null, fallback: number) {
 }
 
 export async function updatePrayerPointById(id: string, formData: FormData) {
+  await requireAdmin();
   const title = toStr(formData.get("title"), 200);
   const slug = toStr(formData.get("slug"), 200);
   const description = toStr(formData.get("description"), 5000);
@@ -50,6 +52,7 @@ export async function updatePrayerPointById(id: string, formData: FormData) {
 }
 
 export async function publishPrayerPointById(id: string) {
+  await requireAdmin();
   // Fetch the record for quality check
   const record = await prisma.prayerPoint.findUnique({
     where: { id },
@@ -91,6 +94,7 @@ export async function publishPrayerPointById(id: string) {
 }
 
 export async function unpublishPrayerPointById(id: string) {
+  await requireAdmin();
   await prisma.prayerPoint.update({
     where: { id },
     data: {
@@ -103,6 +107,7 @@ export async function unpublishPrayerPointById(id: string) {
 }
 
 export async function deletePrayerPointById(id: string) {
+  await requireAdmin();
   await prisma.prayerPoint.delete({ where: { id } });
   redirect(`/admin/prayer-points?deleted=1`);
 }

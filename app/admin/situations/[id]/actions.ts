@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -10,6 +11,7 @@ function toStr(v: FormDataEntryValue | null): string {
 }
 
 export async function updateSituation(id: string, formData: FormData) {
+  await requireAdmin();
   const title = toStr(formData.get("title"));
   const slug = toStr(formData.get("slug"));
   const metaDescription = toStr(formData.get("metaDescription"));
@@ -37,6 +39,7 @@ export async function updateSituation(id: string, formData: FormData) {
 }
 
 export async function publishSituation(id: string) {
+  await requireAdmin();
   // Fetch the record for quality check
   const record = await prisma.situation.findUnique({
     where: { id },
@@ -82,6 +85,7 @@ export async function publishSituation(id: string) {
 }
 
 export async function unpublishSituation(id: string) {
+  await requireAdmin();
   const situation = await prisma.situation.update({
     where: { id },
     data: {
@@ -97,6 +101,7 @@ export async function unpublishSituation(id: string) {
 }
 
 export async function deleteSituation(id: string) {
+  await requireAdmin();
   const existing = await prisma.situation.findUnique({ where: { id }, select: { slug: true } });
   await prisma.situation.delete({ where: { id } });
 
