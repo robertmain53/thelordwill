@@ -4,6 +4,9 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import "./globals.css";
 
+// Cache all non-admin pages by default (admin routes override to force-dynamic).
+export const revalidate = 3600;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

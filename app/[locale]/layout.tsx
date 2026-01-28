@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { LOCALES, isValidLocale, type Locale, LOCALE_NAMES } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 
+// Cache locale-prefixed routes by default (admin routes are outside this segment).
+export const revalidate = 3600;
+
 // Generate static params for all locales
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
