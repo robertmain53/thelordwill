@@ -49,6 +49,7 @@ model Verse {
   situationMappings   SituationVerseMapping[]
   book                Book                      @relation(fields: [bookId], references: [id], onDelete: Cascade)
   strongsNumbers      VerseStrong[]
+  embedding           VerseEmbedding?
 
   @@unique([bookId, chapter, verseNumber])
   @@index([bookId, chapter])
@@ -521,4 +522,21 @@ model TaxonomyLabel {
   @@unique([scope, key])
   @@index([scope])
   @@index([isActive])
+}
+
+model VerseEmbedding {
+  id          String   @id @default(cuid())
+  verseId     Int      @unique
+  model       String
+  dims        Int
+  vector      Json     // stores float[] deterministically as JSON array
+  contentHash String   // sha256 of normalized verse text + model name
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  verse Verse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  @@index([verseId])
+  @@index([model])
+  @@index([contentHash])
 }

@@ -31,8 +31,11 @@
     "qa:sitemaps": "node scripts/qa-sitemaps.mjs",
     "qa:indexing": "node scripts/qa-indexing.mjs",
     "qa:click-depth": "node scripts/qa-click-depth.mjs",
+    "qa:embeddings": "node scripts/qa/qa-embeddings.mjs",
+    "qa:semantic-search": "node scripts/qa/qa-semantic-search-contract.mjs",
     "qa:all": "npm run qa:manifest && npm run qa:quality && npm run qa:graph && npm run qa:indexing",
-    "test:all": "npm run lint && npm run qa:all && npm run build"
+    "test:all": "npm run lint && npm run qa:all && npm run build",
+    "embeddings:verses": "tsx scripts/embeddings/generate-verse-embeddings.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",

@@ -140,6 +140,12 @@ export default async function Home() {
               Search
             </Link>
             <Link
+              href="/semantic-search"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors text-sm font-medium"
+            >
+              Semantic Search
+            </Link>
+            <Link
               href="/about"
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors text-sm font-medium"
             >
