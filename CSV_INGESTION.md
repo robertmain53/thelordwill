@@ -2,7 +2,7 @@
 
 Fast, reliable Bible data ingestion using public domain CSV files from ScrollMapper.
 
-## Why CSV Instead of API?
+## Why  CSV Instead of API?
 
 | Feature | CSV Import | API (bible-api.com) |
 |---------|-----------|---------------------|
