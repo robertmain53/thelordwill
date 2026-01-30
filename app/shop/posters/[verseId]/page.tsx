@@ -4,14 +4,19 @@ import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { getCanonicalUrl } from "@/lib/utils";
 
-export async function generateMetadata({ params }: { params: { verseId: string } }): Promise<Metadata> {
-  const verseId = parseInt(params.verseId, 10);
-  if (Number.isNaN(verseId)) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ verseId: string }>;
+}): Promise<Metadata> {
+  const { verseId } = await params;
+  const parsedVerseId = parseInt(verseId, 10);
+  if (Number.isNaN(parsedVerseId)) {
     return { title: "Verse Poster" };
   }
 
   const verse = await prisma.verse.findUnique({
-    where: { id: verseId },
+    where: { id: parsedVerseId },
     select: {
       chapter: true,
       verseNumber: true,
@@ -28,20 +33,25 @@ export async function generateMetadata({ params }: { params: { verseId: string }
     title: `Verse poster coming soon — ${reference}`,
     description: `Get notified when the ${reference} poster design is ready for order.`,
     alternates: {
-      canonical: getCanonicalUrl(`/shop/posters/${verseId}`),
+      canonical: getCanonicalUrl(`/shop/posters/${parsedVerseId}`),
     },
   };
 }
 
-export default async function PosterShopPage({ params }: { params: { verseId: string } }) {
-  const verseId = parseInt(params.verseId, 10);
+export default async function PosterShopPage({
+  params,
+}: {
+  params: Promise<{ verseId: string }>;
+}) {
+  const { verseId } = await params;
+  const parsedVerseId = parseInt(verseId, 10);
 
-  if (Number.isNaN(verseId)) {
+  if (Number.isNaN(parsedVerseId)) {
     notFound();
   }
 
   const verse = await prisma.verse.findUnique({
-    where: { id: verseId },
+    where: { id: parsedVerseId },
     include: {
       book: { select: { name: true } },
     },

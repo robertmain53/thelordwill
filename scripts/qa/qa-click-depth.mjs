@@ -163,7 +163,7 @@ async function main() {
   const prisma = new PrismaClient();
   const result = {
     passed: true,
-    failures: [] as string[],
+    failures: [],
   };
 
   try {

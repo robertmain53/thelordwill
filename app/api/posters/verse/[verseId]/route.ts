@@ -1,19 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { createPosterProvider } from "@/lib/posters/poster-provider";
 
 export async function GET(
-  request: Request,
-  context: { params: { verseId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ verseId: string }> }
 ): Promise<NextResponse> {
-  const verseId = parseInt(context.params.verseId, 10);
+  const { verseId } = await params;
+  const parsedVerseId = parseInt(verseId, 10);
 
-  if (Number.isNaN(verseId)) {
+  if (Number.isNaN(parsedVerseId)) {
     return NextResponse.json({ error: "invalid_verse_id" }, { status: 400 });
   }
 
   const verse = await prisma.verse.findUnique({
-    where: { id: verseId },
+    where: { id: parsedVerseId },
     select: {
       bookId: true,
       chapter: true,
@@ -34,10 +35,10 @@ export async function GET(
 
   const reference = `${verse.book?.name ?? "Book"} ${verse.chapter}:${verse.verseNumber}`;
   const provider = createPosterProvider();
-  const descriptor = await provider.describeVersePoster(verseId);
+  const descriptor = await provider.describeVersePoster(parsedVerseId);
 
   return NextResponse.json({
-    verseId,
+    verseId: parsedVerseId,
     reference,
     textPreview: (verse.textKjv || verse.textWeb || "").slice(0, 180),
     tagline: descriptor.tagline,
