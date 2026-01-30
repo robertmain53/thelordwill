@@ -376,6 +376,7 @@ export default async function SituationVersesPage({ params }: PageProps) {
       category: situationData.category,
     },
     verseRows,
+    precomputedEntityLinks: crossEntityLinks,
   });
 
   const whoText = buildWhoThisIsFor(situationData.title);

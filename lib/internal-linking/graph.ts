@@ -75,13 +75,19 @@ export async function getGraphLinkSet(options: {
   verseRows: VerseGraphRow[];
   verseLimit?: number;
   entityLimit?: number;
+  precomputedEntityLinks?: RelatedLink[];
 }): Promise<GraphLinkSet> {
   const verseLinks = buildVerseGraphLinks(options.verseRows, options.verseLimit ?? MAX_VERSE_LINKS);
-  const entityLinks = await getEntityGraphLinks(
-    options.entityType,
-    options.record,
-    options.entityLimit ?? MAX_ENTITY_LINKS,
-  );
+  const entityLinks = options.precomputedEntityLinks
+    ? [...options.precomputedEntityLinks]
+        .filter(Boolean)
+        .sort((a, b) => a.title.localeCompare(b.title))
+        .slice(0, options.entityLimit ?? MAX_ENTITY_LINKS)
+    : await getEntityGraphLinks(
+        options.entityType,
+        options.record,
+        options.entityLimit ?? MAX_ENTITY_LINKS,
+      );
 
   return {
     verseLinks,

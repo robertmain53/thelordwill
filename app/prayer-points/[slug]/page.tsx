@@ -343,6 +343,7 @@ export default async function PrayerPointPage({ params }: PageProps) {
       category: prayerPoint.category,
     },
     verseRows,
+    precomputedEntityLinks: crossEntityLinks,
   });
 
   const faqs = (prayerPoint as { faqs?: FAQItem[] | null }).faqs ?? undefined;

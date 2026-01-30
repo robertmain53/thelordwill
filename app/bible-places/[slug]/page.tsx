@@ -132,6 +132,7 @@ export default async function PlacePage({ params }: PageProps) {
       country: place.country,
     },
     verseRows,
+    precomputedEntityLinks: relatedLinks,
   });
 
   const breadcrumbs = [
