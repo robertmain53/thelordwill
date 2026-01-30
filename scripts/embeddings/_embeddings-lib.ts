@@ -300,16 +300,26 @@ export interface IEmbeddingClient {
  * Otherwise, requires OPENAI_API_KEY and returns a real EmbeddingClient.
  */
 export function createEmbeddingClient(model: string): IEmbeddingClient {
-  const provider = process.env.EMBEDDINGS_PROVIDER;
+  const provider = (process.env.EMBEDDINGS_PROVIDER ?? "mock").toLowerCase();
 
   if (provider === "mock") {
+    return new MockEmbeddingClient(model);
+  }
+
+  if (provider !== "openai") {
+    console.warn(
+      `Unknown embeddings provider "${provider}" (falling back to mock for deterministic responses).`
+    );
     return new MockEmbeddingClient(model);
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    throw new Error("OPENAI_API_KEY environment variable is required");
+    console.warn(
+      "OPENAI_API_KEY is not set — falling back to mock embeddings to avoid runtime failures."
+    );
+    return new MockEmbeddingClient(model);
   }
 
   return new EmbeddingClient({

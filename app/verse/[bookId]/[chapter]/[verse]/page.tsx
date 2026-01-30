@@ -18,6 +18,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 interface PageParams {
+  locale?: string;
   bookId: string;
   chapter: string;
   verse: string;
