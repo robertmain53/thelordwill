@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { getCanonicalUrl, titleCase } from "@/lib/utils";
 import { getBiblicalName } from "@/lib/db/queries";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { RelatedSection } from "@/components/related-section";
-import { getRelatedLinks } from "@/lib/internal-linking";
+import { getGraphLinkSet } from "@/lib/internal-linking/graph";
+import { RelatedResourcesSection } from "@/components/related-resources-section";
+import { formatPlaceVerseReference } from "@/lib/db/place-queries";
 
 // Force SSR - disable static generation
 export const dynamic = 'force-dynamic';
@@ -116,11 +117,27 @@ export default async function NameMeaningPage({ params }: PageProps) {
     { label: data.name, href: `/meaning-of/${name}/in-the-bible`, position: 3 },
   ];
 
-  // Get cross-entity related links
-  const relatedLinks = await getRelatedLinks("name", {
-    id: data.id,
-    slug: data.slug,
-    name: data.name,
+  const verseRows = data.mentions.map((mention) => ({
+    reference: formatPlaceVerseReference(
+      mention.verse.bookId,
+      mention.verse.chapter,
+      mention.verse.verseNumber,
+    ),
+    bookId: mention.verse.bookId,
+    chapter: mention.verse.chapter,
+    verseNumber: mention.verse.verseNumber,
+    relevanceScore: 50,
+    snippet: mention.verse.textKjv || mention.verse.textWeb || undefined,
+  }));
+
+  const graphLinks = await getGraphLinkSet({
+    entityType: "name",
+    record: {
+      id: data.id,
+      slug: data.slug,
+      name: data.name,
+    },
+    verseRows,
   });
 
   // JSON-LD Schema for the specific name page
@@ -228,12 +245,10 @@ export default async function NameMeaningPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Cross-Entity Related Content */}
-            {relatedLinks.length > 0 && (
-              <div className="mt-8">
-                <RelatedSection title="Related Content" links={relatedLinks} />
-              </div>
-            )}
+            <RelatedResourcesSection
+              verseLinks={graphLinks.verseLinks}
+              entityLinks={graphLinks.entityLinks}
+            />
           </section>
         </article>
       </main>

@@ -10,6 +10,10 @@ import { FAQSection, type FAQItem } from "@/components/faq-section";
 import { buildBreadcrumbList, buildPrayerPointEntitySchema } from "@/lib/seo/jsonld";
 import { RelatedSection } from "@/components/related-section";
 import { getRelatedLinks } from "@/lib/internal-linking";
+import { getGraphLinkSet } from "@/lib/internal-linking/graph";
+import { formatVerseReference } from "@/lib/db/situation-queries";
+import { RelatedResourcesSection } from "@/components/related-resources-section";
+import { VerseIntelligenceBlock } from "@/components/verse-intelligence-block";
 
 export const dynamic = "force-dynamic";
 
@@ -292,6 +296,11 @@ export default async function PrayerPointPage({ params }: PageProps) {
   ];
 
   const hasVerses = prayerPoint.verseMappings.length > 0;
+  const primaryMapping = hasVerses ? prayerPoint.verseMappings[0] : null;
+  const primaryVerse = primaryMapping?.verse;
+  const primaryCanonicalUrl = primaryVerse
+    ? getCanonicalUrl(`/verse/${primaryVerse.bookId}/${primaryVerse.chapter}/${primaryVerse.verseNumber}`)
+    : null;
 
   // Related list is "same category", filtered to published only
   const relatedPoints = prayerPoint.category
@@ -314,6 +323,26 @@ export default async function PrayerPointPage({ params }: PageProps) {
     slug: prayerPoint.slug,
     title: prayerPoint.title,
     category: prayerPoint.category,
+  });
+
+  const verseRows = prayerPoint.verseMappings.map((mapping) => ({
+    reference: formatVerseReference(mapping.verse),
+    bookId: mapping.verse.bookId,
+    chapter: mapping.verse.chapter,
+    verseNumber: mapping.verse.verseNumber,
+    relevanceScore: mapping.relevanceScore,
+    snippet: mapping.verse.textKjv || mapping.verse.textWeb || undefined,
+  }));
+
+  const graphLinks = await getGraphLinkSet({
+    entityType: "prayer-point",
+    record: {
+      id: prayerPoint.id,
+      slug: prayerPoint.slug,
+      title: prayerPoint.title,
+      category: prayerPoint.category,
+    },
+    verseRows,
   });
 
   const faqs = (prayerPoint as { faqs?: FAQItem[] | null }).faqs ?? undefined;
@@ -501,6 +530,18 @@ export default async function PrayerPointPage({ params }: PageProps) {
           </section>
         )}
 
+        {primaryVerse && primaryCanonicalUrl && (
+          <section className="mb-12">
+            <VerseIntelligenceBlock
+              verseId={primaryVerse.id}
+              bookId={primaryVerse.bookId}
+              chapter={primaryVerse.chapter}
+              verseNumber={primaryVerse.verseNumber}
+              canonicalUrl={primaryCanonicalUrl}
+            />
+          </section>
+        )}
+
         {/* Synthesis + Framework (Information Gain) */}
         {hasVerses && (
           <section className="mb-12 bg-card border rounded-lg p-8">
@@ -602,6 +643,11 @@ export default async function PrayerPointPage({ params }: PageProps) {
         {crossEntityLinks.length > 0 && (
           <RelatedSection title="Related Content" links={crossEntityLinks} />
         )}
+
+        <RelatedResourcesSection
+          verseLinks={graphLinks.verseLinks}
+          entityLinks={graphLinks.entityLinks}
+        />
 
         {/* CTA Section */}
         <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary/20 rounded-xl p-8">

@@ -30,7 +30,14 @@ export interface RelatedLink {
   href: string;
   title: string;
   description?: string;
-  type: "place" | "situation" | "profession" | "prayer-point" | "name" | "itinerary";
+  type:
+    | "place"
+    | "situation"
+    | "profession"
+    | "prayer-point"
+    | "name"
+    | "itinerary"
+    | "verse";
 }
 
 export interface BreadcrumbItem {
@@ -185,7 +192,7 @@ export function normalizeCategoryLabel(slug: string | null | undefined): string 
 // Related Links - Deterministic linking based on DB relations
 // ============================================================================
 
-interface PlaceRecord {
+export interface PlaceRecord {
   id: string;
   slug: string;
   name: string;
@@ -193,40 +200,40 @@ interface PlaceRecord {
   country?: string | null;
 }
 
-interface SituationRecord {
+export interface SituationRecord {
   id: string;
   slug: string;
   title: string;
   category?: string | null;
 }
 
-interface ProfessionRecord {
+export interface ProfessionRecord {
   id: string;
   slug: string;
   title: string;
 }
 
-interface PrayerPointRecord {
+export interface PrayerPointRecord {
   id: string;
   slug: string;
   title: string;
   category?: string | null;
 }
 
-interface NameRecord {
+export interface NameRecord {
   id: string;
   slug: string;
   name: string;
 }
 
-interface ItineraryRecord {
+export interface ItineraryRecord {
   id: string;
   slug: string;
   title: string;
   region: string;
 }
 
-type EntityRecord =
+export type EntityRecord =
   | PlaceRecord
   | SituationRecord
   | ProfessionRecord

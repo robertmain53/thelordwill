@@ -8,7 +8,10 @@ import { buildBreadcrumbList, buildPlaceEntitySchema } from "@/lib/seo/jsonld";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { RelatedSection } from "@/components/related-section";
 import { getRelatedLinks } from "@/lib/internal-linking";
+import { getGraphLinkSet } from "@/lib/internal-linking/graph";
 import Link from "next/link";
+import { RelatedResourcesSection } from "@/components/related-resources-section";
+import { VerseIntelligenceBlock } from "@/components/verse-intelligence-block";
 
 // Force SSR - disable static generation
 export const dynamic = "force-dynamic";
@@ -102,6 +105,33 @@ export default async function PlacePage({ params }: PageProps) {
     name: place.name,
     region: place.region,
     country: place.country,
+  });
+  const primaryVerse = place.verses[0] ?? null;
+  const primaryCanonicalUrl = primaryVerse
+    ? getCanonicalUrl(
+        `/verse/${primaryVerse.bookId}/${primaryVerse.chapter}/${primaryVerse.verseNumber}`
+      )
+    : null;
+
+  const verseRows = place.verses.map((verse) => ({
+    reference: formatPlaceVerseReference(verse.bookId, verse.chapter, verse.verseNumber),
+    bookId: verse.bookId,
+    chapter: verse.chapter,
+    verseNumber: verse.verseNumber,
+    relevanceScore: verse.relevanceScore,
+    snippet: verse.textKjv || verse.textWeb || undefined,
+  }));
+
+  const graphLinks = await getGraphLinkSet({
+    entityType: "place",
+    record: {
+      id: place.id,
+      slug: place.slug,
+      name: place.name,
+      region: place.region,
+      country: place.country,
+    },
+    verseRows,
   });
 
   const breadcrumbs = [
@@ -224,9 +254,33 @@ export default async function PlacePage({ params }: PageProps) {
                       )}
                     </div>
                     <p className="text-gray-800 leading-relaxed">{verse.textKjv || verse.textWeb || "Text not available"}</p>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+                      <span>
+                        Verse intelligence snippet available for {formatPlaceVerseReference(verse.bookId, verse.chapter, verse.verseNumber)}.
+                      </span>
+                      <Link
+                        href={getCanonicalUrl(`/verse/${verse.bookId}/${verse.chapter}/${verse.verseNumber}`)}
+                        className="text-blue-600 hover:text-blue-800"
+                        aria-label={`View verse entity for ${formatPlaceVerseReference(verse.bookId, verse.chapter, verse.verseNumber)}`}
+                      >
+                        View verse entity
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>
+            </section>
+          )}
+
+          {primaryVerse && primaryCanonicalUrl && (
+            <section className="mb-10">
+              <VerseIntelligenceBlock
+                verseId={primaryVerse.id}
+                bookId={primaryVerse.bookId}
+                chapter={primaryVerse.chapter}
+                verseNumber={primaryVerse.verseNumber}
+                canonicalUrl={primaryCanonicalUrl}
+              />
             </section>
           )}
 
@@ -287,6 +341,11 @@ export default async function PlacePage({ params }: PageProps) {
           {relatedLinks.length > 0 && (
             <RelatedSection title="Related Content" links={relatedLinks} />
           )}
+
+          <RelatedResourcesSection
+            verseLinks={graphLinks.verseLinks}
+            entityLinks={graphLinks.entityLinks}
+          />
         </div>
 
         {/* Sidebar - Tour Lead Form (Sticky) */}

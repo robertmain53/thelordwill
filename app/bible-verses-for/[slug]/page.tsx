@@ -27,6 +27,9 @@ import {
 import { RelatedSection } from "@/components/related-section";
 import { getRelatedLinks } from "@/lib/internal-linking";
 import { PosterSectionServer } from "@/components/poster-section";
+import { getGraphLinkSet } from "@/lib/internal-linking/graph";
+import { RelatedResourcesSection } from "@/components/related-resources-section";
+import { VerseIntelligenceBlock } from "@/components/verse-intelligence-block";
 
 // Force SSR - disable static generation
 export const dynamic = 'force-dynamic';
@@ -156,6 +159,51 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+const CATEGORY_HIGHLIGHTS: Record<string, string> = {
+  emotions: "renewed emotional resilience",
+  health: "restorative healing and strength",
+  relationships: "restored unity and trust",
+  faith: "steady, obedient trust in God",
+  guidance: "clarity for hard decisions",
+  "spiritual-warfare": "confidence against unseen opposition",
+  peace: "calm over anxiety and fear",
+  grief: "comfort throughout loss",
+  protection: "peace amidst uncertainty",
+  encouragement: "encouragement for worn hearts",
+};
+
+function buildWhoThisIsFor(title: string) {
+  const cleanedTitle = title.toLowerCase();
+  return `People navigating ${cleanedTitle} will find this collection tailored to their need for Scripture-led clarity.`;
+}
+
+function extractVerseSnippet(text?: string | null) {
+  if (!text) return "";
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  const sentences = cleaned.split(/[.!?]+/).map((part) => part.trim()).filter(Boolean);
+  if (sentences.length > 0) {
+    const sentence = sentences[0];
+    return sentence.length <= 200 ? sentence : `${sentence.slice(0, 200)}…`;
+  }
+  return cleaned.length <= 200 ? cleaned : `${cleaned.slice(0, 200)}…`;
+}
+
+function buildWhyItMatters(category: string | null | undefined, slug: string, title: string) {
+  const normalized = category?.toLowerCase();
+  if (normalized && CATEGORY_HIGHLIGHTS[normalized]) {
+    return `This set of verses sustains ${CATEGORY_HIGHLIGHTS[normalized]}, so you can keep trusting even when your circumstances feel heavy.`;
+  }
+
+  if (slug.includes("peace")) {
+    return "It anchors peace over fear, reminding you that calm obedience wins the day.";
+  }
+  if (slug.includes("healing") || slug.includes("health")) {
+    return "The passages prioritize healing for body, mind, and relationships, inviting you to receive restoration.";
+  }
+
+  return `It matters because ${title.toLowerCase()} deserves Scripture that keeps your heart steady and your decisions aligned with God.`;
+}
+
 export default async function SituationVersesPage({ params }: PageProps) {
   const { slug } = await params;
   if (!process.env.DATABASE_URL) {
@@ -269,6 +317,9 @@ export default async function SituationVersesPage({ params }: PageProps) {
   }
 
   const primaryVerse = primaryMapping.verse;
+  const primaryVerseCanonicalUrl = getCanonicalUrl(
+    `/verse/${primaryVerse.bookId}/${primaryVerse.chapter}/${primaryVerse.verseNumber}`,
+  );
   const primaryReference = formatVerseReference(primaryVerse);
 
   // Get top Strong's numbers from primary verse
@@ -306,6 +357,32 @@ export default async function SituationVersesPage({ params }: PageProps) {
     title: situationData.title,
     category: situationData.category,
   });
+
+  const verseRows = situationData.verseMappings.map((mapping) => ({
+    reference: formatVerseReference(mapping.verse),
+    bookId: mapping.verse.bookId,
+    chapter: mapping.verse.chapter,
+    verseNumber: mapping.verse.verseNumber,
+    relevanceScore: mapping.relevanceScore,
+    snippet: mapping.verse.textKjv || mapping.verse.textWeb || undefined,
+  }));
+
+  const graphLinks = await getGraphLinkSet({
+    entityType: "situation",
+    record: {
+      id: situationData.id,
+      slug: situationData.slug,
+      title: situationData.title,
+      category: situationData.category,
+    },
+    verseRows,
+  });
+
+  const whoText = buildWhoThisIsFor(situationData.title);
+  const whatText = extractVerseSnippet(
+    primaryVerse.textKjv || primaryVerse.textWeb || primaryVerse.textAsv || primaryVerse.textBbe,
+  );
+  const whyText = buildWhyItMatters(situationData.category, slug, situationData.title);
 
   const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
   const lastUpdatedISO =
@@ -370,6 +447,32 @@ export default async function SituationVersesPage({ params }: PageProps) {
 
               </header>
 
+              <section className="rounded-2xl border border-primary/30 bg-card/90 p-6 space-y-4">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Q/A snapshot for this theme
+                </h2>
+                <div className="grid gap-4 md:grid-cols-3 text-sm text-gray-700">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-primary mb-2">
+                      Who is this for?
+                    </p>
+                    <p>{whoText}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-primary mb-2">
+                      What does the verse say?
+                    </p>
+                    <p>{whatText || "Scripture snapshot will appear once this verse is ready."}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-primary mb-2">
+                      Why it matters
+                    </p>
+                    <p>{whyText}</p>
+                  </div>
+                </div>
+              </section>
+
               {/* Ad Slot 1: ATF Leaderboard (728x90 or responsive) */}
               <div
                 id="atf-leaderboard"
@@ -426,14 +529,24 @@ export default async function SituationVersesPage({ params }: PageProps) {
           )}
 
           {/* Verse Poster Section */}
-          <section>
-            <PosterSectionServer
-              slug={slug}
-              situationTitle={situationData.title}
-              verseRef={primaryReference}
-              verseText={primaryVerse.textKjv || primaryVerse.textWeb || ""}
-            />
-          </section>
+      <section>
+        <PosterSectionServer
+          slug={slug}
+          situationTitle={situationData.title}
+          verseRef={primaryReference}
+          verseText={primaryVerse.textKjv || primaryVerse.textWeb || ""}
+        />
+      </section>
+
+      <section className="mb-10">
+        <VerseIntelligenceBlock
+          verseId={primaryVerse.id}
+          bookId={primaryVerse.bookId}
+          chapter={primaryVerse.chapter}
+          verseNumber={primaryVerse.verseNumber}
+          canonicalUrl={primaryVerseCanonicalUrl}
+        />
+      </section>
 
               {/* Additional Verses */}
               {situationData.verseMappings.length > 1 && (
@@ -549,6 +662,11 @@ export default async function SituationVersesPage({ params }: PageProps) {
               {crossEntityLinks.length > 0 && (
                 <RelatedSection title="Related Content" links={crossEntityLinks} />
               )}
+
+              <RelatedResourcesSection
+                verseLinks={graphLinks.verseLinks}
+                entityLinks={graphLinks.entityLinks}
+              />
 
               {/* Call to Action */}
               <section className="bg-gradient-to-r from-primary/10 to-transparent border rounded-lg p-8">
