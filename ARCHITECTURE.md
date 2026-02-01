@@ -5,7 +5,7 @@
 
 This document outlines the architectural decisions made to achieve optimal performance and SEO for a large-scale Bible pSEO engine.
 
-## Core Principles
+## Core  Principles
 
 ### 1. Server-Side Rendering (SSR) for Everything
 
