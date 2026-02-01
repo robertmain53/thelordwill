@@ -4,9 +4,14 @@ import { createPosterProvider } from "@/lib/posters/poster-provider";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { verseId: string } }
+  { params }: { params: Promise<{ verseId: string }> }
 ): Promise<NextResponse> {
-  const { verseId } = params;
+  const resolvedParams = await params;
+  const verseId = resolvedParams?.verseId;
+  if (!verseId) {
+    return NextResponse.json({ error: "invalid_verse_id" }, { status: 400 });
+  }
+
   const parsedVerseId = parseInt(verseId, 10);
 
   if (Number.isNaN(parsedVerseId)) {
