@@ -4,9 +4,9 @@ import { createPosterProvider } from "@/lib/posters/poster-provider";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ verseId: string }> }
+  { params }: { params: { verseId: string } }
 ): Promise<NextResponse> {
-  const { verseId } = await params;
+  const { verseId } = params;
   const parsedVerseId = parseInt(verseId, 10);
 
   if (Number.isNaN(parsedVerseId)) {

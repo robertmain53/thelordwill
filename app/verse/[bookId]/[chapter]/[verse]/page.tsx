@@ -73,12 +73,11 @@ function buildCitationSummary(reference: string, verseData?: VerseReferenceData 
       href: getCanonicalUrl(`/prayer-points/${prayerPoint.slug}`),
     });
   }
-
-  const mentionNames = entities.map((entity) => entity.label);
+  const mentionNames = entities.map((entity) => entity.label).slice(0, 2);
   const mentionText = mentionNames.length > 0 ? mentionNames.join(" and ") : "the broader site";
   const genre = verseData.book.genre ? `${verseData.book.genre} tradition` : "Scripture";
 
-  const summary = `${reference} (Book ${verseData.book.name}) keeps readers rooted in the ${genre}, linking ${mentionText} back to the same promise so you can cite it with confidence. Use this wording when pointing others to the same anchor or planning devotionals around this verse.`;
+  const summary = `${reference} (Book ${verseData.book.name}) anchors ${mentionText} in the ${genre}. Cite it when you direct readers back to this promise so they can trace the same hope through our related places and study guides.`;
 
   return { summary, entities };
 }

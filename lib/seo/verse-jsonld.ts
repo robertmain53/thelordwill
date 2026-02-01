@@ -67,10 +67,16 @@ export function buildVerseJsonLd(input: VerseJsonLdInput) {
   };
 
   if (input.referencingUrls && input.referencingUrls.length > 0) {
-    verseEntity.subjectOf = input.referencingUrls.map((url) => ({
+    const references = input.referencingUrls.map((url) => ({
       "@type": "CreativeWork",
       "@id": url,
+      url,
     }));
+
+    verseEntity.subjectOf = references;
+    verseEntity.isReferencedBy = references;
+    verseEntity.citation = references;
+    verseEntity.mentions = references;
   }
 
   const webPage: Record<string, unknown> = {

@@ -241,34 +241,58 @@ export default async function PlacePage({ params }: PageProps) {
             <section className="mb-10">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">Bible Verses About {place.name}</h2>
               <div className="space-y-6">
-                {place.verses.map((verse) => (
-                  <div key={verse.id} className="border-l-4 border-blue-500 pl-4 py-2">
-                    <div className="mb-2">
-                      <Link
-                        href={`/verse/${verse.bookId}/${verse.chapter}/${verse.verseNumber}`}
-                        className="text-sm font-semibold text-blue-600 hover:text-blue-800"
-                      >
-                        {formatPlaceVerseReference(verse.bookId, verse.chapter, verse.verseNumber)}
-                      </Link>
-                      {verse.mentionType && (
-                        <span className="ml-2 text-xs text-gray-500 italic">({verse.mentionType})</span>
-                      )}
+                {place.verses.map((verse) => {
+                  const verseReference = formatPlaceVerseReference(
+                    verse.bookId,
+                    verse.chapter,
+                    verse.verseNumber,
+                  );
+                  const verseCanonicalUrl = getCanonicalUrl(
+                    `/verse/${verse.bookId}/${verse.chapter}/${verse.verseNumber}`,
+                  );
+                  return (
+                    <div key={verse.id} className="border-l-4 border-blue-500 pl-4 py-2 space-y-3">
+                      <div className="mb-2">
+                        <Link
+                          href={`/verse/${verse.bookId}/${verse.chapter}/${verse.verseNumber}`}
+                          className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+                        >
+                          {verseReference}
+                        </Link>
+                        {verse.mentionType && (
+                          <span className="ml-2 text-xs text-gray-500 italic">
+                            ({verse.mentionType})
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-800 leading-relaxed">
+                        {verse.textKjv || verse.textWeb || "Text not available"}
+                      </p>
+                      <div className="space-y-2">
+                        <VerseIntelligenceBlock
+                          verseId={verse.id}
+                          bookId={verse.bookId}
+                          chapter={verse.chapter}
+                          verseNumber={verse.verseNumber}
+                          canonicalUrl={verseCanonicalUrl}
+                          variant="compact"
+                        />
+                      </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+                        <span>
+                          {verseReference} is part of this place&apos;s verse network.
+                        </span>
+                        <Link
+                          href={verseCanonicalUrl}
+                          className="text-blue-600 hover:text-blue-800"
+                          aria-label={`View verse entity for ${verseReference}`}
+                        >
+                          View verse entity
+                        </Link>
+                      </div>
                     </div>
-                    <p className="text-gray-800 leading-relaxed">{verse.textKjv || verse.textWeb || "Text not available"}</p>
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-                      <span>
-                        Verse intelligence snippet available for {formatPlaceVerseReference(verse.bookId, verse.chapter, verse.verseNumber)}.
-                      </span>
-                      <Link
-                        href={getCanonicalUrl(`/verse/${verse.bookId}/${verse.chapter}/${verse.verseNumber}`)}
-                        className="text-blue-600 hover:text-blue-800"
-                        aria-label={`View verse entity for ${formatPlaceVerseReference(verse.bookId, verse.chapter, verse.verseNumber)}`}
-                      >
-                        View verse entity
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}
