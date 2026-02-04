@@ -12,6 +12,7 @@ import {
   type VerseReferenceData,
 } from "@/lib/db/verse-queries";
 import { VerseIntelligenceBlock } from "@/components/verse-intelligence-block";
+import { VerseSummary } from "@/components/verse-summary";
 import { createPosterProvider } from "@/lib/posters/poster-provider";
 
 export const dynamic = "force-dynamic";
@@ -198,23 +199,26 @@ export default async function VersePage({ params }: PageProps) {
       </section>
 
       {citationSummary.summary && (
-        <section className="space-y-2 border border-primary/20 bg-card rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-gray-900">Citation-ready summary</h2>
-          <p className="text-sm text-gray-700">{citationSummary.summary}</p>
-          {citationSummary.entities.length > 0 && (
-            <p className="text-xs text-muted-foreground">
-              References:{" "}
-              {citationSummary.entities.map((entity, index) => (
-                <span key={entity.href}>
-                  <Link href={entity.href} className="text-blue-600 hover:text-blue-800">
-                    {entity.label}
-                  </Link>
-                  {index < citationSummary.entities.length - 1 ? ", " : ""}
-                </span>
-              ))}
-            </p>
-          )}
-        </section>
+        <>
+          <section className="space-y-2 border border-primary/20 bg-card rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-gray-900">Citation-ready summary</h2>
+            <p className="text-sm text-gray-700">{citationSummary.summary}</p>
+            {citationSummary.entities.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                References:{" "}
+                {citationSummary.entities.map((entity, index) => (
+                  <span key={entity.href}>
+                    <Link href={entity.href} className="text-blue-600 hover:text-blue-800">
+                      {entity.label}
+                    </Link>
+                    {index < citationSummary.entities.length - 1 ? ", " : ""}
+                  </span>
+                ))}
+              </p>
+            )}
+          </section>
+          <VerseSummary summary={citationSummary.summary} reference={reference} canonicalUrl={canonicalUrl} />
+        </>
       )}
 
       <section className="space-y-6">
