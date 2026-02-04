@@ -1,17 +1,6 @@
-import { prisma } from "@/lib/db/prisma";
 import { getCanonicalUrl } from "@/lib/utils";
-import { toFloat32Array, topKSimilar } from "@/scripts/embeddings/_embeddings-lib";
+import { getCachedVerseIntelligence } from "@/lib/cache/verse-intelligence-cache";
 import Link from "next/link";
-
-const SEMANTIC_CANDIDATES = 300;
-const SEMANTIC_RESULTS = 5;
-
-interface SemanticMatch {
-  reference: string;
-  snippet: string;
-  href: string;
-  score: number;
-}
 
 type Variant = "full" | "compact";
 
@@ -24,65 +13,6 @@ interface VerseIntelligenceBlockProps {
   variant?: Variant;
 }
 
-async function getSemanticMatches(
-  currentVerseId: number,
-  model: string,
-  vector: number[]
-): Promise<SemanticMatch[]> {
-  const candidates = await prisma.verseEmbedding.findMany({
-    where: { model },
-    include: {
-      verse: {
-        select: {
-          id: true,
-          bookId: true,
-          chapter: true,
-          verseNumber: true,
-          textKjv: true,
-          textWeb: true,
-          book: {
-            select: {
-              name: true,
-              slug: true,
-            },
-          },
-        },
-      },
-    },
-    orderBy: { verseId: "asc" },
-    take: SEMANTIC_CANDIDATES,
-  });
-
-  const queryVector = toFloat32Array(vector);
-  const candidateVectors = candidates.map((candidate) =>
-    toFloat32Array(candidate.vector as number[]),
-  );
-
-  const topK = topKSimilar(queryVector, candidateVectors, SEMANTIC_RESULTS + 1);
-
-  return topK
-    .map((item) => {
-      const candidate = candidates[item.index];
-      if (!candidate.verse || candidate.verse.id === currentVerseId) return null;
-
-      const bookName = candidate.verse.book?.name || "Book";
-      const text = candidate.verse.textKjv ?? candidate.verse.textWeb ?? "";
-      const snippet = text.length > 120 ? `${text.slice(0, 120)}…` : text;
-      const href = getCanonicalUrl(
-        `/verse/${candidate.verse.bookId}/${candidate.verse.chapter}/${candidate.verse.verseNumber}`,
-      );
-
-      return {
-        reference: `${bookName} ${candidate.verse.chapter}:${candidate.verse.verseNumber}`,
-        snippet,
-        href,
-        score: item.score,
-      };
-    })
-    .filter((match): match is SemanticMatch => !!match)
-    .slice(0, SEMANTIC_RESULTS);
-}
-
 export async function VerseIntelligenceBlock({
   verseId,
   bookId,
@@ -91,63 +21,19 @@ export async function VerseIntelligenceBlock({
   canonicalUrl,
   variant = "full",
 }: VerseIntelligenceBlockProps) {
-  const verse = await prisma.verse.findUnique({
-    where: { id: verseId },
-    include: {
-      book: {
-        select: {
-          name: true,
-          slug: true,
-          testament: true,
-          genre: true,
-        },
-      },
-      placeMentions: {
-        where: { place: { status: "published" } },
-        orderBy: { relevanceScore: "desc" },
-        take: 6,
-        include: {
-          place: {
-            select: { slug: true, name: true },
-          },
-        },
-      },
-      situationMappings: {
-        where: { situation: { status: "published" } },
-        orderBy: { relevanceScore: "desc" },
-        take: 6,
-        include: {
-          situation: {
-            select: { slug: true, title: true, metaDescription: true },
-          },
-        },
-      },
-      prayerPointMappings: {
-        where: { prayerPoint: { status: "published" } },
-        orderBy: { relevanceScore: "desc" },
-        take: 6,
-        include: {
-          prayerPoint: {
-            select: { slug: true, title: true, category: true },
-          },
-        },
-      },
-      embedding: {
-        select: { model: true, vector: true },
-      },
-    },
-  });
-
-  if (!verse) {
+  const intelligence = await getCachedVerseIntelligence(verseId);
+  if (!intelligence) {
     return null;
   }
 
-  const bookName = verse.book?.name ?? "Book";
-  const reference = `${bookName} ${chapter}:${verseNumber}`;
+  const verse = intelligence.verse;
+  const bookName = verse.book.name;
+  const reference = `${bookName} ${verse.chapter}:${verse.verseNumber}`;
   const primaryText = verse.textKjv ?? verse.textWeb ?? "(Verse text pending)";
   const placeCount = verse.placeMentions.length;
   const situationCount = verse.situationMappings.length;
   const prayerCount = verse.prayerPointMappings.length;
+
   if (variant === "compact") {
     return (
       <div
@@ -166,20 +52,17 @@ export async function VerseIntelligenceBlock({
         <p className="mt-2 text-[11px]">
           {reference} • {placeCount} place(s), {situationCount} situation(s), {prayerCount} prayer point(s)
         </p>
-        <p className="text-[11px] text-gray-500">Scores remain deterministic across updates.</p>
+        <p className="text-[11px] text-gray-500">Scores and references are deterministic.</p>
       </div>
     );
   }
 
-  const semanticMatchPromises = verse.embedding
-    ? getSemanticMatches(verse.id, verse.embedding.model, verse.embedding.vector as number[])
-    : Promise.resolve([]);
-  const semanticMatches = await semanticMatchPromises;
+  const semanticMatches = intelligence.semanticMatches;
 
   const aboutBullets = [
-    `${reference} is anchored in ${verse.book?.testament ?? "the Bible"} tradition (${verse.book?.genre ?? "book"}).`,
+    `${reference} is anchored in ${verse.book.testament ?? "the Bible"} tradition (${verse.book.genre ?? "book"}).`,
     `${reference} appears across ${placeCount} place page(s), ${situationCount} situation guide(s), and ${prayerCount} prayer point(s).`,
-    `Primary translation snapshot (${verse.book?.name ?? "Book"}): ${primaryText.slice(0, 120)}${
+    `Primary translation snapshot (${bookName}): ${primaryText.slice(0, 120)}${
       primaryText.length > 120 ? "…" : ""
     }`,
   ];
