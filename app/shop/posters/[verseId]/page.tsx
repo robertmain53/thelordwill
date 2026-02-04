@@ -1,105 +1,135 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { createPosterProvider } from "@/lib/posters/poster-provider";
 import { prisma } from "@/lib/db/prisma";
 import { getCanonicalUrl } from "@/lib/utils";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ verseId: string }>;
-}): Promise<Metadata> {
-  const { verseId } = await params;
-  const parsedVerseId = parseInt(verseId, 10);
-  if (Number.isNaN(parsedVerseId)) {
-    return { title: "Verse Poster" };
-  }
+interface PageProps {
+  params: {
+    verseId: string;
+  };
+}
 
-  const verse = await prisma.verse.findUnique({
-    where: { id: parsedVerseId },
-    select: {
-      chapter: true,
-      verseNumber: true,
-      book: { select: { name: true } },
+async function fetchVerse(verseId: number) {
+  return prisma.verse.findUnique({
+    where: { id: verseId },
+    include: {
+      book: {
+        select: {
+          id: true,
+          name: true,
+          testament: true,
+        },
+      },
     },
   });
+}
 
-  if (!verse) {
-    return { title: "Poster not available" };
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const verseId = parseInt(params.verseId, 10);
+  if (Number.isNaN(verseId)) {
+    return {
+      title: "Verse poster preview",
+    };
   }
 
-  const reference = `${verse.book?.name ?? "Book"} ${verse.chapter}:${verse.verseNumber}`;
+  const verse = await fetchVerse(verseId);
+  if (!verse) {
+    return {
+      title: "Verse poster preview",
+    };
+  }
+
+  const reference = `${verse.book?.name ?? "Verse"} ${verse.chapter}:${verse.verseNumber}`;
+  const canonicalUrl = getCanonicalUrl(`/shop/posters/${verseId}`);
+
   return {
-    title: `Verse poster coming soon — ${reference}`,
-    description: `Get notified when the ${reference} poster design is ready for order.`,
+    title: `${reference} poster preview - The Lord Will`,
+    description: `Preview the poster aesthetic inspired by ${reference}. Emerge from Scripture into ethical wall art.`,
     alternates: {
-      canonical: getCanonicalUrl(`/shop/posters/${parsedVerseId}`),
+      canonical: canonicalUrl,
     },
   };
 }
 
-export default async function PosterShopPage({
-  params,
-}: {
-  params: Promise<{ verseId: string }>;
-}) {
-  const { verseId } = await params;
-  const parsedVerseId = parseInt(verseId, 10);
-
-  if (Number.isNaN(parsedVerseId)) {
+export default async function VersePosterPage({ params }: PageProps) {
+  const verseId = parseInt(params.verseId, 10);
+  if (Number.isNaN(verseId)) {
     notFound();
   }
 
-  const verse = await prisma.verse.findUnique({
-    where: { id: parsedVerseId },
-    include: {
-      book: { select: { name: true } },
-    },
-  });
-
+  const verse = await fetchVerse(verseId);
   if (!verse) {
     notFound();
   }
 
-  const reference = `${verse.book?.name ?? "Book"} ${verse.chapter}:${verse.verseNumber}`;
-  const textPreview = (verse.textKjv || verse.textWeb || verse.textAsv || "").slice(0, 220);
-  const mailto = `mailto:hello@thelordwill.com?subject=Poster%20for%20${encodeURIComponent(reference)}`;
+  const reference = `${verse.book?.name ?? "Verse"} ${verse.chapter}:${verse.verseNumber}`;
+  const canonicalUrl = getCanonicalUrl(`/shop/posters/${verseId}`);
+  const verseCanonical = getCanonicalUrl(`/verse/${verse.bookId}/${verse.chapter}/${verse.verseNumber}`);
+  const posterDescriptor = await createPosterProvider().describeVersePoster(verseId);
+  const breadcrumbs = [
+    { label: "Home", href: "/", position: 1 },
+    { label: "Shop", href: "/shop/posters", position: 2 },
+    { label: reference, href: canonicalUrl, position: 3 },
+  ];
+
+  const palette = posterDescriptor.colorPalette.map((color) => (
+    <span
+      key={color}
+      className="h-10 w-10 rounded-full border border-gray-200"
+      style={{ backgroundColor: color }}
+      aria-hidden
+    />
+  ));
 
   return (
-    <main className="min-h-screen bg-background/80 py-12 px-4">
-      <div className="mx-auto max-w-4xl space-y-8">
-        <header className="space-y-3">
-          <p className="text-sm text-muted-foreground">Verse poster preview</p>
-          <h1 className="text-4xl font-bold">Aesthetic poster art for {reference}</h1>
-          <p className="text-lg text-gray-700">
-            The layout, color palette, and typography are being crafted to honor this Scripture. While the actual print is still in development, we&apos;re collecting interest from readers like you.
-          </p>
-        </header>
+    <main className="min-h-screen py-12 px-4">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <Breadcrumbs items={breadcrumbs} />
 
-        <section className="space-y-3 rounded-2xl border border-dashed border-primary/40 bg-card p-6">
-          <p className="text-sm text-muted-foreground uppercase tracking-wider">Preview verse</p>
-          <p className="text-lg text-gray-900 italic">“{textPreview}…”</p>
-          <p className="text-xs text-muted-foreground">{reference}</p>
+        <section className="space-y-4">
+          <h1 className="text-4xl font-bold text-gray-900">{reference} poster</h1>
+          <p className="text-muted-foreground">
+            Ethical, Scripture-forward art direction that keeps the verse at the center while you wait for the studio release.
+          </p>
         </section>
 
-        <section className="space-y-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-6">
-          <p className="text-muted-foreground">
-            Posters will include museum-quality paper, archival inks, and optional hand-lettered notes for your personal devotionals or shared spaces.
-          </p>
+        <section className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent p-6 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-primary">Tagline</p>
+              <p className="text-lg font-semibold text-gray-900">{posterDescriptor.tagline}</p>
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Orientation: {posterDescriptor.orientation}
+            </span>
+          </div>
+          <p className="text-sm text-gray-700">{posterDescriptor.description}</p>
+          <div className="flex flex-wrap gap-3">{palette}</div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href={mailto}
-              className="inline-flex items-center justify-center rounded-full border border-primary px-6 py-2 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
+              href={`/api/posters/verse/${verseId}`}
+              className="inline-flex items-center justify-center rounded-full border border-blue-500 px-5 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
             >
-              Notify me when it&apos;s ready
+              View descriptor JSON
             </Link>
             <Link
-              href={`/verse/${verse.bookId}/${verse.chapter}/${verse.verseNumber}`}
-              className="inline-flex items-center justify-center rounded-full border border-muted px-6 py-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors"
+              href={verseCanonical}
+              className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              View verse entity
+              Back to verse
             </Link>
           </div>
+        </section>
+
+        <section className="bg-card border border-dashed border-gray-200 rounded-2xl p-6 space-y-3">
+          <h2 className="text-2xl font-semibold text-gray-900">Coming soon</h2>
+          <p className="text-sm text-muted-foreground">
+            We are building an ethical commerce funnel for Scripture-inspired posters. No automated checkout yet—just a curated queue for new releases. Save this preview and join the waitlist when you are ready to secure yours.
+          </p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">No Etsy api. No checkout.</p>
         </section>
       </div>
     </main>

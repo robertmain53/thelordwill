@@ -7,8 +7,6 @@ type Variant = "full" | "compact";
 interface VerseIntelligenceBlockProps {
   verseId: number;
   bookId: number;
-  chapter: number;
-  verseNumber: number;
   canonicalUrl: string;
   variant?: Variant;
 }
@@ -16,8 +14,6 @@ interface VerseIntelligenceBlockProps {
 export async function VerseIntelligenceBlock({
   verseId,
   bookId,
-  chapter,
-  verseNumber,
   canonicalUrl,
   variant = "full",
 }: VerseIntelligenceBlockProps) {

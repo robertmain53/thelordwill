@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { createPosterProvider } from "@/lib/posters/poster-provider";
 
+interface VerseRouteParams {
+  verseId: string;
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ verseId: string }> }
+  { params }: { params: VerseRouteParams }
 ): Promise<NextResponse> {
-  const resolvedParams = await params;
-  const verseId = resolvedParams?.verseId;
+  const verseId = params?.verseId;
   if (!verseId) {
     return NextResponse.json({ error: "invalid_verse_id" }, { status: 400 });
   }

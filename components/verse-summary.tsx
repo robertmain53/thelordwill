@@ -1,5 +1,3 @@
-import { getCanonicalUrl } from "@/lib/utils";
-
 interface VerseSummaryProps {
   summary: string;
   reference: string;

@@ -536,8 +536,6 @@ export default async function PrayerPointPage({ params }: PageProps) {
             <VerseIntelligenceBlock
               verseId={primaryVerse.id}
               bookId={primaryVerse.bookId}
-              chapter={primaryVerse.chapter}
-              verseNumber={primaryVerse.verseNumber}
               canonicalUrl={primaryCanonicalUrl}
             />
           </section>

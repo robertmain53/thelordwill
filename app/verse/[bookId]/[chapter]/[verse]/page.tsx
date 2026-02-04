@@ -74,11 +74,23 @@ function buildCitationSummary(reference: string, verseData?: VerseReferenceData 
       href: getCanonicalUrl(`/prayer-points/${prayerPoint.slug}`),
     });
   }
-  const mentionNames = entities.map((entity) => entity.label).slice(0, 2);
-  const mentionText = mentionNames.length > 0 ? mentionNames.join(" and ") : "the broader site";
-  const genre = verseData.book.genre ? `${verseData.book.genre} tradition` : "Scripture";
 
-  const summary = `${reference} (Book ${verseData.book.name}) anchors ${mentionText} in the ${genre}. Cite it when you direct readers back to this promise so they can trace the same hope through our related places and study guides.`;
+  const mentionNames = entities.map((entity) => entity.label).slice(0, 2);
+  const fallbackEntities = ["Bible Verses hub", "Prayer Points hub"];
+  const selection = mentionNames.length > 0 ? mentionNames : fallbackEntities;
+  const mentionPhrase =
+    selection.length === 1
+      ? selection[0]
+      : `${selection[0]} and ${selection[1]}`;
+  const mentionSentence =
+    mentionNames.length === 0
+      ? `Cite it alongside ${mentionPhrase} to keep the broader narrative cohesive.`
+      : `Cite it alongside ${mentionPhrase} to keep those pathways linked.`;
+
+  const genreDescriptor = verseData.book.genre
+    ? verseData.book.genre.toLowerCase()
+    : "Scriptural";
+  const summary = `${reference} (${reference}) weaves a ${genreDescriptor} promise through ${verseData.book.name}, reminding readers why this verse anchors our editorial beat. ${mentionSentence} That keeps the reference aligned with the same internal signals you just followed.`;
 
   return { summary, entities };
 }
@@ -232,8 +244,6 @@ export default async function VersePage({ params }: PageProps) {
       <VerseIntelligenceBlock
         verseId={verseData.id}
         bookId={verseData.book.id}
-        chapter={verseData.chapter}
-        verseNumber={verseData.verseNumber}
         canonicalUrl={canonicalUrl}
       />
       <section className="space-y-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-6">

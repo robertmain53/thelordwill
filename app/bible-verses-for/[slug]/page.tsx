@@ -543,8 +543,6 @@ export default async function SituationVersesPage({ params }: PageProps) {
         <VerseIntelligenceBlock
           verseId={primaryVerse.id}
           bookId={primaryVerse.bookId}
-          chapter={primaryVerse.chapter}
-          verseNumber={primaryVerse.verseNumber}
           canonicalUrl={primaryVerseCanonicalUrl}
         />
       </section>

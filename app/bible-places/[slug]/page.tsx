@@ -272,8 +272,6 @@ export default async function PlacePage({ params }: PageProps) {
                         <VerseIntelligenceBlock
                           verseId={verse.id}
                           bookId={verse.bookId}
-                          chapter={verse.chapter}
-                          verseNumber={verse.verseNumber}
                           canonicalUrl={verseCanonicalUrl}
                           variant="compact"
                         />
@@ -302,8 +300,6 @@ export default async function PlacePage({ params }: PageProps) {
               <VerseIntelligenceBlock
                 verseId={primaryVerse.id}
                 bookId={primaryVerse.bookId}
-                chapter={primaryVerse.chapter}
-                verseNumber={primaryVerse.verseNumber}
                 canonicalUrl={primaryCanonicalUrl}
               />
             </section>
