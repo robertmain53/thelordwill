@@ -155,7 +155,7 @@ export async function getCachedVerseIntelligence(verseId: number): Promise<Intel
   const payload: IntelligenceVersePayload = {
     verse: {
       id: verse.id,
-      bookId: verse.book?.id ?? verse.bookId,
+      bookId: verse.bookId,
       chapter: verse.chapter,
       verseNumber: verse.verseNumber,
       updatedAt: verse.updatedAt,
