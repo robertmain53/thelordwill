@@ -15,6 +15,7 @@
     "db:status": "prisma migrate status",
     "db:reset": "prisma migrate reset",
     "db:deploy": "prisma migrate deploy",
+    "db:check": "npx dotenv-cli -- bash scripts/db-check.sh",
     "ingest:bible": "tsx scripts/ingest-from-csv.ts",
     "ingest:bible:api": "tsx scripts/ingest-bible-simple.ts",
     "ingest:bible:legacy": "tsx scripts/ingest-bible-data.ts",
