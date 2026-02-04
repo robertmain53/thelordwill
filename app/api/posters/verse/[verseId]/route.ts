@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse, type RequestEvent } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { createPosterProvider } from "@/lib/posters/poster-provider";
 
 export async function GET(
   request: NextRequest,
-  event: RequestEvent<{ params: { verseId: string } }>
+  context: { params?: { verseId?: string } }
 ): Promise<NextResponse> {
-  const verseId = event.params?.verseId;
+  const verseId = context.params?.verseId;
   if (!verseId) {
     return NextResponse.json({ error: "invalid_verse_id" }, { status: 400 });
   }
