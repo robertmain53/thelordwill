@@ -8,7 +8,7 @@ This directory contains scripts for populating the database with Bible content a
 # 1. Seed Book table (66 books) - REQUIRED for routes to work
 npm run seed:books
 
-# 2. Check if books were seeded successfully
+# 2. Check if books were seeded  successfully
 npm run check:books
 
 # 3. Seed pSEO content
