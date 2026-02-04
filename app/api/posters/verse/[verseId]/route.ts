@@ -4,9 +4,9 @@ import { createPosterProvider } from "@/lib/posters/poster-provider";
 
 export async function GET(
   request: NextRequest,
-  context: { params?: { verseId?: string } }
+  { params }: { params: Promise<{ verseId: string }> }
 ): Promise<NextResponse> {
-  const verseId = context.params?.verseId;
+  const { verseId } = await params;
   if (!verseId) {
     return NextResponse.json({ error: "invalid_verse_id" }, { status: 400 });
   }
