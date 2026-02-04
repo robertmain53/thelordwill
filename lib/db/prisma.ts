@@ -4,17 +4,9 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Add pgbouncer parameter to connection string for pooled connections
+// Use POSTGRES_PRISMA_URL (Vercel/Supabase integration) with fallback to DATABASE_URL
 const getDatabaseUrl = () => {
-  const url = process.env.DATABASE_URL;
-  if (!url) return undefined;
-
-  // Add pgbouncer=true parameter if using Supabase pooler and not already present
-  if (url.includes('pooler.supabase.com') && !url.includes('pgbouncer=true')) {
-    const separator = url.includes('?') ? '&' : '?';
-    return url + separator + 'pgbouncer=true';
-  }
-  return url;
+  return process.env.POSTGRES_PRISMA_URL ?? process.env.DATABASE_URL;
 };
 
 export const prisma =
