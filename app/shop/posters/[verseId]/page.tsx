@@ -7,9 +7,9 @@ import { prisma } from "@/lib/db/prisma";
 import { getCanonicalUrl } from "@/lib/utils";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     verseId: string;
-  };
+  }>;
 }
 
 async function fetchVerse(verseId: number) {
@@ -28,7 +28,8 @@ async function fetchVerse(verseId: number) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const verseId = parseInt(params.verseId, 10);
+  const resolvedParams = await params;
+  const verseId = parseInt(resolvedParams.verseId, 10);
   if (Number.isNaN(verseId)) {
     return {
       title: "Verse poster preview",
@@ -55,7 +56,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function VersePosterPage({ params }: PageProps) {
-  const verseId = parseInt(params.verseId, 10);
+  const resolvedParams = await params;
+  const verseId = parseInt(resolvedParams.verseId, 10);
   if (Number.isNaN(verseId)) {
     notFound();
   }
