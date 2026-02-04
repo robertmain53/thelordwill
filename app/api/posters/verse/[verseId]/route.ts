@@ -2,13 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { createPosterProvider } from "@/lib/posters/poster-provider";
 
-interface VerseRouteParams {
-  verseId: string;
-}
-
 export async function GET(
   request: NextRequest,
-  { params }: { params: VerseRouteParams }
+  { params }: { params: { verseId: string } }
 ): Promise<NextResponse> {
   const verseId = params?.verseId;
   if (!verseId) {
