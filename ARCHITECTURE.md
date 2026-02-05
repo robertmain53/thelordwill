@@ -218,9 +218,26 @@ export const PERFORMANCE_THRESHOLDS = {
 4. Result cached and returned
    ↓
 5. Multiple components can use same data:
-   - No duplicate queries
-   - Consistent data across components
+  - No duplicate queries
+  - Consistent data across components
 ```
+
+## Operational Workstreams
+
+### Data & Content Pipeline
+- **Ingestion scripts** (`tsx scripts/ingest-from-csv.ts`, `scripts/ingest-bible-simple.ts`, `scripts/ingest-multilang.ts`, `scripts/ingest-strongs.ts`, `seed-*` helpers) pre-populate books, situations, professions, verses, and Strong's mappings while writing `IngestionLog` records; reruns rely on `upsert` semantics to avoid duplicates.
+- **QA gate** (`scripts/qa-*.mjs`, `scripts/build-url-manifest.mjs`) runs before production pushes to validate graphs, sitemaps, indexing, click depth, and semantic search contracts.
+- **Content generation** (`lib/content/generator.ts`, translation comparison, Strong's display, FAQ schema) powers `/bible-verses-for-*`, `/meaning-of-*`, and place pages, with caching in `lib/db/queries.ts`/`React cache()` deduplicating per-request queries.
+
+### Monitoring, Performance, and Scaling
+- `lib/performance.ts` plus Vercel analytics track LCP/INP/CLS; alerts feed dashboards used during monthly audits to ensure top KPIs stay within target.
+- `logs.csv`/`logs_result.csv` capture ingestion/QA events while `scripts/index-vectors.mjs` and `scripts/embeddings/generate-verse-embeddings.ts` keep semantic indexes up to date after every ingestion sprint.
+- Deployment cadence mirrors `DEPLOYMENT.md`: ingestion and QA scripts run weekly or ahead of releases, embeddings update post-data ingest, and sitemap/canonical checks happen as part of the monthly monitoring playbook.
+
+### Monetization & Revenue Target
+- **Affiliate anchor (30K € goal):** The Holy Land tour funnel described in `TOUR_MONETIZATION_GUIDE.md` uses place landing pages, `TourLeadForm`, and `/api/tour-leads` to nudge visitors toward the €750-per-booking affiliate (15% commission on $5K average) and requires ~40 bookings monthly to hit 30K €.
+- **Ad + trust support:** `UI_UX_MONETIZATION.md` outlines Mediavine/Raptive ad slots (leaderboard, mid-content, sticky sidebar) married to E-E-A-T pages (`/about`, `/editorial-process`) so revenue comes from both affiliates and display partners without sacrificing performance.
+- **Signal alignment:** Internal linking (next section) keeps conversion paths <3 clicks, QA scripts maintain performance metrics, and tracking dashboards monitor bookings, affiliate clicks, and RPMs to steer the combined stack toward the 30K € monthly goal.
 
 ## Deployment Architecture
 

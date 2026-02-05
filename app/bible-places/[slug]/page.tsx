@@ -7,11 +7,12 @@ import { EEATStrip } from "@/components/eeat-strip";
 import { buildBreadcrumbList, buildPlaceEntitySchema } from "@/lib/seo/jsonld";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { RelatedSection } from "@/components/related-section";
-import { getRelatedLinks } from "@/lib/internal-linking";
-import { getGraphLinkSet } from "@/lib/internal-linking/graph";
+import { getRelatedLinks, type RelatedLink } from "@/lib/internal-linking";
+import { getGraphLinkSet, type VerseGraphRow } from "@/lib/internal-linking/graph";
 import Link from "next/link";
 import { RelatedResourcesSection } from "@/components/related-resources-section";
 import { VerseIntelligenceBlock } from "@/components/verse-intelligence-block";
+import { RESOURCE_LINKS, FALLBACK_ENTITY_LINKS } from "@/lib/place-link-data.mjs";
 
 // Force SSR - disable static generation
 export const dynamic = "force-dynamic";
@@ -22,6 +23,55 @@ interface PageProps {
 }
 
 type PlaceResult = Awaited<ReturnType<typeof getPlaceBySlug>>;
+type PlaceRecord = NonNullable<PlaceResult>;
+
+function mergeRelatedLinks(primary: RelatedLink[]): RelatedLink[] {
+  const merged = [...primary];
+
+  for (const fallback of FALLBACK_ENTITY_LINKS) {
+    if (merged.length >= 6) break;
+    if (!merged.some((link) => link.href === fallback.href)) {
+      merged.push(fallback);
+    }
+  }
+
+  return merged;
+}
+
+function buildPlaceNarrative(place: PlaceRecord, verseRows: VerseGraphRow[]): string[] {
+  const regionPhrase = place.region
+    ? `${place.region}${place.country ? ` in ${place.country}` : ""}`
+    : place.country
+      ? place.country
+      : "the Holy Land";
+  const mentionCount = place.verses.length;
+  const verseHighlights =
+    verseRows.length > 0
+      ? `Notable references include ${verseRows
+          .slice(0, 3)
+          .map((row) => row.reference)
+          .join(", ")}`
+      : "Scripture highlights span multiple books and genres";
+
+  const overview = `${place.name} rests ${regionPhrase}. ${
+    place.description ||
+    `${place.name} is a sacred stop on the pilgrim path, echoing with testimony from Scripture.`
+  } Travelers and theologians alike note how the terrain, the climate, and the local stories reinforce both the geography and the theology of the spot.`;
+
+  const context = place.biblicalContext
+    ? `Biblical accounts describe ${place.biblicalContext}.`
+    : `${place.name} appears in the life of Scripture as a hinge point for important narratives, and tradition has preserved those associations for generations.`;
+
+  const history = place.historicalInfo
+    ? place.historicalInfo
+    : `Over the centuries, historians have recorded pilgrim visits, reforms, and reconstructions that keep ${place.name} a living witness to the unfolding story of God's people.`;
+
+  const pilgrimage = `This place connects ${mentionCount} verse mention${
+    mentionCount === 1 ? "" : "s"
+  } with the faithful. ${verseHighlights}. Pilgrims use these verses to meditate before they visit and to pray afterward, and guided groups rely on the TourLeadForm to coordinate travel, lodging, and itinerary planning.`;
+
+  return [overview, context, history, pilgrimage];
+}
 
 // Centralized publish-gate (prevents draft leakage)
 function assertPublished(place: PlaceResult): asserts place is NonNullable<PlaceResult> {
@@ -122,6 +172,9 @@ export default async function PlacePage({ params }: PageProps) {
     snippet: verse.textKjv || verse.textWeb || undefined,
   }));
 
+  const narrativeParagraphs = buildPlaceNarrative(place, verseRows);
+  const entityLinks = mergeRelatedLinks(relatedLinks);
+
   const graphLinks = await getGraphLinkSet({
     entityType: "place",
     record: {
@@ -132,7 +185,7 @@ export default async function PlacePage({ params }: PageProps) {
       country: place.country,
     },
     verseRows,
-    precomputedEntityLinks: relatedLinks,
+    precomputedEntityLinks: entityLinks,
   });
 
   const breadcrumbs = [
@@ -189,6 +242,17 @@ export default async function PlacePage({ params }: PageProps) {
         <p className="text-xl text-gray-600 leading-relaxed">{place.description}</p>
       </div>
 
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Why pilgrims visit {place.name}</h2>
+        <div className="space-y-5 text-gray-700">
+          {narrativeParagraphs.map((paragraph, index) => (
+            <p key={index} className="text-lg leading-relaxed">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </section>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2">
@@ -235,6 +299,25 @@ export default async function PlacePage({ params }: PageProps) {
               </div>
             </section>
           )}
+
+          <section className="mb-10">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Scripture & Prayer Pathways</h2>
+            <p className="text-gray-700">
+              Tie this place to the broader journey with curated verses, prayer prompts, and person-level stories
+              so every visitor knows which resources to explore next.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {RESOURCE_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-4 py-2 rounded-full border border-gray-200 text-sm font-semibold text-gray-800 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </section>
 
           {/* Bible Verses Mentioning This Place */}
           {place.verses.length > 0 && (
@@ -359,8 +442,8 @@ export default async function PlacePage({ params }: PageProps) {
           </section>
 
           {/* Related Content Section - Deterministic Internal Linking */}
-          {relatedLinks.length > 0 && (
-            <RelatedSection title="Related Content" links={relatedLinks} />
+          {entityLinks.length > 0 && (
+            <RelatedSection title="Related Content" links={entityLinks} />
           )}
 
           <RelatedResourcesSection

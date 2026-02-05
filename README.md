@@ -204,6 +204,37 @@ All queries are cached using React's `cache()` function:
 - `trackPageView()` - Analytics tracking
 - `getPopularPages()` - Sitemap prioritization
 
+## Implementation & Operations
+
+### Stack and tooling
+- **Next.js 15.3 App Router** with React 19 and TypeScript 5 server components plus `tsx` scripts for ingestion/QA/autogeneration.
+- **Tailwind CSS 3** with `tailwind-merge`, `class-variance-authority`, and `lucide-react` for the responsive UI system.
+- **Prisma 6** ORM on PostgreSQL 12+ (with `DATABASE_URL`/`DIRECT_URL` pairing) and Prisma client instantiation in `lib/db/prisma.ts`.
+- **Infrastructure scripts:** `scripts/ingest-from-csv.ts`, `scripts/ingest-bible-simple.ts`, `scripts/ingest-multilang.ts`, `scripts/ingest-strongs.ts`, `scripts/seed-*` populate the schema; `scripts/index-vectors.mjs` and `scripts/embeddings/generate-verse-embeddings.ts` build the semantic layer.
+
+### Operational workflow
+- **Data ingestion:** `ingest` scripts hydrate books, situations, professions, verses, and Strong's mappings while writing `IngestionLog` records; reruns use `upsert` semantics so failures can be retried without duplicates.
+- **Content generation:** `lib/content/generator.ts`, AI prompt helpers, translation components, and FAQ schema wiring feed the `/bible-verses-for-*` and `/meaning-of-*` pages; `lib/seo/internal-linking.ts` guarantees the 5–15 link density described below while `components/search-bar.tsx` stays as the only hydrated client island on those pages.
+- **Quality assurance & indexing:** `scripts/build-url-manifest.mjs`, `scripts/qa-*.mjs` (quality, graph, sitemaps, indexing, click-depth, semantic-search), and `lib/performance.ts` guard metadata, canonical URLs, web vitals, and vector indexes before deploys.
+- **Monitoring & reports:** `logs.csv` and `logs_result.csv` track ingestion/QA events, while `lib/performance.ts` and `app/layout.tsx` share metadata for analytics.
+- **Deployments:** per `DEPLOYMENT.md`, we push to Vercel (Node 20.9, `npm run build`) with environment variables, migrations, and post-launch QA runs.
+
+### Cadence
+- Weekly or on-demand ingestion runs refresh translations and Strong's numbers; QA scripts execute before every production release, and embeddings/vector scripts update once new verse data lands.
+- Analytics tracking, sitemap submission, and canonical audits happen monthly as part of the monitoring checklist.
+
+## Monetization & Revenue Targets
+
+### Revenue stack
+- **Affiliate anchor:** The Holy Land tours funnel documented in `TOUR_MONETIZATION_GUIDE.md` captures high-intent leads with `TourLeadForm`, Lead API endpoints, and contextual CTAs; 15% commissions on $3K–$8K tickets mean ~$750 per booking, so 40 bookings per month hit the 30,000 € target.
+- **Ad revenue:** `UI_UX_MONETIZATION.md` describes the Mediavine/Raptive placements (ATF leaderboard, mid-content rectangle, sticky sidebar) that keep RPMs elevated while bolstering trust via E-E-A-T compliance pages.
+- **Secondary affiliates:** Advisory guides, downloadable pilgrim PDFs, and the budget calculator (all surfaced through content pages and internal linking) keep additional affiliate links in rotation.
+
+### Operational objectives for 30K € / month
+- Programmatic pages (names, situations, professions, and place landing pages) funnel organic traffic into lead forms and affiliate CTAs that feed the 30K € goal while the internal linking rules ensure each conversion page is reachable within three clicks.
+- Weekly QA & performance audits ensure high LCP/INP scores so both affiliate and ad partners see consistent traffic volumes; these audits are on the same cadence as the ingestion/QA pipeline.
+- Monitoring dashboards surface bookings, affiliate click-throughs, and ad RPMs so we can refine the mix between tours and ad revenue toward the 30K € target.
+
 ## API Integration
 
 Bible API wrappers ([lib/api/bible.ts](lib/api/bible.ts)) support:

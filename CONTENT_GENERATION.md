@@ -398,6 +398,13 @@ Most components are server-rendered:
 **Benefits:**
 - Faster LCP (< 2.0s)
 - Minimal JavaScript
+
+## Conversion & Monetization Flow
+
+Each `/bible-verses-for-[situation]` page funnels to the affiliate goal:
+- **Primary CTA:** The "Experience [Place]" / "Plan your trip" callouts link to the TourLeadForm and `/api/tour-leads` flow documented in `TOUR_MONETIZATION_GUIDE.md`, ensuring every contextual narrative ends with a high-intent offer.
+- **Internal linking:** The related topics section (5 contextual links) plus breadcrumbs stay within 3 clicks of the tour pages so traffic is steered toward the €750-per-booking affiliate product; combined with Mediavine/Raptive ad slots, the page mix needs ~40 bookings/month (~30K €) to meet the revenue goal.
+- **Quality gate:** Content quality validation (word count, uniqueness, translations, Strong's usage, FAQ presence) runs automatically during builds and QA scripts to keep conversion pages compliant with E-E-A-T, which in turn keeps affiliate and ad partners confident in the traffic quality.
 - Better SEO crawling
 
 ### Caching Layers

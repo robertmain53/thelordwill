@@ -592,6 +592,12 @@ score =
 - [Sitemap Protocol](https://www.sitemaps.org/protocol.html)
 - [PageRank Algorithm](https://en.wikipedia.org/wiki/PageRank)
 
+## Monetization Alignment
+
+- **Conversion-first linking:** Link density and thematic clusters always prioritize tour lead pages, FAQ/E-E-A-T assets, and place pages so any visitor reaches the Holy Land tour CTA within three clicks, enabling the 30K € monthly affiliate target outlined in `TOUR_MONETIZATION_GUIDE.md`.
+- **Ad + trust balance:** Breadcrumbs and hub spokes let Mediavine/Raptive ad slots (ATF leaderboard, mid-content rectangle, sticky sidebar) appear without compromising CTA visibility, helping the ads-and-affiliate revenue mix stay on track.
+- **Operational discipline:** QA scripts (`scripts/qa-*.mjs`), linking audits, and logs (`logs.csv`, `logs_result.csv`) monitor link density, crawl depth, and sitemap health as part of the broader pipeline described in `DEPLOYMENT.md`, keeping the internal linking system synced with monetization and performance KPIs.
+
 ## Conclusion
 
 This internal linking system ensures:

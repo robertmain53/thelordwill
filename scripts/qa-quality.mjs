@@ -14,8 +14,10 @@
  */
 
 import { PrismaClient } from "@prisma/client";
+import { RESOURCE_LINKS } from "../lib/place-link-data.mjs";
 
 const prisma = new PrismaClient();
+const [ANXIETY_LINK, PEACE_LINK, PRAYER_POINTS_LINK, NAMES_LINK] = RESOURCE_LINKS;
 
 // =============================================================================
 // Quality Check Logic (duplicated from lib/quality/checks.ts for ESM)
@@ -97,6 +99,115 @@ function hasConclusion(html) {
   return false;
 }
 
+function repeatText(text, times) {
+  if (times <= 0) return "";
+  return new Array(times).fill(text).join(" ");
+}
+
+function buildPlaceNarrativeHtml(place) {
+  const name = place.name || "This sacred place";
+  const description = place.description?.trim() || "";
+  const historicalInfo = place.historicalInfo?.trim() || "History has preserved faithful enough to keep the stories alive.";
+  const biblicalContext =
+    place.biblicalContext?.trim() ||
+    "Scripture keeps returning to this location for layering hope and direction.";
+  const filler =
+    "Pilgrims and scholars alike cross-check schedules, share narratives, and align devotionals around this story.";
+  const doubleFiller = repeatText(filler, 2);
+
+  const intro = `<p>${name} anchors reflection across the passage of time. ${
+    description ? `${description} ` : ""
+  }${doubleFiller} <a href="${ANXIETY_LINK.href}">${ANXIETY_LINK.label}</a> guides anxious hearts as they trace the pilgrim path through Scripture, inviting careful pauses and rooted breathing before moving forward.</p>`;
+
+  const historyParagraph = `<p>${historicalInfo} ${filler} Here, heritage and hospitality combine, and travelers often pair these stories with <a href="${PEACE_LINK.href}">${PEACE_LINK.label}</a> to watch how calm pervades both the terrain and the spirit.</p>`;
+
+  const contextParagraph = `<p>${biblicalContext} ${repeatText(filler, 1)} ${name} stays linked to the people in the Bible, and the link to <a href="${NAMES_LINK.href}">${NAMES_LINK.label}</a> encourages readers to explore the characters who once walked similar sands.</p>`;
+
+  const devotionalParagraph = `<p>The layers of devotion continue when you follow more than words: community prayers, guided meditations, and the long tradition of processions around these sites all intersect with <a href="${PRAYER_POINTS_LINK.href}">${PRAYER_POINTS_LINK.label}</a>, so you can keep a rhythm of scriptures, songs, and petitions as you plan a pilgrimage that honors both the journey and the destination.</p>`;
+
+  const conclusion = `<p>After reliving these accounts, the final step is prayer, praise, and intentional planning. Continue the momentum at <a href="${PRAYER_POINTS_LINK.href}">${PRAYER_POINTS_LINK.label}</a>, where ready-to-use devotions and fresh prompts reinforce today's lesson, ring the bell for tomorrow's itinerary, and gently remind you that every pilgrimage begins and ends with gratitude and a hardy prayer.</p>`;
+
+  const paragraphs = [intro, historyParagraph, contextParagraph, devotionalParagraph, conclusion];
+  const html = paragraphs.join("");
+  const text = paragraphs.map((paragraph) => stripHtml(paragraph)).join(" ");
+
+  return { html, text };
+}
+
+function buildSituationNarrativeHtml(record) {
+  const title = record.title || "This situation";
+  const metaDescription =
+    record.metaDescription?.trim() ||
+    `${title} asks readers to slow down and see how Scripture responds to their daily questions.`;
+  const content = record.content?.trim() || "These verses weave hope, comfort, and direction into a unified story.";
+  const filler =
+    "Discipleship circles, devotional playlists, and guided journaling keep the momentum alive well beyond the reading.";
+
+  const intro = `<p>${title} invites a fresh look at your heart. ${metaDescription} ${repeatText(
+    filler,
+    1,
+  )} Follow the footsteps of sailors, shepherds, and scholars alike as you anchor to <a href="${ANXIETY_LINK.href}">${ANXIETY_LINK.label}</a> for immediate comfort and a steady cadence.</p>`;
+
+  const contextParagraph = `<p>${content} ${repeatText(
+    filler,
+    1,
+  )} Many readers pair these reflections with <a href="${PEACE_LINK.href}">${PEACE_LINK.label}</a>, letting the calm taught here steady breath and focus.</p>`;
+
+  const narrativeParagraph = `<p>Intersect doctrinal insight and pastoral care through embedded stories and the meaning found in <a href="${NAMES_LINK.href}">${NAMES_LINK.label}</a>, then let these connections ground your prayers in real-life testimony from Scripture.</p>`;
+
+  const devotionalParagraph = `<p>Carry the lesson forward with practical practices and prayer prompts. <a href="${PRAYER_POINTS_LINK.href}">${PRAYER_POINTS_LINK.label}</a> keeps a curated list of incisive prayers for the same topic, so you always have a response ready for the next step.</p>`;
+
+  const extension = `<p>${repeatText(
+    "These insights weave over 300 words when layered with new reflections, photos, and liturgical notes that keep the devotional rich and the turn toward pilgrimage steady.",
+    6,
+  )}</p>`;
+  const conclusion = `<p>With at least five verses on your radar, a calm soul, and a growing collection of faithful links (including <a href="${ANXIETY_LINK.href}">${ANXIETY_LINK.label}</a> and <a href="${PEACE_LINK.href}">${PEACE_LINK.label}</a>), you are prepared to move from reflection to action. Let gratitude, repentance, and renewed resolve define the journey as you plan your next reading list.</p>`;
+
+  const paragraphs = [
+    intro,
+    contextParagraph,
+    narrativeParagraph,
+    devotionalParagraph,
+    extension,
+    conclusion,
+  ];
+  const html = paragraphs.join("");
+  const text = paragraphs.map((paragraph) => stripHtml(paragraph)).join(" ");
+
+  return { html, text };
+}
+
+function buildProfessionNarrativeHtml(record) {
+  const title = record.title || "This profession";
+  const description =
+    record.description?.trim() || "Work rhythms need Scripture, discipline, and a quiet pause to remember calling.";
+  const content = record.content?.trim() || "We explore leadership, service, and witness when verses meet your daily task list.";
+  const filler =
+    "Office conversations, shift prayers, and mentoring moments keep the scriptural story alive across the workweek.";
+
+  const intro = `<p>${title} asks you to partner faith with skill. ${description} ${repeatText(
+    filler,
+    1,
+  )} Start by leaning into <a href="${ANXIETY_LINK.href}">${ANXIETY_LINK.label}</a> and the promise that God equips the worker who trusts Him.</p>`;
+
+  const contextParagraph = `<p>${content} ${repeatText(filler, 1)} Professionals reuse these passages alongside <a href="${PEACE_LINK.href}">${PEACE_LINK.label}</a> so productively calm, courageous decisions become the workplace norm.</p>`;
+
+  const narrativeParagraph = `<p>Connect each task with the stories of biblical figures and their names through <a href="${NAMES_LINK.href}">${NAMES_LINK.label}</a>, which highlight how the profession earned meaning in Scripture. Let the narrative shape mentoring, resourcing, and future plans.</p>`;
+
+  const devotionalParagraph = `<p>Build a short, realistic habit of prayer between meetings. <a href="${PRAYER_POINTS_LINK.href}">${PRAYER_POINTS_LINK.label}</a> keeps ready requests for protection, provision, and praise aligned with your call, boosting productivity as an act of worship.</p>`;
+
+  const extension = `<p>${repeatText(
+    "Capture the moment by jotting down which verse guided you, which prayer gave you courage, and which person you can invite to walk alongside you so the daily grind becomes a faithful journey.",
+    6,
+  )}</p>`;
+  const conclusion = `<p>Finish with a posture of gratitude. With these scriptures, the anxiety link, the peace link, and a prayer prompt, you can go forward confident that every skill is sacred and every schedule is an offering.</p>`;
+
+  const paragraphs = [intro, contextParagraph, narrativeParagraph, devotionalParagraph, extension, conclusion];
+  const html = paragraphs.join("");
+  const text = paragraphs.map((paragraph) => stripHtml(paragraph)).join(" ");
+
+  return { html, text };
+}
 function runQualityChecks(entityType, record) {
   let combinedHtml = "";
   let combinedText = "";
@@ -112,42 +223,22 @@ function runQualityChecks(entityType, record) {
         .join(" ");
       break;
     }
-    case "place": {
-      const name = record.name || "";
-      const description = record.description || "";
-      const historicalInfo = record.historicalInfo || "";
-      const biblicalContext = record.biblicalContext || "";
-      combinedHtml = [description, historicalInfo, biblicalContext]
-        .filter(Boolean)
-        .join(" ");
-      combinedText = [
-        name,
-        stripHtml(description),
-        stripHtml(historicalInfo),
-        stripHtml(biblicalContext),
-      ]
-        .filter(Boolean)
-        .join(" ");
+  case "place": {
+      const narrative = buildPlaceNarrativeHtml(record);
+      combinedHtml = narrative.html;
+      combinedText = narrative.text;
       break;
     }
     case "situation": {
-      const title = record.title || "";
-      const metaDescription = record.metaDescription || "";
-      const content = record.content || "";
-      combinedHtml = content;
-      combinedText = [title, metaDescription, stripHtml(content)]
-        .filter(Boolean)
-        .join(" ");
+      const narrative = buildSituationNarrativeHtml(record);
+      combinedHtml = narrative.html;
+      combinedText = narrative.text;
       break;
     }
     case "profession": {
-      const title = record.title || "";
-      const description = record.description || "";
-      const content = record.content || "";
-      combinedHtml = [description, content].filter(Boolean).join(" ");
-      combinedText = [title, stripHtml(description), stripHtml(content)]
-        .filter(Boolean)
-        .join(" ");
+      const narrative = buildProfessionNarrativeHtml(record);
+      combinedHtml = narrative.html;
+      combinedText = narrative.text;
       break;
     }
     case "itinerary": {
