@@ -17,6 +17,16 @@ const prisma = new PrismaClient({
   datasources: { db: { url: urlWithoutCache } },
 });
 
+const LOCALES = ["en", "es", "pt"];
+
+const translate = (value?: string) => {
+  if (!value) return undefined;
+  return LOCALES.reduce((acc, locale) => {
+    acc[locale] = value;
+    return acc;
+  }, {} as Record<string, string>);
+};
+
 const situations = [
   {
     slug: 'anxiety',
@@ -184,13 +194,23 @@ async function main() {
       // Create or update situation
       const situation = await prisma.situation.upsert({
         where: { slug: sitData.slug },
-        update: {},
+        update: {
+          title: sitData.title,
+          metaDescription: sitData.metaDescription,
+          content: sitData.content,
+          titleTranslations: translate(sitData.title),
+          metaDescriptionTranslations: translate(sitData.metaDescription),
+          contentTranslations: translate(sitData.content),
+        },
         create: {
           slug: sitData.slug,
           title: sitData.title,
           metaDescription: sitData.metaDescription,
           category: sitData.category,
           content: sitData.content,
+          titleTranslations: translate(sitData.title),
+          metaDescriptionTranslations: translate(sitData.metaDescription),
+          contentTranslations: translate(sitData.content),
         },
       });
 

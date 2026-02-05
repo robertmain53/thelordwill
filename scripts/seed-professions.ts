@@ -16,6 +16,16 @@ const prisma = new PrismaClient({
   datasources: { db: { url: urlWithoutCache } },
 });
 
+const LOCALES = ["en", "es", "pt"];
+
+const translate = (value?: string) => {
+  if (!value) return undefined;
+  return LOCALES.reduce((acc, locale) => {
+    acc[locale] = value;
+    return acc;
+  }, {} as Record<string, string>);
+};
+
 const professions = [
   {
     slug: 'teachers',
@@ -148,7 +158,18 @@ async function main() {
     try {
       const profession = await prisma.profession.upsert({
         where: { slug: prof.slug },
-        update: {},
+        update: {
+          title: prof.title,
+          description: prof.description,
+          content: prof.content,
+          metaTitle: prof.metaTitle,
+          metaDescription: prof.metaDescription,
+          titleTranslations: translate(prof.title),
+          descriptionTranslations: translate(prof.description),
+          contentTranslations: translate(prof.content),
+          metaTitleTranslations: translate(prof.metaTitle),
+          metaDescriptionTranslations: translate(prof.metaDescription),
+        },
         create: {
           slug: prof.slug,
           title: prof.title,
@@ -156,6 +177,11 @@ async function main() {
           metaTitle: prof.metaTitle,
           metaDescription: prof.metaDescription,
           content: prof.content,
+          titleTranslations: translate(prof.title),
+          descriptionTranslations: translate(prof.description),
+          contentTranslations: translate(prof.content),
+          metaTitleTranslations: translate(prof.metaTitle),
+          metaDescriptionTranslations: translate(prof.metaDescription),
         },
       });
 

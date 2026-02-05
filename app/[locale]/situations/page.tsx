@@ -18,6 +18,40 @@ type SituationListItem = {
   updatedAt: Date;
 };
 
+type RawSituationRow = {
+  slug: string;
+  title: string;
+  metaDescription: string;
+  category: string | null;
+  updatedAt: Date;
+  titleTranslations: Record<Locale, string> | null;
+  metaDescriptionTranslations: Record<Locale, string> | null;
+};
+
+const SITUATIONS_META: Record<Locale, { title: string; description: string }> = {
+  en: {
+    title: "Situations - Bible Verses for Life Circumstances",
+    description: "Scripture-anchored guidance for real-life situations.",
+  },
+  es: {
+    title: "Situaciones - Versículos bíblicos para la vida",
+    description: "Guía bíblica para situaciones de la vida cotidiana.",
+  },
+  pt: {
+    title: "Situações - Versículos bíblicos para a vida",
+    description: "Orientação bíblica para circunstâncias reais da vida.",
+  },
+};
+
+function localizedField(
+  base: string,
+  translations: Record<Locale, string> | null | undefined,
+  locale: Locale,
+) {
+  if (!translations) return base;
+  return translations[locale] ?? base;
+}
+
 const SCOPE = "situationCategory";
 const FALLBACK_CATEGORY_KEY = "other";
 const FALLBACK_CATEGORY_LABEL = "Other";
@@ -32,18 +66,20 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
 
-  if (!isValidLocale(locale)) {
+  if (!isValidLocale(localeParam)) {
     return {};
   }
 
+  const locale = localeParam as Locale;
   const alternates = buildAlternates("/situations", locale);
   const isTranslated = locale === DEFAULT_LOCALE;
+  const meta = SITUATIONS_META[locale];
 
   return {
-    title: "Situations - Bible Verses for Life Circumstances",
-    description: "Scripture-anchored guidance for real-life situations.",
+    title: meta.title,
+    description: meta.description,
     alternates,
     robots: getFallbackRobotsMeta(locale, isTranslated),
   };
@@ -59,7 +95,7 @@ export default async function SituationsPage({ params }: PageProps) {
   const locale = localeParam as Locale;
   const isTranslated = locale === DEFAULT_LOCALE;
 
-  const situations: SituationListItem[] = await prisma.situation.findMany({
+  const rawSituations: RawSituationRow[] = await prisma.situation.findMany({
     where: { status: "published" },
     select: {
       slug: true,
@@ -67,10 +103,24 @@ export default async function SituationsPage({ params }: PageProps) {
       metaDescription: true,
       category: true,
       updatedAt: true,
+      titleTranslations: true,
+      metaDescriptionTranslations: true,
     },
     orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
     take: 500,
   });
+
+  const situations: SituationListItem[] = rawSituations.map((row) => ({
+    slug: row.slug,
+    title: localizedField(row.title, row.titleTranslations, locale),
+    metaDescription: localizedField(
+      row.metaDescription,
+      row.metaDescriptionTranslations,
+      locale,
+    ),
+    category: row.category,
+    updatedAt: row.updatedAt,
+  }));
 
   const categoryKeys = Array.from(
     new Set(situations.map((s) => normKey(s.category))),

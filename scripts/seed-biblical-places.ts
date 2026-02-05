@@ -34,6 +34,11 @@ interface BiblicalPlace {
   description: string;
   historicalInfo?: string;
   biblicalContext?: string;
+  descriptionTranslations?: Record<string, string>;
+  historicalInfoTranslations?: Record<string, string>;
+  biblicalContextTranslations?: Record<string, string>;
+  metaTitleTranslations?: Record<string, string>;
+  metaDescriptionTranslations?: Record<string, string>;
   modernName?: string;
   country: string;
   region: string;
@@ -43,6 +48,26 @@ interface BiblicalPlace {
   tourPriority: number;
   metaTitle?: string;
   metaDescription?: string;
+}
+
+const LOCALES = ["en", "es", "pt"];
+
+function translate(value?: string) {
+  if (!value) return undefined;
+  return LOCALES.reduce((acc, locale) => {
+    acc[locale] = value;
+    return acc;
+  }, {} as Record<string, string>);
+}
+
+function ensureTranslations(place: BiblicalPlace) {
+  place.descriptionTranslations = place.descriptionTranslations ?? translate(place.description);
+  place.historicalInfoTranslations = place.historicalInfoTranslations ?? translate(place.historicalInfo);
+  place.biblicalContextTranslations =
+    place.biblicalContextTranslations ?? translate(place.biblicalContext);
+  place.metaTitleTranslations = place.metaTitleTranslations ?? translate(place.metaTitle);
+  place.metaDescriptionTranslations =
+    place.metaDescriptionTranslations ?? translate(place.metaDescription);
 }
 
 const BIBLICAL_PLACES: BiblicalPlace[] = [
@@ -469,6 +494,7 @@ async function seedBiblicalPlaces() {
   let skipped = 0;
 
   for (const place of BIBLICAL_PLACES) {
+    ensureTranslations(place);
     try {
       // Check if place exists
       const existing = await prisma.place.findUnique({

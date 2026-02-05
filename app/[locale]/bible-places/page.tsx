@@ -11,6 +11,30 @@ import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+type RawPlaceRow = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  descriptionTranslations: Record<Locale, string> | null;
+  country: string | null;
+  region: string | null;
+  tourHighlight: boolean;
+  _count: { verseMentions: number };
+};
+
+type RawPlaceRow = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  descriptionTranslations: Record<Locale, string> | null;
+  country: string | null;
+  region: string | null;
+  tourHighlight: boolean;
+  _count: { verseMentions: number };
+};
+
 type PlaceListItem = {
   id: string;
   slug: string;
@@ -21,6 +45,33 @@ type PlaceListItem = {
   tourHighlight: boolean;
   _count: { verseMentions: number };
 };
+
+const PLACE_META: Record<Locale, { title: string; description: string }> = {
+  en: {
+    title: "Biblical Places - Holy Land Sites & Christian Pilgrimage Tours",
+    description:
+      "Explore biblical places mentioned in Scripture. Discover the historical and spiritual significance of Jerusalem, Bethlehem, Nazareth, and other Holy Land locations.",
+  },
+  es: {
+    title: "Lugares bíblicos - Sitios santos y tours cristianos",
+    description:
+      "Explora los lugares bíblicos mencionados en las Escrituras. Descubre la importancia espiritual de Jerusalén, Belén, Nazaret y otros sitios sagrados.",
+  },
+  pt: {
+    title: "Lugares bíblicos - Locais sagrados e peregrinações",
+    description:
+      "Explore os locais bíblicos mencionados nas Escrituras. Descubra a importância espiritual de Jerusalém, Belém, Nazaré e outros lugares santos.",
+  },
+};
+
+function localizedField(
+  base: string,
+  translations: Record<Locale, string> | null | undefined,
+  locale: Locale,
+) {
+  if (!translations) return base;
+  return translations[locale] ?? base;
+}
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -35,16 +86,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const alternates = buildAlternates("/bible-places", locale);
   const isTranslated = locale === DEFAULT_LOCALE;
+  const meta = PLACE_META[locale];
 
   return {
-    title: "Biblical Places - Holy Land Sites & Christian Pilgrimage Tours",
-    description: "Explore biblical places mentioned in Scripture. Discover the historical and spiritual significance of Jerusalem, Bethlehem, Nazareth, and other Holy Land locations.",
+    title: meta.title,
+    description: meta.description,
     alternates,
     robots: getFallbackRobotsMeta(locale, isTranslated),
   };
 }
 
-async function getPlaces(): Promise<PlaceListItem[]> {
+async function getPlaces(): Promise<RawPlaceRow[]> {
   return await prisma.place.findMany({
     where: { status: "published" },
     orderBy: [{ tourPriority: "desc" }, { name: "asc" }],
@@ -53,6 +105,7 @@ async function getPlaces(): Promise<PlaceListItem[]> {
       slug: true,
       name: true,
       description: true,
+      descriptionTranslations: true,
       country: true,
       region: true,
       tourHighlight: true,
@@ -70,7 +123,18 @@ export default async function BiblePlacesPage({ params }: PageProps) {
 
   const locale = localeParam as Locale;
   const isTranslated = locale === DEFAULT_LOCALE;
-  const places = await getPlaces();
+  const meta = PLACE_META[locale];
+  const rawPlaces = await getPlaces();
+  const places: PlaceListItem[] = rawPlaces.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    description: localizedField(row.description, row.descriptionTranslations, locale),
+    country: row.country,
+    region: row.region,
+    tourHighlight: row.tourHighlight,
+    _count: row._count,
+  }));
 
   const breadcrumbs = [
     { label: "Home", href: `/${locale}`, position: 1 },
@@ -91,11 +155,10 @@ export default async function BiblePlacesPage({ params }: PageProps) {
 
         <div className="mt-6 mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Biblical Places & Holy Land Tours
+            {meta.title}
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Discover the locations where biblical history unfolded. Explore verses mentioning
-            each sacred site and plan your Christian pilgrimage.
+            {meta.description}
           </p>
         </div>
 
