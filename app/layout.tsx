@@ -1,24 +1,30 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Crimson_Pro, Libre_Baskerville } from "next/font/google"; // Institutional Fonts
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import "./globals.css";
 
-// Cache all non-admin pages by default (admin routes override to force-dynamic).
+// Cache all non-admin pages by default
 export const revalidate = 3600;
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/** * Institutional Header Font
+ * Replaces GeistSans to remove the "AI-built" look.
+ */
+const serifHeading = Crimson_Pro({
+  variable: "--font-serif",
   subsets: ["latin"],
   display: "swap",
-  preload: true,
+  weight: ["600", "800"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+/** * Biblical Body Font
+ * Replaces GeistMono for a traditional, authoritative reading experience.
+ */
+const serifBody = Libre_Baskerville({
+  variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
-  preload: true,
+  weight: ["400", "700"],
 });
 
 // Global metadataBase for absolute URLs
@@ -66,7 +72,7 @@ export const metadata: Metadata = {
   },
 };
 
-// Global JSON-LD Schema for Organization and Website
+// Global JSON-LD Schema
 function GlobalSchema() {
   const organizationSchema = {
     "@context": "https://schema.org",
@@ -117,16 +123,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${serifHeading.variable} ${serifBody.variable}`}>
       <head>
         <GlobalSchema />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className="font-body antialiased bg-background text-foreground selection:bg-accent/30"
         suppressHydrationWarning
       >
         <Header />
-        {children}
+        <main className="min-h-screen">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

@@ -6,12 +6,31 @@ import { prisma } from "@/lib/db/prisma";
 import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
+import { localizedField } from "@/lib/i18n/translation-utils";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
+
+const PROFESSIONS_META: Record<Locale, { title: string; description: string }> = {
+  en: {
+    title: "Bible Verses for Every Profession",
+    description:
+      "Find relevant Bible verses for your profession. Discover biblical wisdom and guidance for teachers, doctors, nurses, and more.",
+  },
+  es: {
+    title: "Versículos bíblicos para cada profesión",
+    description:
+      "Encuentra versículos que fortalecen tu profesión. Sabiduría bíblica para maestros, médicos, enfermeras y más.",
+  },
+  pt: {
+    title: "Versículos bíblicos para cada profissão",
+    description:
+      "Encontre versículos para fortalecer sua vocação. Sabedoria bíblica para professores, médicos, enfermeiros e outros.",
+  },
+};
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
@@ -22,10 +41,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const alternates = buildAlternates("/professions", locale);
   const isTranslated = locale === DEFAULT_LOCALE;
+  const meta = PROFESSIONS_META[locale];
 
   return {
-    title: "Bible Verses for Every Profession",
-    description: "Find relevant Bible verses for your profession. Discover biblical wisdom and guidance for teachers, doctors, nurses, and more.",
+    title: meta.title,
+    description: meta.description,
     alternates,
     robots: getFallbackRobotsMeta(locale, isTranslated),
   };
@@ -41,16 +61,41 @@ export default async function ProfessionsPage({ params }: PageProps) {
   const locale = localeParam as Locale;
   const isTranslated = locale === DEFAULT_LOCALE;
 
-  const professions = await prisma.profession.findMany({
+  const rawProfessions = await prisma.profession.findMany({
     where: { status: "published" },
     select: {
       slug: true,
       title: true,
       description: true,
       metaDescription: true,
+      titleTranslations: true,
+      descriptionTranslations: true,
+      metaDescriptionTranslations: true,
     },
     orderBy: { title: "asc" },
   });
+
+  const professions = rawProfessions.map((profession) => ({
+    slug: profession.slug,
+    title: localizedField(
+      profession.title,
+      profession.titleTranslations,
+      locale,
+    ),
+    description: localizedField(
+      profession.description,
+      profession.descriptionTranslations,
+      locale,
+    ),
+    metaDescription: localizedField(
+      profession.metaDescription,
+      profession.metaDescriptionTranslations,
+      locale,
+      profession.description,
+    ),
+  }));
+
+  const heroMeta = PROFESSIONS_META[locale];
 
   return (
     <>
@@ -62,11 +107,9 @@ export default async function ProfessionsPage({ params }: PageProps) {
         <div className="max-w-6xl mx-auto">
           <header className="mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Bible Verses for Every Profession
+              {heroMeta.title}
             </h1>
-            <p className="text-xl text-muted-foreground">
-              Discover biblical wisdom and guidance for your professional calling
-            </p>
+            <p className="text-xl text-muted-foreground">{heroMeta.description}</p>
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

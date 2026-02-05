@@ -41,12 +41,19 @@ type PlaceQueryResult = {
   updatedAt: Date;
   historicalInfo: string | null;
   biblicalContext: string | null;
+  descriptionTranslations: Record<string, string> | null;
+  historicalInfoTranslations: Record<string, string> | null;
+  biblicalContextTranslations: Record<string, string> | null;
   latitude: number | null;
   longitude: number | null;
   country: string | null;
   region: string | null;
   tourHighlight: boolean;
   status: string; // Always selected for publish-gate checks
+  metaTitle: string | null;
+  metaDescription: string | null;
+  metaTitleTranslations: Record<string, string> | null;
+  metaDescriptionTranslations: Record<string, string> | null;
   verseMentions: PlaceVerseMention[];
   relatedPlaces: RelatedPlaceEdge[];
 };
@@ -59,12 +66,19 @@ export interface PlaceWithVerses {
   updatedAt: Date;
   historicalInfo: string | null;
   biblicalContext: string | null;
+  descriptionTranslations: Record<string, string> | null;
+  historicalInfoTranslations: Record<string, string> | null;
+  biblicalContextTranslations: Record<string, string> | null;
   latitude: number | null;
   longitude: number | null;
   country: string | null;
   region: string | null;
   tourHighlight: boolean;
   status: string; // Required for publish-gate checks
+  metaTitle: string | null;
+  metaDescription: string | null;
+  metaTitleTranslations: Record<string, string> | null;
+  metaDescriptionTranslations: Record<string, string> | null;
   verses: Array<{
     id: number;
     bookId: number;
@@ -112,15 +126,22 @@ async function getPlaceBySlugInternal(
       slug: true,
       name: true,
       description: true,
+      descriptionTranslations: true,
       updatedAt: true,
       historicalInfo: true,
+      historicalInfoTranslations: true,
       biblicalContext: true,
+      biblicalContextTranslations: true,
       latitude: true,
       longitude: true,
       country: true,
       region: true,
       tourHighlight: true,
       status: true, // Required for publish-gate checks
+      metaTitle: true,
+      metaDescription: true,
+      metaTitleTranslations: true,
+      metaDescriptionTranslations: true,
       verseMentions: {
         take: verseLimit,
         orderBy: { relevanceScore: "desc" },
@@ -174,15 +195,22 @@ async function getPlaceBySlugInternal(
     slug: place.slug,
     name: place.name,
     description: place.description,
+    descriptionTranslations: place.descriptionTranslations,
     updatedAt: place.updatedAt,
     historicalInfo: place.historicalInfo,
+    historicalInfoTranslations: place.historicalInfoTranslations,
     biblicalContext: place.biblicalContext,
+    biblicalContextTranslations: place.biblicalContextTranslations,
     latitude: place.latitude,
     longitude: place.longitude,
     country: place.country,
     region: place.region,
     tourHighlight: place.tourHighlight,
     status: place.status || "draft", // Default to draft if somehow missing
+    metaTitle: place.metaTitle,
+    metaDescription: place.metaDescription,
+    metaTitleTranslations: place.metaTitleTranslations,
+    metaDescriptionTranslations: place.metaDescriptionTranslations,
     verses: place.verseMentions.map((vm) => ({
       id: vm.verse.id,
       bookId: vm.verse.bookId,

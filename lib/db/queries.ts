@@ -73,9 +73,25 @@ export const getProfession = cache(async (slug: string) => {
       slug,
       status: "published",
     },
-    include: {
+    select: {
+      slug: true,
+      title: true,
+      description: true,
+      content: true,
+      metaTitle: true,
+      metaDescription: true,
+      titleTranslations: true,
+      descriptionTranslations: true,
+      contentTranslations: true,
+      metaTitleTranslations: true,
+      metaDescriptionTranslations: true,
       relatedProfessions: {
         take: 5,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+        },
       },
     },
   });

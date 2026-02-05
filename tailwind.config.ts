@@ -57,8 +57,10 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
-        mono: ['var(--font-geist-mono)', 'monospace'],
+        // 'serif' will now prioritize institutional, classic fonts
+        serif: ["Crimson Text", ...fontFamily.serif],
+        // 'sans' remains for UI elements but with a more professional lean
+        sans: ["Inter", ...fontFamily.sans],
       },
     },
   },

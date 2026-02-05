@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
+import { localizedField } from "@/lib/i18n/translation-utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -42,15 +43,6 @@ const SITUATIONS_META: Record<Locale, { title: string; description: string }> = 
     description: "Orientação bíblica para circunstâncias reais da vida.",
   },
 };
-
-function localizedField(
-  base: string,
-  translations: Record<Locale, string> | null | undefined,
-  locale: Locale,
-) {
-  if (!translations) return base;
-  return translations[locale] ?? base;
-}
 
 const SCOPE = "situationCategory";
 const FALLBACK_CATEGORY_KEY = "other";
@@ -110,6 +102,8 @@ export default async function SituationsPage({ params }: PageProps) {
     take: 500,
   });
 
+  const heroMeta = SITUATIONS_META[locale];
+
   const situations: SituationListItem[] = rawSituations.map((row) => ({
     slug: row.slug,
     title: localizedField(row.title, row.titleTranslations, locale),
@@ -168,10 +162,8 @@ export default async function SituationsPage({ params }: PageProps) {
       <main className="min-h-screen py-12 px-4">
         <div className="max-w-5xl mx-auto space-y-10">
           <header className="space-y-2">
-            <h1 className="text-4xl font-bold">Situations</h1>
-            <p className="text-muted-foreground">
-              Scripture-anchored guidance for real-life situations.
-            </p>
+            <h1 className="text-4xl font-bold">{heroMeta.title}</h1>
+            <p className="text-muted-foreground">{heroMeta.description}</p>
           </header>
 
           {situations.length === 0 ? (

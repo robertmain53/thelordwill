@@ -12,6 +12,7 @@ import { getRelatedLinks } from "@/lib/internal-linking";
 import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
+import { localizedField } from "@/lib/i18n/translation-utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -39,20 +40,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const place = await getPlaceBySlug(slug, 20);
   assertPublished(place);
 
-  const title = `${place.name} in the Bible - Scriptures & Holy Land Tours`;
-  const description = `Discover ${place.name} in the Bible: ${place.description.substring(0, 150)}... Explore verses mentioning this sacred location.`;
+  const titleFallback = `${place.name} in the Bible - Scriptures & Holy Land Tours`;
+  const descriptionFallback = `Discover ${place.name} in the Bible: ${place.description?.substring(0, 150) ?? ""}... Explore verses mentioning this sacred location.`;
+  const localizedTitle = localizedField(
+    place.metaTitle ?? titleFallback,
+    place.metaTitleTranslations,
+    locale,
+    titleFallback,
+  );
+  const localizedDescription = localizedField(
+    place.metaDescription ?? descriptionFallback,
+    place.metaDescriptionTranslations,
+    locale,
+    descriptionFallback,
+  );
   const alternates = buildAlternates(`/bible-places/${slug}`, locale);
   const isTranslated = locale === DEFAULT_LOCALE;
   const imageUrl = getCanonicalUrl(`/api/og?place=${encodeURIComponent(place.name)}&type=place`);
 
   return {
-    title,
-    description,
+    title: localizedTitle,
+    description: localizedDescription,
     alternates,
     robots: getFallbackRobotsMeta(locale, isTranslated),
     openGraph: {
-      title,
-      description,
+      title: localizedTitle,
+      description: localizedDescription,
       url: getCanonicalUrl(`/bible-places/${slug}`),
       type: "article",
       images: [{ url: imageUrl, width: 1200, height: 630, alt: `${place.name} in the Bible` }],
@@ -60,8 +73,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: localizedTitle,
+      description: localizedDescription,
       images: [imageUrl],
     },
     keywords: [
@@ -94,6 +107,22 @@ export default async function LocalePlacePage({ params }: PageProps) {
     region: place.region,
     country: place.country,
   });
+
+  const localizedDescription = localizedField(
+    place.description,
+    place.descriptionTranslations,
+    locale,
+  );
+  const localizedHistoricalInfo = localizedField(
+    place.historicalInfo,
+    place.historicalInfoTranslations,
+    locale,
+  );
+  const localizedBiblicalContext = localizedField(
+    place.biblicalContext,
+    place.biblicalContextTranslations,
+    locale,
+  );
 
   const breadcrumbs = [
     { label: "Home", href: `/${locale}`, position: 1 },
@@ -139,7 +168,7 @@ export default async function LocalePlacePage({ params }: PageProps) {
         />
 
         <div className="mt-6 mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">{place.name} in the Bible</h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">{place.name} in the Bible</h1>
 
           <EEATStrip
             authorName="The Lord Will Editorial Team"
@@ -149,28 +178,28 @@ export default async function LocalePlacePage({ params }: PageProps) {
             categoryLabel="Biblical Places"
           />
 
-          <p className="text-xl text-gray-600 leading-relaxed">{place.description}</p>
+          <p className="text-xl text-gray-600 leading-relaxed">{localizedDescription}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            {place.biblicalContext && (
-              <section className="mb-10">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Biblical Significance</h2>
-                <div className="prose prose-lg max-w-none">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">{place.biblicalContext}</p>
-                </div>
-              </section>
-            )}
+          {localizedBiblicalContext && (
+            <section className="mb-10">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Biblical Significance</h2>
+              <div className="prose prose-lg max-w-none">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{localizedBiblicalContext}</p>
+              </div>
+            </section>
+          )}
 
-            {place.historicalInfo && (
-              <section className="mb-10">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Historical Context</h2>
-                <div className="prose prose-lg max-w-none">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">{place.historicalInfo}</p>
-                </div>
-              </section>
-            )}
+          {localizedHistoricalInfo && (
+            <section className="mb-10">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Historical Context</h2>
+              <div className="prose prose-lg max-w-none">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{localizedHistoricalInfo}</p>
+              </div>
+            </section>
+          )}
 
             {(place.latitude || place.country) && (
               <section className="mb-10 p-6 bg-blue-50 rounded-lg">

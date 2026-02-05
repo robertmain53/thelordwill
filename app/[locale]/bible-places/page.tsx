@@ -7,21 +7,10 @@ import { prisma } from "@/lib/db/prisma";
 import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
+import { localizedField } from "@/lib/i18n/translation-utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-type RawPlaceRow = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  descriptionTranslations: Record<Locale, string> | null;
-  country: string | null;
-  region: string | null;
-  tourHighlight: boolean;
-  _count: { verseMentions: number };
-};
 
 type RawPlaceRow = {
   id: string;
