@@ -68,7 +68,7 @@ export const getSituation = cache(async (slug: string) => {
  * Only returns published professions
  */
 export const getProfession = cache(async (slug: string) => {
-  return await prisma.profession.findFirst({
+  const profession = await prisma.profession.findFirst({
     where: {
       slug,
       status: "published",
@@ -88,13 +88,36 @@ export const getProfession = cache(async (slug: string) => {
       relatedProfessions: {
         take: 5,
         select: {
-          id: true,
-          slug: true,
-          title: true,
+          relatedProfessionId: true,
         },
       },
     },
   });
+
+  if (!profession) {
+    return null;
+  }
+
+  const relatedIds = profession.relatedProfessions
+    .map((relation) => relation.relatedProfessionId)
+    .filter(Boolean);
+
+  const relatedProfessionDetails =
+    relatedIds.length > 0
+      ? await prisma.profession.findMany({
+          where: { id: { in: relatedIds } },
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+          },
+        })
+      : [];
+
+  return {
+    ...profession,
+    relatedProfessions: relatedProfessionDetails,
+  };
 });
 
 /**

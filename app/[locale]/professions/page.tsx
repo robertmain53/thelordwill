@@ -79,17 +79,17 @@ export default async function ProfessionsPage({ params }: PageProps) {
     slug: profession.slug,
     title: localizedField(
       profession.title,
-      profession.titleTranslations,
+      profession.titleTranslations as Record<Locale, string> | null,
       locale,
     ),
     description: localizedField(
       profession.description,
-      profession.descriptionTranslations,
+      profession.descriptionTranslations as Record<Locale, string> | null,
       locale,
     ),
     metaDescription: localizedField(
       profession.metaDescription,
-      profession.metaDescriptionTranslations,
+      profession.metaDescriptionTranslations as Record<Locale, string> | null,
       locale,
       profession.description,
     ),

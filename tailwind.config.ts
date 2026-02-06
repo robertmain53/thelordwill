@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 const config: Config = {
   darkMode: ["class"],
@@ -43,13 +44,6 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -57,9 +51,10 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        // 'serif' will now prioritize institutional, classic fonts
-        serif: ["Crimson Text", ...fontFamily.serif],
-        // 'sans' remains for UI elements but with a more professional lean
+        // Link these to the variables defined in your layout.tsx
+        serif: ["var(--font-serif)", ...fontFamily.serif],
+        body: ["var(--font-body)", ...fontFamily.serif],
+        // Keeping sans as a fallback for functional UI components
         sans: ["Inter", ...fontFamily.sans],
       },
     },

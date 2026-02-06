@@ -4,6 +4,7 @@
  */
 
 import { cache } from 'react';
+import type { Locale } from "@/lib/i18n/locales";
 
 async function getPrisma() {
   const { prisma } = await import('./prisma');
@@ -17,6 +18,8 @@ export interface SituationWithVerses {
   metaDescription: string;
   content: string | null;
   category: string | null;
+  titleTranslations: Record<Locale, string> | null;
+  metaDescriptionTranslations: Record<Locale, string> | null;
   updatedAt: Date;
   verseMappings: Array<{
     relevanceScore: number;
@@ -62,12 +65,12 @@ export const getSituationWithVerses = cache(
     }
 
     const prisma = await getPrisma();
-    return await prisma.situation.findFirst({
+    const situation = await prisma.situation.findFirst({
       where: {
         slug,
         status: "published",
       },
-      include: {
+        include: {
         verseMappings: {
           orderBy: { relevanceScore: 'desc' },
           take: limit,
@@ -93,6 +96,16 @@ export const getSituationWithVerses = cache(
         },
       },
     });
+
+    if (!situation) {
+      return null;
+    }
+
+    return {
+      ...situation,
+      titleTranslations: situation.titleTranslations as Record<Locale, string> | null,
+      metaDescriptionTranslations: situation.metaDescriptionTranslations as Record<Locale, string> | null,
+    };
   }
 );
 

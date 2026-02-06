@@ -7,22 +7,26 @@ import { prisma } from "@/lib/db/prisma";
 import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
-import { localizedField } from "@/lib/i18n/translation-utils";
+import { localizedField as resolveLocalizedField } from "@/lib/i18n/translation-utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-type RawPlaceRow = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  descriptionTranslations: Record<Locale, string> | null;
-  country: string | null;
-  region: string | null;
-  tourHighlight: boolean;
-  _count: { verseMentions: number };
-};
+import type { Prisma } from "@prisma/client";
+
+const PLACE_SELECT = {
+  id: true,
+  slug: true,
+  name: true,
+  description: true,
+  descriptionTranslations: true,
+  country: true,
+  region: true,
+  tourHighlight: true,
+  _count: { select: { verseMentions: true } },
+} as const;
+
+type RawPlaceRow = Prisma.PlaceGetPayload<{ select: typeof PLACE_SELECT }>;
 
 type PlaceListItem = {
   id: string;
@@ -53,15 +57,6 @@ const PLACE_META: Record<Locale, { title: string; description: string }> = {
   },
 };
 
-function localizedField(
-  base: string,
-  translations: Record<Locale, string> | null | undefined,
-  locale: Locale,
-) {
-  if (!translations) return base;
-  return translations[locale] ?? base;
-}
-
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
@@ -89,17 +84,7 @@ async function getPlaces(): Promise<RawPlaceRow[]> {
   return await prisma.place.findMany({
     where: { status: "published" },
     orderBy: [{ tourPriority: "desc" }, { name: "asc" }],
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      description: true,
-      descriptionTranslations: true,
-      country: true,
-      region: true,
-      tourHighlight: true,
-      _count: { select: { verseMentions: true } },
-    },
+    select: PLACE_SELECT,
   });
 }
 
@@ -118,7 +103,11 @@ export default async function BiblePlacesPage({ params }: PageProps) {
     id: row.id,
     slug: row.slug,
     name: row.name,
-    description: localizedField(row.description, row.descriptionTranslations, locale),
+    description: resolveLocalizedField(
+      row.description,
+      row.descriptionTranslations as Record<Locale, string> | null,
+      locale,
+    ),
     country: row.country,
     region: row.region,
     tourHighlight: row.tourHighlight,

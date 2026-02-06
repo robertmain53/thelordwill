@@ -107,18 +107,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const professionTitleFallback = `Bible Verses for ${profession.title} - Scripture & Wisdom`;
   const professionDescriptionFallback = profession.metaDescription ?? profession.description;
-  const localizedTitle = localizedField(
-    professionTitleFallback,
-    profession.titleTranslations,
-    locale,
-    professionTitleFallback,
-  );
-  const localizedDescription = localizedField(
-    professionDescriptionFallback,
-    profession.metaDescriptionTranslations,
-    locale,
-    professionDescriptionFallback,
-  );
+    const localizedTitle = localizedField(
+      professionTitleFallback,
+      profession.titleTranslations as Record<Locale, string> | null,
+      locale,
+      professionTitleFallback,
+    );
+    const localizedDescription = localizedField(
+      professionDescriptionFallback,
+      profession.metaDescriptionTranslations as Record<Locale, string> | null,
+      locale,
+      professionDescriptionFallback,
+    );
   const canonicalUrl = getCanonicalUrl(`/bible-verses-for/${slug}`);
   const imageUrl = getCanonicalUrl(
     `/api/og?profession=${encodeURIComponent(profession.title)}&type=profession`

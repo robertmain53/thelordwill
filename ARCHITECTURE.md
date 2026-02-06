@@ -227,6 +227,7 @@ export const PERFORMANCE_THRESHOLDS = {
 ### Data & Content Pipeline
 - **Ingestion scripts** (`tsx scripts/ingest-from-csv.ts`, `scripts/ingest-bible-simple.ts`, `scripts/ingest-multilang.ts`, `scripts/ingest-strongs.ts`, `seed-*` helpers) pre-populate books, situations, professions, verses, and Strong's mappings while writing `IngestionLog` records; reruns rely on `upsert` semantics to avoid duplicates.
 - **QA gate** (`scripts/qa-*.mjs`, `scripts/build-url-manifest.mjs`) runs before production pushes to validate graphs, sitemaps, indexing, click depth, and semantic search contracts.
+- **Blueprint verification job** (`scripts/verify-content-job.mjs`) evaluates every JSON blueprint with `@qe/factory`, compares against policy definitions, and halts the release if introductions, conclusions, internal links, or entity references fail so thin content never leaves staging.  
 - **Content generation** (`lib/content/generator.ts`, translation comparison, Strong's display, FAQ schema) powers `/bible-verses-for-*`, `/meaning-of-*`, and place pages, with caching in `lib/db/queries.ts`/`React cache()` deduplicating per-request queries.
 
 ### Monitoring, Performance, and Scaling
@@ -238,6 +239,11 @@ export const PERFORMANCE_THRESHOLDS = {
 - **Affiliate anchor (30K € goal):** The Holy Land tour funnel described in `TOUR_MONETIZATION_GUIDE.md` uses place landing pages, `TourLeadForm`, and `/api/tour-leads` to nudge visitors toward the €750-per-booking affiliate (15% commission on $5K average) and requires ~40 bookings monthly to hit 30K €.
 - **Ad + trust support:** `UI_UX_MONETIZATION.md` outlines Mediavine/Raptive ad slots (leaderboard, mid-content, sticky sidebar) married to E-E-A-T pages (`/about`, `/editorial-process`) so revenue comes from both affiliates and display partners without sacrificing performance.
 - **Signal alignment:** Internal linking (next section) keeps conversion paths <3 clicks, QA scripts maintain performance metrics, and tracking dashboards monitor bookings, affiliate clicks, and RPMs to steer the combined stack toward the 30K € monthly goal.
+
+### Localization & Review Workflow
+- **Current coverage:** English routes (situations, professions, places, names) are live; Portuguese and Spanish are on the roadmap and must be rebuilt from scratch per `[locale]` route (situations detail, professions list/detail, place detail, `/bible-verses-for-*`, plus shared UI strings).  
+- **Batch approach:** Expand each locale in small batches, run the verification job plus `npm run qa:all` after each batch, and collect the requested interim reviews before progressing to the next route to keep reviewers informed and prevent regressions.  
+- **Locale-aware linking:** The internal linking matrix recalculates related clusters per locale so entity references (`/bible-verses-for/`, `/prayer-points/`, etc.) stay consistent; QA logs capture link density per locale while monetization signals (affiliate clicks, UTM tracking) continue feeding the 30K € target.
 
 ## Deployment Architecture
 

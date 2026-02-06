@@ -195,6 +195,26 @@ npm start
 4. **Caching**: React cache() for database queries
 5. **Compression**: Gzip/Brotli enabled
 
+## Verification & QA Pipeline
+
+- **QA Scripts** (`npm run qa:manifest`, `qa:quality`, `qa:graph`, `qa:indexing`) run before releases to prove crawl depth, link density, sitemap integrity, and content quality across every published blueprint.  
+- **Blueprint validation** (`scripts/verify-content-job.mjs`) evaluates every JSON blueprint via `@qe/factory` policies and emits a JSON or console report; failures surface before deploys to avoid publishing thin or mislinked copy.  
+- **Logs & Metrics**: `logs.csv`, `logs_result.csv`, and the QA audit reports feed dashboards that monitor affiliate conversions, internal link health, and sitewide runtime metrics (LCP/INP).  
+- **Preference alignment**: QA checks and the localization rollout follow the requested interim reviews after each major route (place detail, situations detail, professions list/detail, etc.), easing human oversight while the pipeline runs.
+
+## Localization Roadmap
+
+- **Primary English stack** is fully wired (situations, names, professions, places, prayer points, itineraries).  
+- **Portuguese & Spanish launches** are built from the same blueprint pipeline but currently require fresh localized content for each `[locale]` route (situations detail, professions list/detail, place detail, `bible-verses-for-*`, and UI strings).  
+- **Operational flow**: replicate the English ingestion → QA → internal linking loop for each locale, run `npm run qa:all` per locale, and verify localized URL manifests before publishing.  
+- **Next steps**: batch build small groups of localized routes, run the verification job + QA per batch, gather interim reviews, then push translations once they meet the 300+ word/anchor/link requirements.
+
+## Monetization & Business Goal
+
+- **30 000 € / month target** powered by affiliate programs (Bible study tools, travel partners for pilgrimage sites, trusted publishers).  
+- **Lead indicators**: QA quality pass rate, conversion-focused internal links, and steady LCP/INP metrics ensure affiliates see premium traffic.  
+- **Operational hygiene**: Deployments trigger the verification job, QA scripts, and link audits, while localized pages inherit the same monetization tracking (UTMs, click paths) so every language contributes toward the revenue goal.
+
 ## Database Queries
 
 All queries are cached using React's `cache()` function:

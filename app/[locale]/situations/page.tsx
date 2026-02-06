@@ -7,9 +7,22 @@ import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
 import { localizedField } from "@/lib/i18n/translation-utils";
+import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+const SITUATION_SELECT = {
+  slug: true,
+  title: true,
+  metaDescription: true,
+  category: true,
+  updatedAt: true,
+  titleTranslations: true,
+  metaDescriptionTranslations: true,
+} satisfies Partial<Prisma.SituationSelect>;
+
+type RawSituationRow = Prisma.SituationGetPayload<{ select: typeof SITUATION_SELECT }>;
 
 type SituationListItem = {
   slug: string;
@@ -17,16 +30,6 @@ type SituationListItem = {
   metaDescription: string;
   category: string | null;
   updatedAt: Date;
-};
-
-type RawSituationRow = {
-  slug: string;
-  title: string;
-  metaDescription: string;
-  category: string | null;
-  updatedAt: Date;
-  titleTranslations: Record<Locale, string> | null;
-  metaDescriptionTranslations: Record<Locale, string> | null;
 };
 
 const SITUATIONS_META: Record<Locale, { title: string; description: string }> = {
@@ -89,15 +92,7 @@ export default async function SituationsPage({ params }: PageProps) {
 
   const rawSituations: RawSituationRow[] = await prisma.situation.findMany({
     where: { status: "published" },
-    select: {
-      slug: true,
-      title: true,
-      metaDescription: true,
-      category: true,
-      updatedAt: true,
-      titleTranslations: true,
-      metaDescriptionTranslations: true,
-    },
+    select: SITUATION_SELECT,
     orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
     take: 500,
   });
@@ -106,10 +101,14 @@ export default async function SituationsPage({ params }: PageProps) {
 
   const situations: SituationListItem[] = rawSituations.map((row) => ({
     slug: row.slug,
-    title: localizedField(row.title, row.titleTranslations, locale),
+    title: localizedField(
+      row.title,
+      row.titleTranslations as Record<Locale, string> | null,
+      locale,
+    ),
     metaDescription: localizedField(
       row.metaDescription,
-      row.metaDescriptionTranslations,
+      row.metaDescriptionTranslations as Record<Locale, string> | null,
       locale,
     ),
     category: row.category,

@@ -1,10 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useLocale } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Locale } from '@/lib/i18n/locales';
+import {
+  isValidLocale,
+  type Locale,
+  DEFAULT_LOCALE,
+} from '@/lib/i18n/locales';
 
 interface TourLeadFormProps {
   placeName?: string;
@@ -122,7 +126,10 @@ export function TourLeadForm({
   contextType = 'unknown',
   className = '',
 }: TourLeadFormProps) {
-  const locale = (useLocale() || 'en') as Locale;
+  const pathname = usePathname();
+  const derivedLocale = pathname?.split('/')[1];
+  const locale =
+    isValidLocale(derivedLocale) ? (derivedLocale as Locale) : DEFAULT_LOCALE;
   const localeText = TOUR_LEAD_TEXTS[locale];
 
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -137,8 +137,8 @@ model Situation {
   metaDescription String  @db.Text
   content         String? @db.Text
   titleTranslations Json?
-  metaDescriptionTranslations Json? @db.Text
-  contentTranslations Json? @db.Text
+  metaDescriptionTranslations Json?
+  contentTranslations Json?
   category        String?
 
   // Publish state
@@ -196,10 +196,10 @@ model Profession {
   metaTitle       String?
   metaDescription String?
   titleTranslations Json?
-  descriptionTranslations Json? @db.Text
-  contentTranslations Json? @db.Text
+  descriptionTranslations Json?
+  contentTranslations Json?
   metaTitleTranslations Json?
-  metaDescriptionTranslations Json? @db.Text
+  metaDescriptionTranslations Json?
 
   // Publish state
   status      String    @default("draft") // "draft" | "published"
@@ -319,11 +319,11 @@ model Place {
   slug            String  @unique
   name            String  @unique
   description     String  @db.Text
-  descriptionTranslations Json? @db.Text
+  descriptionTranslations Json?
   historicalInfo  String? @db.Text
-  historicalInfoTranslations Json? @db.Text
+  historicalInfoTranslations Json?
   biblicalContext String? @db.Text
-  biblicalContextTranslations Json? @db.Text
+  biblicalContextTranslations Json?
   modernName      String?
   country         String?
   region          String?
@@ -332,7 +332,7 @@ model Place {
   metaTitle       String?
   metaTitleTranslations Json?
   metaDescription String? @db.Text
-  metaDescriptionTranslations Json? @db.Text
+  metaDescriptionTranslations Json?
   tourHighlight   Boolean @default(false)
   tourPriority    Int     @default(50)
 
