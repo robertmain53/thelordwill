@@ -1,0 +1,16 @@
+{
+  "id": "places/mount-sinai-en",
+  "blueprintId": "places/mount-sinai-en",
+  "type": "localized-place-detail",
+  "title": "Mount Sinai in the Bible (English)",
+  "description": "Blueprint for the Mount Sinai detail page linking verses, situations, and prayer points.",
+  "content": "<p>Mount Sinai anchors faith with the covenant, the Ten Commandments, and Moses' encounters with God. The page links to <a href=\"/situations/grief\">grief</a> and <a href=\"/situations/anxiety\">anxiety</a> resources, shares related prayer prompts (<a href=\"/prayer-points/anxiety\">anxiety prayer points</a>), and highlights the TourLeadForm for pilgrims who want a guided experience.</p><p>It also notes that the semantic search tool (<a href=\"/semantic-search\">semantic search</a>) helps travelers assemble the best verses for their own struggles and links to the verse page for Exodus references.</p><p>The conclusion reminds visitors that Mount Sinai is part of the 30 000 € pilgrimage funnel and invites them to plan their itinerary with trusted affiliates.</p>",
+  "links": [
+    "/situations/anxiety",
+    "/situations/grief",
+    "/prayer-points/anxiety",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

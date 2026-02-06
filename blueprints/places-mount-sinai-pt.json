@@ -1,0 +1,16 @@
+{
+  "id": "places/mount-sinai-pt",
+  "blueprintId": "places/mount-sinai-pt",
+  "type": "localized-place-detail",
+  "title": "Monte Sinai na Bíblia (Português)",
+  "description": "Blueprint que liga Monte Sinai a verso, oração e itinerário.",
+  "content": "<p>Monte Sinai continua sendo um espaço de silêncio e revelação onde Moisés encontrou Deus. A página indica links para <a href=\"/situations/anxiety\">ansiedade</a> e <a href=\"/situations/grief\">luto</a>, cita <a href=\"/prayer-points/anxiety\">pontos de oração</a> e lembra o TourLeadForm para peregrinos que buscam direção guiada.</p><p>Também menciona a <a href=\"/semantic-search\">busca semântica</a> como ferramenta para encontrar versos adicionais e referencia textos do Êxodo.</p><p>O encerramento agradece o leitor e convida a apoiar a meta de 30 000 € mensais ao reservar tours que valorizam educação bíblica e experiência espiritual.</p>",
+  "links": [
+    "/situations/anxiety",
+    "/situations/grief",
+    "/prayer-points/anxiety",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

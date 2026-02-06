@@ -1,0 +1,18 @@
+{
+  "id": "situations/anxiety-en",
+  "blueprintId": "situations/anxiety-en",
+  "type": "localized-situation",
+  "title": "Bible Verses for Anxiety (English)",
+  "description": "Plan the localized page for anxiety that ties the verse stack to pilgrimage links, prayer points, and a tour lead.",
+  "content": "<p>Anxiety asks the reader to breathe in the calm breath of Scripture before making the next risky move. The narrative opens with Joseph, David, and Paul, all of whom authored prayers that still calm anxious hearts, and it cites <a href=\"/bible-verses-for/anxiety\">Bible verses for anxiety</a> so the visitor knows where to read for comfort. The middle portion weaves a brief travel sidebar that points to <a href=\"/bible-places/jerusalem\">Jerusalem</a> and <a href=\"/bible-places/mount-sinai\">Mount Sinai</a>, highlighting places pilgrims visit when they take the anxiety-focused Holy Land tour. A short paragraph then recalls the communal prayers collected under <a href=\"/prayer-points/anxiety\">anxiety prayer points</a> and describes how that resource ties into the meditation prompts. Finally, a conclusion invites the reader to schedule a call with the tour team via the <a href=\"/tour-leads\">TourLeadForm</a> and to bookmark <a href=\"/situations/anxiety\">this situation guide</a> so they can keep a steady devotional rhythm.</p><p>The next section introduces the specific verse cluster, references the <a href=\"/semantic-search\">semantic search</a> tool, and repeats the core call-to-action to travel with trusted guides.</p><p>Closing with gratitude, the blueprint reminds shoppers that the prayer-kit PDF, the 300-word introduction, and the internal linking bouquet make this page both rich and ready for affiliates.</p>",
+  "links": [
+    "/bible-verses-for/anxiety",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/prayer-points/anxiety",
+    "/tour-leads",
+    "/situations/anxiety",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

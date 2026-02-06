@@ -1,0 +1,16 @@
+{
+  "id": "places/mount-sinai-es",
+  "blueprintId": "places/mount-sinai-es",
+  "type": "localized-place-detail",
+  "title": "Monte Sinaí en la Biblia (Español)",
+  "description": "Plan de página para Monte Sinaí con enlaces a situaciones, oraciones y itinerarios.",
+  "content": "<p>Monte Sinaí es el lugar donde Dios habló con Moisés y entregó los mandamientos. La página conecta con las situaciones de <a href=\"/situations/grief\">duelo</a> y <a href=\"/situations/anxiety\">ansiedad</a>, menciona los <a href=\"/prayer-points/anxiety\">puntos de oración</a> y recuerda que el <a href=\"/tour-leads\">TourLeadForm</a> guía peregrinos a un viaje lleno de significado.</p><p>También se menciona la <a href=\"/semantic-search\">búsqueda semántica</a> para descubrir versos fieles y vincularlos con los relatos del Éxodo.</p><p>El cierre agradece al lector y lo invita a contribuir con los 30 000 € mensuales al reservar tours responsables en los que la fe y el turismo se apoyan mutuamente.</p>",
+  "links": [
+    "/situations/anxiety",
+    "/situations/grief",
+    "/prayer-points/anxiety",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

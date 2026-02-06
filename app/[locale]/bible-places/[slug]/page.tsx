@@ -13,6 +13,8 @@ import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
 import { localizedField } from "@/lib/i18n/translation-utils";
+import { BlueprintFallback } from "@/components/blueprint-fallback";
+import { getBlueprintForRoute } from "@/lib/blueprints";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -23,13 +25,6 @@ interface PageProps {
 
 type PlaceResult = Awaited<ReturnType<typeof getPlaceBySlug>>;
 
-function assertPublished(place: PlaceResult): asserts place is NonNullable<PlaceResult> {
-  if (!place) notFound();
-  if (place.status !== "published") {
-    notFound();
-  }
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale, slug } = await params;
 
@@ -37,8 +32,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  const place = await getPlaceBySlug(slug, 20);
-  assertPublished(place);
+  let place: PlaceResult | null = null;
+  try {
+    place = await getPlaceBySlug(slug, 20);
+  } catch (error) {
+    console.error("Place metadata query failed:", error);
+  }
+
+  const blueprintFallback =
+    getBlueprintForRoute("places", slug, locale) ??
+    getBlueprintForRoute("places", "list", locale);
+
+  if (!place || place.status !== "published") {
+    return {
+      title: blueprintFallback?.title ?? `Bible Place: ${slug}`,
+      description: blueprintFallback?.description ?? `Details about ${slug} are coming soon.`,
+      alternates: {
+        canonical: getCanonicalUrl(`/bible-places/${slug}`),
+      },
+      robots: getFallbackRobotsMeta(locale, blueprintFallback !== undefined),
+    };
+  }
 
   const titleFallback = `${place.name} in the Bible - Scriptures & Holy Land Tours`;
   const descriptionFallback = `Discover ${place.name} in the Bible: ${place.description?.substring(0, 150) ?? ""}... Explore verses mentioning this sacred location.`;
@@ -97,8 +111,16 @@ export default async function LocalePlacePage({ params }: PageProps) {
   const locale = localeParam as Locale;
   const isTranslated = locale === DEFAULT_LOCALE;
 
-  const place = await getPlaceBySlug(slug, 20);
-  assertPublished(place);
+  let place: PlaceResult | null = null;
+  try {
+    place = await getPlaceBySlug(slug, 20);
+  } catch (error) {
+    console.error("Place detail query failed:", error);
+  }
+
+  if (!place || place.status !== "published") {
+    return renderPlaceFallback(locale, slug);
+  }
 
   const relatedLinks = await getRelatedLinks("place", {
     id: place.id,
@@ -309,6 +331,30 @@ export default async function LocalePlacePage({ params }: PageProps) {
           </div>
         </div>
       </div>
+    </>
+  );
+}
+
+function renderPlaceFallback(locale: Locale, slug: string) {
+  const blueprintFallback =
+    getBlueprintForRoute("places", slug, locale) ??
+    getBlueprintForRoute("places", "list", locale);
+
+  return (
+    <>
+      {locale !== DEFAULT_LOCALE && (
+        <LocaleFallbackBanner locale={locale} currentPath={`/${locale}/bible-places/${slug}`} />
+      )}
+      <main className="min-h-screen py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          <BlueprintFallback
+            blueprint={blueprintFallback}
+            title={`Bible Place: ${slug}`}
+            description="Detailed content coming soon."
+            fallbackContent="<p>We're preparing this place page to include verses, prayer prompts, and pilgrimage guidance.</p>"
+          />
+        </div>
+      </main>
     </>
   );
 }

@@ -1,0 +1,18 @@
+{
+  "id": "situations/list-es",
+  "blueprintId": "situations/list-es",
+  "type": "localized-situations-list",
+  "title": "Centro de situaciones (Español)",
+  "description": "Hoja de ruta en español que enlaza versos por situaciones con herramientas de oración, lugares y tours.",
+  "content": "<p>La página de situaciones explica cómo organizamos los versos en grupos temáticos y acompaña cada emoción con rutas de oración y enlaces a los lugares sagrados de Israel. Se menciona la <a href=\"/semantic-search\">búsqueda semántica</a> para encontrar frases similares y reservar una peregrinación con socios confiables.</p><p>También se enlazan Jerusalén y Monte Sinaí, así como puntos de oración seleccionados, para que los lectores vean cómo el tour y las ofertas afiliadas sostienen una experiencia completa.</p><p>Finalizamos agradeciendo la confianza del lector, recordando que los recursos respaldan la meta de 30 000 € mensuales y animando a elegir el tema que necesitan hoy mismo.</p>",
+  "links": [
+    "/situations/anxiety",
+    "/situations/peace",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/prayer-points",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

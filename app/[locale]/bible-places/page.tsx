@@ -8,6 +8,8 @@ import { isValidLocale, type Locale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { buildAlternates } from "@/lib/i18n/links";
 import { LocaleFallbackBanner, getFallbackRobotsMeta } from "@/components/locale-fallback-banner";
 import { localizedField as resolveLocalizedField } from "@/lib/i18n/translation-utils";
+import { BlueprintFallback } from "@/components/blueprint-fallback";
+import { getBlueprintForRoute } from "@/lib/blueprints";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -98,7 +100,12 @@ export default async function BiblePlacesPage({ params }: PageProps) {
   const locale = localeParam as Locale;
   const isTranslated = locale === DEFAULT_LOCALE;
   const meta = PLACE_META[locale];
-  const rawPlaces = await getPlaces();
+  let rawPlaces: RawPlaceRow[] = [];
+  try {
+    rawPlaces = await getPlaces();
+  } catch (error) {
+    console.error("Bible places query failed:", error);
+  }
   const places: PlaceListItem[] = rawPlaces.map((row) => ({
     id: row.id,
     slug: row.slug,
@@ -113,6 +120,28 @@ export default async function BiblePlacesPage({ params }: PageProps) {
     tourHighlight: row.tourHighlight,
     _count: row._count,
   }));
+
+  const blueprintFallback = getBlueprintForRoute("places", "list", locale);
+
+  if (places.length === 0) {
+    return (
+      <>
+        {!isTranslated && (
+          <LocaleFallbackBanner locale={locale} currentPath={`/${locale}/bible-places`} />
+        )}
+        <main className="min-h-screen py-12 px-4">
+          <div className="max-w-5xl mx-auto">
+            <BlueprintFallback
+              blueprint={blueprintFallback}
+              title="Bible Places"
+              description="Scripture-linked Holy Land locations are arriving."
+              fallbackContent="<p>We're curating sacred place content that pairs verse excerpts with pilgrimage insights. Please check back soon.</p>"
+            />
+          </div>
+        </main>
+      </>
+    );
+  }
 
   const breadcrumbs = [
     { label: "Home", href: `/${locale}`, position: 1 },

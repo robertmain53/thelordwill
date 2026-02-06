@@ -1,0 +1,16 @@
+{
+  "id": "professions/list-pt",
+  "blueprintId": "professions/list-pt",
+  "type": "localized-professions-list",
+  "title": "Guia de profissões (Português)",
+  "description": "Blueprint em português para o hub de profissões, destacando versos, lugares e links de fidelidade.",
+  "content": "<p>A introdução explica como cada profissão exige inspiração bíblica e destaca links para <a href=\"/bible-verses-for/teachers\">versículos para professores</a>, médicos e enfermeiros. A referência à <a href=\"/semantic-search\">busca semântica</a> lembra que os usuários podem explorar novos versos antes de planejar uma peregrinação.</p><p>O segundo parágrafo menciona <a href=\"/bible-places/jerusalem\">Jordânia</a> e <a href=\"/prayer-points/teachers\">pontos de oração</a>, além de reforçar o <a href=\"/tour-leads\">TourLeadForm</a> como parte do funil ético para garantir uma viagem guiada que respeite o ritmo profissional.</p><p>Finalizamos incentivando o leitor a guardar o guia e a manter contato para atualizações mensais sobre os versos e o impacto do programa de afiliados.</p>",
+  "links": [
+    "/bible-verses-for/teachers",
+    "/bible-places/jerusalem",
+    "/prayer-points/teachers",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

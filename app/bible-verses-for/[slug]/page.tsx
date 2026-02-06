@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { getCanonicalUrl, titleCase } from "@/lib/utils";
 import { EEATStrip } from "@/components/eeat-strip";
 import {
@@ -30,6 +29,8 @@ import { PosterSectionServer } from "@/components/poster-section";
 import { getGraphLinkSet } from "@/lib/internal-linking/graph";
 import { RelatedResourcesSection } from "@/components/related-resources-section";
 import { VerseIntelligenceBlock } from "@/components/verse-intelligence-block";
+import { BlueprintFallback } from "@/components/blueprint-fallback";
+import { getBlueprintForRoute } from "@/lib/blueprints";
 
 // Force SSR - disable static generation
 export const dynamic = 'force-dynamic';
@@ -219,6 +220,8 @@ export default async function SituationVersesPage({ params }: PageProps) {
     );
   }
 
+  try {
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thelordwill.com";
   const todayISO = new Date().toISOString().slice(0, 10);
 
@@ -228,7 +231,7 @@ export default async function SituationVersesPage({ params }: PageProps) {
     const profession = await getProfession(slug);
 
     if (!profession) {
-      notFound();
+      return renderVerseFallback(slug);
     }
 
     const description = profession.metaDescription ?? profession.description;
@@ -312,9 +315,9 @@ export default async function SituationVersesPage({ params }: PageProps) {
 
   // Get primary verse for detailed analysis
   const primaryMapping = situationData.verseMappings[0];
-  if (!primaryMapping) {
-    notFound();
-  }
+    if (!primaryMapping) {
+      return renderVerseFallback(slug);
+    }
 
   const primaryVerse = primaryMapping.verse;
   const primaryVerseCanonicalUrl = getCanonicalUrl(
@@ -709,5 +712,25 @@ export default async function SituationVersesPage({ params }: PageProps) {
         </div>
       </main>
     </>
+  );
+  } catch (error) {
+    console.error("Verse page rendering failed:", slug, error);
+    return renderVerseFallback(slug);
+  }
+}
+
+function renderVerseFallback(slug: string) {
+  const blueprintFallback = getBlueprintForRoute("verse", slug, "en");
+  return (
+    <main className="min-h-screen py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        <BlueprintFallback
+          blueprint={blueprintFallback}
+          title={`Bible Verses for ${slug}`}
+          description="This verse collection is under construction."
+          fallbackContent="<p>We're assembling scripture, prayer prompts, and pilgrimage links around this verse. Check back soon for the full resource.</p>"
+        />
+      </div>
+    </main>
   );
 }

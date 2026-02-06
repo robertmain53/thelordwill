@@ -1,0 +1,17 @@
+{
+  "id": "professions/list-en",
+  "blueprintId": "professions/list-en",
+  "type": "localized-professions-list",
+  "title": "Professions Guide (English)",
+  "description": "Blueprint that outlines the professions hub page with verse clusters, internal linking, and monetization hooks.",
+  "content": "<p>The professions hub introduces the concept of pairing work life with Scripture. It references the list of top verses for teachers, doctors, and nurses and points visitors toward the situation clusters that echo their calling, while also nodding to <a href=\"/semantic-search\">semantic search</a> so visitors can discover new verse pairs before booking a tour.</p><p>The page highlights internal linking to <a href=\"/bible-verses-for/teachers\">Bible verses for teachers</a>, <a href=\"/bible-places/jerusalem\">Jerusalem</a>, <a href=\"/prayer-points/teachers\">prayer points for teachers</a>, and <a href=\"/bible-places/rome\">Rome</a> to show how the content network supports both devotionals and pilgrimage planning. A side paragraph explains how the TourLeadForm surfaces in contexts where professionals seek guided Holy Land trips.</p><p>Closing the blueprint, we remind editors to keep a conclusion that invites readers to subscribe for weekly profession-verses updates and to mention the affiliate partnerships with tour operators that align with the 30 000 € goal.</p>",
+  "links": [
+    "/bible-verses-for/teachers",
+    "/bible-places/jerusalem",
+    "/prayer-points/teachers",
+    "/bible-places/rome",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

@@ -1,0 +1,17 @@
+{
+  "id": "places/list-es",
+  "blueprintId": "places/list-es",
+  "type": "localized-places-list",
+  "title": "Directorio de lugares (Español)",
+  "description": "Guía en español que enlaza sitios bíblicos clave, herramientas semánticas y el formulario de tours.",
+  "content": "<p>La página empieza con un párrafo que invita a recorrer los lugares sagrados y sugiere usar <a href=\"/semantic-search\">la búsqueda semántica</a> para descubrir nuevos versos antes de viajar. Se mencionan Jerusalén, Monte Sinaí y Nazaret como destinos favoritos.</p><p>La sección central continúa con enlaces a <a href=\"/bible-places/jerusalem\">Jerusalén</a>, <a href=\"/bible-places/mount-sinai\">Monte Sinaí</a> y <a href=\"/bible-places/nazareth\">Nazaret</a>, además de recordar al lector que los <a href=\"/prayer-points/pilgrimage\">puntos de oración para peregrinaciones</a> enriquecen la experiencia espiritual.</p><p>El cierre le pide al lector que reserve via <a href=\"/tour-leads\">TourLeadForm</a> y destaca que sus reservas apoyan actividades confiables con socios comprometidos a alcanzar la meta de 30 000 € mensuales.</p>",
+  "links": [
+    "/semantic-search",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/bible-places/nazareth",
+    "/prayer-points/pilgrimage",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

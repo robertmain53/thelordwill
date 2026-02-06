@@ -1,0 +1,18 @@
+{
+  "id": "situations/anxiety-pt",
+  "blueprintId": "situations/anxiety-pt",
+  "type": "localized-situation",
+  "title": "Versículos bíblicos para ansiedade (Português)",
+  "description": "Versão em português da página de ansiedade, conectando versos, lugares e orações.",
+  "content": "<p>A ansiedade pede um suspiro profundo e a companhia de Escrituras firmes. Descrevemos o efeito calmante dos <a href=\"/bible-verses-for/anxiety\">versículos bíblicos para ansiedade</a> e mostramos que lugares como Jerusalém e Monte Sinai continuam sendo pontos de referência para peregrinos que buscam descanso. O texto ainda direciona os leitores aos <a href=\"/prayer-points/anxiety\">pontos de oração</a> disponíveis para uso imediato e lembra que podem conversar com consultores do <a href=\"/tour-leads\">TourLeadForm</a> para planejar uma viagem significativa.</p><p>Na parte central mencionamos a busca semântica em <a href=\"/semantic-search\">/semantic-search</a>, evitando repetir o mesmo parágrafo em cada idioma e reforçando que o cluster de links internos inclui situações, profissões e lugares complementares.</p><p>O encerramento agradece o tempo investido, reforça a confiança no guia <a href=\"/situations/anxiety\">ansiedade</a> e convida a seguir explorando o itinerário espiritual antes de reservar o próximo voo.</p>",
+  "links": [
+    "/bible-verses-for/anxiety",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/prayer-points/anxiety",
+    "/tour-leads",
+    "/semantic-search",
+    "/situations/anxiety"
+  ],
+  "policyFailures": []
+}

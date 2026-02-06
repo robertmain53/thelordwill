@@ -1,0 +1,17 @@
+{
+  "id": "places/list-pt",
+  "blueprintId": "places/list-pt",
+  "type": "localized-places-list",
+  "title": "Diretório de lugares (Português)",
+  "description": "Versão em português do hub de lugares bíblicos, destacando buscas e links de viagem.",
+  "content": "<p>A introdução descreve lugares como Jerusalém, Monte Sinai e Nazaré, e lembra o visitante de testar <a href=\"/semantic-search\">a busca semântica</a> antes de montar o roteiro espiritual. O texto usa termos amistosos, reforçando o desejo de caminhar com versos em mãos.</p><p>O corpo cita os mesmos lugares e acrescenta <a href=\"/prayer-points/pilgrimage\">pontos de oração para peregrinos</a>, dizendo que são usados por grupos antes e depois de viver a experiência no local.</p><p>O fechamento convida a usar o <a href=\"/tour-leads\">TourLeadForm</a> para reservar com parceiros éticos e reforça que esse engajamento ajuda a alcançar os 30 000 € em afiliados sem comprometer a experiência devocional.</p>",
+  "links": [
+    "/semantic-search",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/bible-places/nazareth",
+    "/prayer-points/pilgrimage",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

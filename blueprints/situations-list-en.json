@@ -1,0 +1,18 @@
+{
+  "id": "situations/list-en",
+  "blueprintId": "situations/list-en",
+  "type": "localized-situations-list",
+  "title": "Situations Hub (English)",
+  "description": "Blueprint for the situations hub, anchoring topical verse clusters to pilgrimage and prayer resources.",
+  "content": "<p>The hub page explains how we organize <strong>situations</strong> into verse clusters, prayer collections, and travel opportunities. It links the anxious, grieving, and hopeful reader to curated verses while pointing to <a href=\"/semantic-search\">semantic search</a> for discovering custom Scripture combinations.</p><p>The copy mentions our places of pilgrimage (Jerusalem, Mount Sinai) and prayer-point hubs so every situation page becomes a waypoint on the tour funnel. We remind readers that the TourLeadForm is available for booking ethical journeys that reinforce the devotional path.</p><p>Closing; we thank the reader for seeking Scripture, remind them of our affiliate partnerships that support the 30 000 € monthly goal, and invite them to follow the navigation tiles below for specific life moments.</p>",
+  "links": [
+    "/situations/anxiety",
+    "/situations/peace",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/prayer-points",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

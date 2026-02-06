@@ -1,0 +1,17 @@
+{
+  "id": "places/list-en",
+  "blueprintId": "places/list-en",
+  "type": "localized-places-list",
+  "title": "Bible Places Directory (English)",
+  "description": "Blueprint for the Bible Places directory page, covering hero copy, resource links, and affiliate CTA.",
+  "content": "<p>The introduction orients visitors with a paragraph about walking Scripture-rich ground and references <a href=\"/semantic-search\">semantic search</a> to discover new verses before visiting. It mentions the top pilgrimage highlights (Jerusalem, Mount Sinai, Nazareth) and notes that pilgrims often pair those stops with the TourLeadForm to book curated trips.</p><p>The body reiterates internal links to featured places (<a href=\"/bible-places/jerusalem\">Jerusalem</a>, <a href=\"/bible-places/mount-sinai\">Mount Sinai</a>, <a href=\"/bible-places/nazareth\">Nazareth</a>), spans over to prayer resources (<a href=\"/prayer-points/pilgrimage\">prayer points for pilgrims</a>), and includes a callout to the semantic search tool for verse research.</p><p>Closing invites the reader to plan a trip through the affiliate TourLeadForm and thanks them for supporting the ministry as they explore the 30 000 € goal set via ethical partnerships.</p>",
+  "links": [
+    "/semantic-search",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/bible-places/nazareth",
+    "/prayer-points/pilgrimage",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

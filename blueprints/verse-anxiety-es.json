@@ -1,0 +1,17 @@
+{
+  "id": "verse/anxiety-es",
+  "blueprintId": "verse/anxiety-es",
+  "type": "verse-page",
+  "title": "Versículo para ansiedad (Español)",
+  "description": "Guía del verso enfocado en ansiedad, conectando entidades y enlaces internos en español.",
+  "content": "<p>El verso comienza conectado con los lugares sagrados que ayudan a aterrizar la ansiedad en la narrativa de Jerusalén y Monte Sinaí. Se menciona el enlace a <a href=\"/situations/anxiety\">la guía para ansiedad</a>, recuerda <a href=\"/prayer-points/anxiety\">los puntos de oración</a> y orienta al lector al <a href=\"/tour-leads\">TourLeadForm</a> para planear un viaje con propósito.</p><p>La sección de inteligencia versa describe cómo la lista de lugares, situaciones y oración aparece automáticamente y enfatiza la herramienta de <a href=\"/semantic-search\">búsqueda semántica</a> para encontrar versos similares.</p><p>El cierre anima a compartir el verso, a guardar la página y a suscribirse a la lista de afiliados que apoya el objetivo de 30 000 € sin sacrificar la experiencia devocional.</p>",
+  "links": [
+    "/situations/anxiety",
+    "/prayer-points/anxiety",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

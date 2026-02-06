@@ -1,0 +1,18 @@
+{
+  "id": "situations/list-pt",
+  "blueprintId": "situations/list-pt",
+  "type": "localized-situations-list",
+  "title": "Hub de situações (Português)",
+  "description": "Versão em português do centro de situações, combinando versos, oração e passeios éticos.",
+  "content": "<p>O hub descreve como cada situação recebe um conjunto de versos, sugestões de oração e referências a lugares bíblicos. Há um destaque para a <a href=\"/semantic-search\">busca semântica</a> que ajuda a encontrar passagens adicionais e a integrar esses versos ao roteiro de viagem.</p><p>Jerusalém e Monte Sinai aparecem como destinos recomendados, junto com links para pontos de oração e o TourLeadForm, para que os leitores saibam como agendar uma peregrinação significativa.</p><p>Fechamos agradecendo a confiança em nossos recursos, explicando que cada clique contribui para a meta de 30 000 € e convidando a explorar a situação apropriada.</p>",
+  "links": [
+    "/situations/anxiety",
+    "/situations/peace",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/prayer-points",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

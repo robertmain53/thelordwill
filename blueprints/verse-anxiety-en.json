@@ -1,0 +1,17 @@
+{
+  "id": "verse/anxiety-en",
+  "blueprintId": "verse/anxiety-en",
+  "type": "verse-page",
+  "title": "Bible Verse Cluster for Anxiety (English)",
+  "description": "Focuses on the verse entity page for anxiety, linking to places, situations, and prayer points.",
+  "content": "<p>The verse page opens with the primary verse text and mentions Jerusalem, Mount Sinai, and Nazareth in the narrative, highlighting how each place anchors the emotion of anxiety in Scripture. It includes deterministic references to <a href=\"/situations/anxiety\">the anxiety situation</a>, <a href=\"/prayer-points/anxiety\">anxiety prayer points</a>, and the TourLeadForm to keep the commerce funnel attached to the experience.</p><p>The middle section describes how embedded verse intelligence pearls (places, situations, prayer points) appear under the “Verse Intelligence Block” and emphasizes the semantic search tool, which is accessible via <a href=\"/semantic-search\">/semantic-search</a>.</p><p>The conclusion invites the reader to bookmark the verse page, listen to the audio guide, and sign up for the newsletter that ties to the 30 000 € affiliate target.</p>",
+  "links": [
+    "/situations/anxiety",
+    "/prayer-points/anxiety",
+    "/bible-places/jerusalem",
+    "/bible-places/mount-sinai",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}

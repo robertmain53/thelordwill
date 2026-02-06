@@ -1,0 +1,16 @@
+{
+  "id": "professions/list-es",
+  "blueprintId": "professions/list-es",
+  "type": "localized-professions-list",
+  "title": "Guía de profesiones (Español)",
+  "description": "Versión en español del hub de profesiones con enlaces internos, versos, y recordatorios de tours.",
+  "content": "<p>La página comienza explicando cómo cada vocación necesita versos específicos. Menciona el enlace a <a href=\"/bible-verses-for/teachers\">versículos para maestros</a> y otra selección para médicos y enfermeras, así como el acceso a <a href=\"/semantic-search\">búsqueda semántica</a> para encontrar expresiones afines antes de diseñar un programa de viaje.</p><p>La segunda sección repite el enlace hacia <a href=\"/bible-places/jerusalem\">Jerusalén</a>, <a href=\"/prayer-points/teachers\">puntos de oración para docentes</a>, y el formulario del <a href=\"/tour-leads\">TourLeadForm</a>, reforzando que la ruta de afiliados permite reservar una peregrinación de descanso y aprendizaje sin abandonar la misión.</p><p>Cierra la descripción con una llamada a la acción para suscribirse a las actualizaciones semanales y descubrir las alianzas éticas detrás de los tours que acercan a los profesionales a la Tierra Santa.</p>",
+  "links": [
+    "/bible-verses-for/teachers",
+    "/bible-places/jerusalem",
+    "/prayer-points/teachers",
+    "/semantic-search",
+    "/tour-leads"
+  ],
+  "policyFailures": []
+}
