@@ -253,8 +253,8 @@ export const PERFORMANCE_THRESHOLDS = {
 1. **Edge Network**: Global CDN for fast delivery
 2. **Automatic Scaling**: Handles traffic spikes
 3. **PostgreSQL Integration**: Vercel Postgres with connection pooling
-4. **Environment Variables**: Easy configuration management
-5. **Analytics**: Built-in Web Vitals monitoring
+4. **Environment Variables** : Easy configuration management
+5. **Analytics**: Built-in Web Vij tals monitoring
 
 **Configuration:**
 ```typescript
