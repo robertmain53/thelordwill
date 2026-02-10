@@ -1,0 +1,18 @@
+{
+  "id": "places/jerusalem-pt",
+  "blueprintId": "places/jerusalem-pt",
+  "type": "localized-place-detail",
+  "title": "Jerusalém na Bíblia (Português)",
+  "description": "Blueprint que liga Jerusalém a versos, situações e ao TourLeadForm no portal português.",
+  "content": "<p>Jerusalém é abordada com versos de justiça e paz, ycles as ancoragens do bloco de inteligência com os temas paz, gratidão e coragem; menciona a coleção <a href=\"/bible-verses-for/jerusalem\">versículos de Jerusalém</a> e destaca o <a href=\"/tour-leads\">TourLeadForm</a> para planejar a peregrinação ética que sustenta os €30 000 mensais.</p><p>Na seção principal, liga a cidade a <a href=\"/prayer-points/events\">pontos de oração por eventos</a>, a situações como paz e luto, e aponta a <a href=\"/semantic-search\">busca semântica</a> para comparar diferentes traduções antes da viagem.</p><p>O encerramento agradece a visita e convida a compartilhar o conteúdo com a comunidade cristã.</p>",
+  "links": [
+    "/bible-verses-for/jerusalem",
+    "/bible-places/jerusalem",
+    "/situations/peace",
+    "/situations/grief",
+    "/prayer-points/events",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

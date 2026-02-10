@@ -1,0 +1,27 @@
+{
+  "id": "professions/detail-bundle-es",
+  "blueprintId": "professions/detail-bundle-es",
+  "type": "localized-profession-detail",
+  "title": "Historias profesionales (Español)",
+  "description": "Blueprint en español que enlaza doctores, enfermeras, ingenieros, padres, pastores, estudiantes, abogados y artistas con versos, oración y tour.",
+  "content": "<p>Cada profesión tiene un bloque de inteligencia de versos: doctores con sanación, enfermeras con compasión, ingenieros con sabiduría, padres con paciencia, pastores con liderazgo pastoral, estudiantes con perseverancia, abogados con justicia y artistas con creatividad. El texto inicial menciona el bloque de inteligencia, los <a href=\"/prayer-points\">puntos de oración</a> específicos y el <a href=\"/tour-leads\">TourLeadForm</a> como el paso siguiente para reservar peregrinaciones éticas que alimentan la meta de 30 000 €.</p><p>El cuerpo destaca enlaces a Jerusalén, Nazaret y Roma para cada historia, recuerda los versos en común con las situaciones (ansiedad, paz, esperanza) y recomienda usar la <a href=\"/semantic-search\">búsqueda semántica</a> para comparar traducciones antes de viajar.</p><p>El cierre anima a compartir estos versos con colegas, a descargar los puntos de oración y a usar el formulario de tours para que cada página profesional conecte devoción y viaje.</p>",
+  "links": [
+    "/bible-verses-for/doctors",
+    "/bible-verses-for/nurses",
+    "/bible-verses-for/engineers",
+    "/bible-verses-for/parents",
+    "/bible-verses-for/pastors",
+    "/bible-verses-for/students",
+    "/bible-verses-for/lawyers",
+    "/bible-verses-for/artists",
+    "/prayer-points/doctors",
+    "/prayer-points/nurses",
+    "/prayer-points/parents",
+    "/tour-leads",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/bible-places/rome",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

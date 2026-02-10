@@ -1,0 +1,17 @@
+{
+  "id": "places/sea-of-galilee-pt",
+  "blueprintId": "places/sea-of-galilee-pt",
+  "type": "localized-place-detail",
+  "title": "Mar da Galileia na Bíblia (Português)",
+  "description": "Blueprint português que liga o Mar da Galileia a versos, oração e reservas de viagem.",
+  "content": "<p>O Mar da Galileia começa com versos sobre fé durante tempestades e serenidade. Menciona <a href=\"/bible-verses-for/sea-of-galilee\">versículos para o Mar da Galileia</a>, refere o bloco de inteligência e lembra o <a href=\"/tour-leads\">TourLeadForm</a> para organizar peregrinações.</p><p>O corpo destaca <a href=\"/prayer-points/travelers\">pontos de oração para viajantes</a>, conecta à Jerusalém e Nazaret, e incentiva o uso da <a href=\"/semantic-search\">busca semântica</a> para comparar traduções.</p><p>O encerramento agradece a visita, pede que compartilhem a história e reforça o objetivo de €30 000 mensais através de reservas responsáveis.</p>",
+  "links": [
+    "/bible-verses-for/sea-of-galilee",
+    "/prayer-points/travelers",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

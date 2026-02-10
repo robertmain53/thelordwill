@@ -1,0 +1,27 @@
+{
+  "id": "professions/detail-bundle-pt",
+  "blueprintId": "professions/detail-bundle-pt",
+  "type": "localized-profession-detail",
+  "title": "Trilhas profissionais (Português)",
+  "description": "Blueprint em português que conecta médicos, enfermeiros, engenheiros, pais, pastores, estudantes, advogados e artistas com versos e o funil TourLeadForm.",
+  "content": "<p>Cada profissão tem seu bloco de inteligência: médicos com cura, enfermeiros com compaixão, engenheiros com discernimento, pais com paciência, pastores com liderança, estudantes com foco, advogados com equidade e artistas com imaginação. O parágrafo inicial destaca o bloco de inteligência, os <a href=\"/prayer-points\">pontos de oração</a> dedicados e o <a href=\"/tour-leads\">TourLeadForm</a> para reservar peregrinações aliadas à meta de 30 000 €.</p><p>O corpo menciona Jerusalém, Nazaré e Roma como destinos recomendados, lembra as situações compartilhadas (ansiedade, paz, paciência) e incentiva o uso da <a href=\"/semantic-search\">busca semântica</a> para comparar traduções antes de viajar.</p><p>No fechamento, agradecemos o apoio financeiro, convidamos os leitores a compartilhar os versos com suas comunidades e reforçamos que o formulário de tours conecta propósito devocional e itinerários.</p>",
+  "links": [
+    "/bible-verses-for/doctors",
+    "/bible-verses-for/nurses",
+    "/bible-verses-for/engineers",
+    "/bible-verses-for/parents",
+    "/bible-verses-for/pastors",
+    "/bible-verses-for/students",
+    "/bible-verses-for/lawyers",
+    "/bible-verses-for/artists",
+    "/prayer-points/doctors",
+    "/prayer-points/nurses",
+    "/prayer-points/parents",
+    "/tour-leads",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/bible-places/rome",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

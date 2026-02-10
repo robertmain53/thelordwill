@@ -1,0 +1,17 @@
+{
+  "id": "professions/teachers-en",
+  "blueprintId": "professions/teachers-en",
+  "type": "localized-profession-detail",
+  "title": "Bible verses for teachers (English)",
+  "description": "English blueprint linking the Teacher profession to verse clusters, prayer points, and the TourLeadForm funnel.",
+  "content": "<p>The Teacher detail page centers on verse clusters that honor guiding, mentoring, and equipping students. The hero paragraph references <a href=\"/bible-verses-for/teachers\">Bible verses for teachers</a>, highlights the TourLeadForm as the call-to-action for Holy Land group journeys, and includes a prayer link to <a href=\"/prayer-points/teachers\">teacher prayer points</a>.</p><p>The middle section introduces the verse intelligence block, explains how the profession shares verses with situations (anxiety, peace, patience), and adds a travel angle by referencing <a href=\"/bible-places/jerusalem\">Jerusalem</a> and <a href=\"/bible-places/nazareth\">Nazareth</a> where teachers trace Jesus’s lessons. A paragraph then invites visitors to compare the verses via <a href=\"/semantic-search\">semantic search</a>.</p><p>The conclusion restates the affiliate goal (30 000 € monthly from pilgrimage bookings) and reminds readers to schedule the TourLeadForm call so the page both ministers and funnels high-value intent.</p>",
+  "links": [
+    "/bible-verses-for/teachers",
+    "/prayer-points/teachers",
+    "/tour-leads",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

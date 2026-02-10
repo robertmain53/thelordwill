@@ -1,0 +1,17 @@
+{
+  "id": "professions/teachers-pt",
+  "blueprintId": "professions/teachers-pt",
+  "type": "localized-profession-detail",
+  "title": "Versículos para professores (Português)",
+  "description": "Blueprint português que conecta professores a versos, oração e formulário de turismo.",
+  "content": "<p>A página destaca versos que celebram a vocação do professor e mostra como cada passagem alimenta esperança em sala de aula. Refere os visitantes a <a href=\"/bible-verses-for/teachers\">versículos para professores</a>, <a href=\"/prayer-points/teachers\">pontos de oração</a> específicos e incentiva o preenchimento do <a href=\"/tour-leads\">TourLeadForm</a> para organizar uma viagem guiada.</p><p>O bloco de inteligência versa aparece logo depois, conecta Jerusalém e Nazaré como roteiros recomendados e lembra que a <a href=\"/semantic-search\">busca semântica</a> permite comparar frases antes de viajar.</p><p>No encerramento agradecemos o apoio à meta de 30 000 € por mês e incentivamos os professores a compartilhar esses recursos com suas redes de aprendizagem.</p>",
+  "links": [
+    "/bible-verses-for/teachers",
+    "/prayer-points/teachers",
+    "/tour-leads",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

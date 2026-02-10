@@ -1,0 +1,17 @@
+{
+  "id": "places/bethlehem-es",
+  "blueprintId": "places/bethlehem-es",
+  "type": "localized-place-detail",
+  "title": "Belén en la Biblia (Español)",
+  "description": "Blueprint en español para Belén con versos, oración y TourLeadForm.",
+  "content": "<p>Belén se presenta con versos de nacimiento y esperanza. Se menciona la colección <a href=\"/bible-verses-for/bethlehem\">versículos de Belén</a>, las situaciones de esperanza y gratitud, y se invita al <a href=\"/tour-leads\">TourLeadForm</a> para reservar un tour que respete los 30 000 € afiliados.</p><p>La sección central enlaza los <a href=\"/prayer-points/hope\">puntos de oración de esperanza</a>, menciona Jerusalén y Roma como destinos clave, y recuerda que la <a href=\"/semantic-search\">búsqueda semántica</a> permite descubrir más versos antes de viajar.</p><p>El cierre agradece la visita, sugiere compartir la historia y anima a seguir las rutas devocionales compartidas.</p>",
+  "links": [
+    "/bible-verses-for/bethlehem",
+    "/prayer-points/hope",
+    "/bible-places/jerusalem",
+    "/bible-places/rome",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

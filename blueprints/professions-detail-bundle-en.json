@@ -1,0 +1,27 @@
+{
+  "id": "professions/detail-bundle-en",
+  "blueprintId": "professions/detail-bundle-en",
+  "type": "localized-profession-detail",
+  "title": "Professions detail stories (English)",
+  "description": "Blueprint covering doctors, nurses, engineers, parents, pastors, students, lawyers, and artists with verse intelligence, prayer links, and pilgrimage CTAs.",
+  "content": "<p>Each profession gets a verse cluster tied to its calling: doctors are paired with healing passages, nurses with compassion, engineers with wisdom, parents with patience, pastors with discipleship, students with diligence, lawyers with justice, and artists with creativity. The intro paragraph references the `Verse Intelligence Block` that surfaces related situations (anxiety, peace, strength) and highlights the TourLeadForm so readers can book ethical Holy Land pilgrimages as part of the €30k affiliate goal.</p><p>The body links every profession to a prayer point (e.g., <a href=\"/prayer-points/doctors\">doctors prayer points</a>), to at least two pilgrimage places (Jerusalem, Nazareth, Rome) that echo the passage, and to the semantic search tool (<a href=\"/semantic-search\">semantic search</a>) so visitors can compare verse variations before traveling.</p><p>The closing paragraph reminds professionals to bookmark the verse tile, share it with colleagues, and use the TourLeadForm to coordinate travel partners who respect ministry values while reinforcing the affiliate funnel.</p>",
+  "links": [
+    "/bible-verses-for/doctors",
+    "/bible-verses-for/nurses",
+    "/bible-verses-for/engineers",
+    "/bible-verses-for/parents",
+    "/bible-verses-for/pastors",
+    "/bible-verses-for/students",
+    "/bible-verses-for/lawyers",
+    "/bible-verses-for/artists",
+    "/prayer-points/doctors",
+    "/prayer-points/nurses",
+    "/prayer-points/parents",
+    "/tour-leads",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/bible-places/rome",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

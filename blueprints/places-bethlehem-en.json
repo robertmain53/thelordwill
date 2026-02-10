@@ -1,0 +1,17 @@
+{
+  "id": "places/bethlehem-en",
+  "blueprintId": "places/bethlehem-en",
+  "type": "localized-place-detail",
+  "title": "Bethlehem in the Bible (English)",
+  "description": "Blueprint for Bethlehem linking verse clusters, prayer points, and TourLeadForm funnel.",
+  "content": "<p>Bethlehem’s detail page highlights birth/hope verses and positions the Verse Intelligence Block around joy and faith. The intro references <a href=\"/bible-verses-for/bethlehem\">Bethlehem verses</a>, related situations (hope, gratitude), and invites visitors to schedule the TourLeadForm to lock in an ethical Holy Land journey that contributes to the €30K affiliate goal.</p><p>The body directs readers to relevant prayer points (e.g., <a href=\"/prayer-points/hope\">hope prayer points</a>), mentions pilgrimage hubs Jerusalem and Rome, and points to <a href=\"/semantic-search\">semantic search</a> for exploring narrative parallels.</p><p>The close thanks visitors for investing spiritual energy in the Bethlehem story and encourages sharing the verses with friends.</p>",
+  "links": [
+    "/bible-verses-for/bethlehem",
+    "/prayer-points/hope",
+    "/bible-places/jerusalem",
+    "/bible-places/rome",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

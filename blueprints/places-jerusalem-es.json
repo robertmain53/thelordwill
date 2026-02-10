@@ -1,0 +1,18 @@
+{
+  "id": "places/jerusalem-es",
+  "blueprintId": "places/jerusalem-es",
+  "type": "localized-place-detail",
+  "title": "Jerusalén en la Biblia (Español)",
+  "description": "Versión en español que conecta Jerusalén con versos, situaciones y el formulario TourLeadForm.",
+  "content": "<p>Jerusalén se presenta con un clúster de versos de justicia, paz y convocatoria de peregrinos. La primera sección menciona la colección <a href=\"/bible-verses-for/jerusalem\">versículos para Jerusalén</a>, destaca el bloque de inteligencia (paz, alegría, fortaleza) y remite al <a href=\"/tour-leads\">TourLeadForm</a> para reservar viajes honestos que sostienen los 30 000 € mensuales.</p><p>El cuerpo incluye enlaces a <a href=\"/prayer-points/events\">puntos de oración por eventos</a>, relaciona la ciudad con situaciones de gratitud y renovación, y anima a usar la <a href=\"/semantic-search\">búsqueda semántica</a> antes de elegir los versos preferidos.</p><p>El cierre da gracias por la visita y recuerda compartir los versos y planes con amigos de la comunidad de fe.</p>",
+  "links": [
+    "/bible-verses-for/jerusalem",
+    "/bible-places/jerusalem",
+    "/situations/peace",
+    "/situations/grief",
+    "/prayer-points/events",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

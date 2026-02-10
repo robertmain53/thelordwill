@@ -1,0 +1,17 @@
+{
+  "id": "professions/teachers-es",
+  "blueprintId": "professions/teachers-es",
+  "type": "localized-profession-detail",
+  "title": "Versículos para maestros (Español)",
+  "description": "Página en español para maestros que ancla versos, oración y el formulario de tours.",
+  "content": "<p>La página presenta una colección de versos para maestros y aclara cómo esos pasajes se traducen en dirección pastoral en la sala de clases. Se enlaza con <a href=\"/bible-verses-for/teachers\">versículos para maestros</a>, <a href=\"/prayer-points/teachers\">puntos de oración</a> y el <a href=\"/tour-leads\">TourLeadForm</a> como paso siguiente para reservar la peregrinación.</p><p>La sección intermedia describe el bloque de inteligencia de versos, recomienda explorar Jerusalén y Nazaret, y recuerda que la <a href=\"/semantic-search\">búsqueda semántica</a> permite comparar frases sin pedir un guía.</p><p>En el cierre se agradece la confianza, se menciona la meta de 30 000 € mensuales de los afiliados y se anima a compartir la ruta con colegas y estudiantes.</p>",
+  "links": [
+    "/bible-verses-for/teachers",
+    "/prayer-points/teachers",
+    "/tour-leads",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

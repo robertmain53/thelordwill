@@ -1,0 +1,17 @@
+{
+  "id": "places/nazareth-en",
+  "blueprintId": "places/nazareth-en",
+  "type": "localized-place-detail",
+  "title": "Nazareth in the Bible (English)",
+  "description": "Blueprint covering Nazareth with verse clusters, prayer support, and the TourLeadForm path.",
+  "content": "<p>Nazareth’s detail page celebrates Jesus’s hometown with verses about obedience and vocation. The intro references <a href=\"/bible-verses-for/nazareth\">Nazareth verse collection</a>, mentions related situations (faith, guidance), and highlights the TourLeadForm for ethical bookings tied to the €30K affiliate goal.</p><p>The middle section includes prayer link references (e.g., <a href=\"/prayer-points/guidance\">guidance prayer points</a>), connects Nazareth to Jerusalem and Sea of Galilee pilgrimage stops, and encourages visitors to use <a href=\"/semantic-search\">semantic search</a> for additional verse pairings.</p><p>The conclusion invites pilgrims to share Nazareth’s story, bookmark the verse intelligence block, and join the newsletter that tracks the affiliate conversions.</p>",
+  "links": [
+    "/bible-verses-for/nazareth",
+    "/prayer-points/guidance",
+    "/bible-places/jerusalem",
+    "/bible-places/sea-of-galilee",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

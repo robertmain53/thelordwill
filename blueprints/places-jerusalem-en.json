@@ -1,0 +1,18 @@
+{
+  "id": "places/jerusalem-en",
+  "blueprintId": "places/jerusalem-en",
+  "type": "localized-place-detail",
+  "title": "Jerusalem in the Bible (English)",
+  "description": "Blueprint for Jerusalem detail page linking verses, situations, prayer points, and the TourLeadForm.",
+  "content": "<p>Jerusalem anchors the narrative with verse clusters about justice, peace, and pilgrimage readiness. The introduction references the <a href=\"/bible-verses-for/jerusalem\">Jerusalem verse collection</a>, mentions *Verse Intelligence Block* entries (peace, anxiety, strength), and invites visitors to use the <a href=\"/tour-leads\">TourLeadForm</a> to plan an ethically sourced Holy Land trip that feeds the 30 000 € affiliate goal.</p><p>The body outlines how Jerusalem appears in related prayer points (<a href=\"/prayer-points/events\">events prayer points</a>), ties each section to situations such as comfort and gratitude, and points to the semantic search tool (<a href=\"/semantic-search\">semantic search</a>) for comparing translation angles before traveling.</p><p>The conclusion thanks readers for exploring the verses, reiterates the FAQ about Jerusalem’s itinerary, and encourages sharing the content with fellow pilgrims.</p>",
+  "links": [
+    "/bible-verses-for/jerusalem",
+    "/bible-places/jerusalem",
+    "/situations/peace",
+    "/situations/grief",
+    "/prayer-points/events",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

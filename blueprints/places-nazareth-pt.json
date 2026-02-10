@@ -1,0 +1,17 @@
+{
+  "id": "places/nazareth-pt",
+  "blueprintId": "places/nazareth-pt",
+  "type": "localized-place-detail",
+  "title": "Nazaret na Bíblia (Português)",
+  "description": "Blueprint que liga Nazaret aos versos certos, oração e aos tours guiados.",
+  "content": "<p>Nazaret é destacado com versos sobre obediência e chamado. A introdução refere <a href=\"/bible-verses-for/nazareth\">versículos de Nazaret</a>, situa as situações de orientação e menciona o <a href=\"/tour-leads\">TourLeadForm</a> para reservar peregrinações éticas.</p><p>A seção principal conecta aos <a href=\"/prayer-points/guidance\">pontos de oração por orientação</a>, recomenda viagens a Jerusalém e o Mar da Galileia, e sugere a <a href=\"/semantic-search\">busca semântica</a> para comparar frases antes da viagem.</p><p>O encerramento agradece a visita, incentiva a compartilhar os versos e reforça a meta de €30 000 por mês com parceiros responsáveis.</p>",
+  "links": [
+    "/bible-verses-for/nazareth",
+    "/prayer-points/guidance",
+    "/bible-places/jerusalem",
+    "/bible-places/sea-of-galilee",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

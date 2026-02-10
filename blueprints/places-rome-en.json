@@ -1,0 +1,17 @@
+{
+  "id": "places/rome-en",
+  "blueprintId": "places/rome-en",
+  "type": "localized-place-detail",
+  "title": "Rome in the Bible (English)",
+  "description": "Blueprint covering Rome’s biblical significance, verse clusters, prayer points, and TourLeadForm CTA.",
+  "content": "<p>Rome’s detail text showcases verses about witness, persecution, and mission, aligning with the Verse Intelligence Block that covers perseverance and courage. The introduction points to <a href=\"/bible-verses-for/rome\">Rome verses</a>, links to Rome-related situations (boldness, justice), and gives the TourLeadForm as the affiliate CTA for ethically guided pilgrimages.</p><p>The body recommends prayer points for witnesses (<a href=\"/prayer-points/witness\">witness prayer points</a>), ties Rome back to Jerusalem and Nazareth itineraries, and includes a semantic-search mention so readers explore similar passages before booking.</p><p>The conclusion thanks visitors for stewarding the story, encourages sharing with their networks, and reaffirms that the tours support the €30K monthly revenue goal.</p>",
+  "links": [
+    "/bible-verses-for/rome",
+    "/prayer-points/witness",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

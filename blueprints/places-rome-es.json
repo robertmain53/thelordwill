@@ -1,0 +1,17 @@
+{
+  "id": "places/rome-es",
+  "blueprintId": "places/rome-es",
+  "type": "localized-place-detail",
+  "title": "Roma en la Biblia (Español)",
+  "description": "Blueprint español para Roma con versículos, oración y TourLeadForm.",
+  "content": "<p>Roma se presenta con versos de testimonio y perseverancia. La introducción referencia <a href=\"/bible-verses-for/rome\">versículos sobre Roma</a>, menciona situaciones de valentía y justicia, e invita al <a href=\"/tour-leads\">TourLeadForm</a> para que los peregrinos reserven viajes éticos y permitan alcanzar los 30 000 € mensuales.</p><p>El cuerpo recomienda <a href=\"/prayer-points/witness\">puntos de oración para testigos</a>, conecta con Jerusalén y Nazaret, y recuerda la <a href=\"/semantic-search\">búsqueda semántica</a> para comparar traducciones antes del viaje.</p><p>El cierre agradece el interés, anima a compartir los versos con la comunidad y destaca que el viaje apoya a socios responsables.</p>",
+  "links": [
+    "/bible-verses-for/rome",
+    "/prayer-points/witness",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

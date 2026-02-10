@@ -1,0 +1,17 @@
+{
+  "id": "places/sea-of-galilee-en",
+  "blueprintId": "places/sea-of-galilee-en",
+  "type": "localized-place-detail",
+  "title": "Sea of Galilee in the Bible (English)",
+  "description": "Blueprint for Sea of Galilee detailing verse clusters, prayer points, and TourLeadForm CTA.",
+  "content": "<p>The Sea of Galilee page opens with verses about faith amid storms and calm waters. It references <a href=\"/bible-verses-for/sea-of-galilee\">Sea of Galilee passages</a>, mentions the Verse Intelligence Block for trust/anxiety, and invites visitors to book pilgrimages via the <a href=\"/tour-leads\">TourLeadForm</a>.</p><p>The middle section connects to prayer points for travelers, ties the location to related situations (faith, encouragement), and includes pilgrimage referrals to Jerusalem and Nazareth plus the semantic-search tool (<a href=\"/semantic-search\">semantic search</a>).</p><p>It closes by thanking readers for exploring the Galilean stories, encouraging them to share the verses, and reaffirming the €30K affiliate goal.</p>",
+  "links": [
+    "/bible-verses-for/sea-of-galilee",
+    "/prayer-points/travelers",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

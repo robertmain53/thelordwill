@@ -1,0 +1,17 @@
+{
+  "id": "places/rome-pt",
+  "blueprintId": "places/rome-pt",
+  "type": "localized-place-detail",
+  "title": "Roma na Bíblia (Português)",
+  "description": "Blueprint em português conectando Roma a versos, oração e o TourLeadForm.",
+  "content": "<p>Roma é apresentada com versos de testemunho e perseverança. A introdução refere <a href=\"/bible-verses-for/rome\">versículos de Roma</a>, menciona as situações de coragem e justiça, e orienta ao <a href=\"/tour-leads\">TourLeadForm</a> para reservar peregrinações éticas que suportam o objetivo de €30 000 mensais.</p><p>O corpo indica <a href=\"/prayer-points/witness\">pontos de oração para testemunhas</a>, aponta para Jerusalém e Nazaré, e incentiva a <a href=\"/semantic-search\">busca semântica</a> antes de escolher as passagens.</p><p>O encerramento agradece a jornada, convida a compartilhar os versos e lembra que cada reserva apoia parceiros responsáveis.</p>",
+  "links": [
+    "/bible-verses-for/rome",
+    "/prayer-points/witness",
+    "/bible-places/jerusalem",
+    "/bible-places/nazareth",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}

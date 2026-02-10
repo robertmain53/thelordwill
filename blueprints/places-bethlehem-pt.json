@@ -1,0 +1,17 @@
+{
+  "id": "places/bethlehem-pt",
+  "blueprintId": "places/bethlehem-pt",
+  "type": "localized-place-detail",
+  "title": "Belém na Bíblia (Português)",
+  "description": "Blueprint português para Belém que une versos, oração e reservas de peregrinação.",
+  "content": "<p>Belém aparece com versos sobre o nascimento e a esperança. A introdução refere <a href=\"/bible-verses-for/bethlehem\">versículos sobre Belém</a>, liga às situações de esperança e gratidão e lembra o <a href=\"/tour-leads\">TourLeadForm</a> para reservar peregrinações que sustentam o objetivo de €30 000.</p><p>A parte principal cita <a href=\"/prayer-points/hope\">pontos de oração da esperança</a>, recomenda Jerusalém e Roma como destinos e incentiva a <a href=\"/semantic-search\">busca semântica</a> para ampliar os versos.</p><p>O encerramento agradece a leitura, convida a compartilhar a história e reforça o impacto das reservas responsáveis.</p>",
+  "links": [
+    "/bible-verses-for/bethlehem",
+    "/prayer-points/hope",
+    "/bible-places/jerusalem",
+    "/bible-places/rome",
+    "/tour-leads",
+    "/semantic-search"
+  ],
+  "policyFailures": []
+}
